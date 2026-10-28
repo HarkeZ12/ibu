@@ -57,12 +57,13 @@ a.quiz .meta{font-family:var(--f-mono); font-size:.8rem; color:var(--muted); whi
 </div>
 <script>
 // Novi kviz: dodaj red u "quizzes" odgovarajućeg predmeta.
+// Folder predmeta se zove "<code> - <name>", npr. "IT 2001 - Web Programming".
 const SUBJECTS = [
-  { code:"FENMS 0121", name:"Data Structures and Algorithms", dir:"fenms0121-dsa", quizzes:[] },
-  { code:"IT 2001", name:"Web Programming", dir:"it2001-web", quizzes:[] },
-  { code:"IT 2002", name:"System Analysis and Design", dir:"it2002-sad", quizzes:[] },
-  { code:"IT 2003", name:"Ethical and Legal Issues of IT", dir:"it2003-ethics", quizzes:[] },
-  { code:"IT 2004", name:"Parallel Programming", dir:"it2004-parallel", quizzes:[] },
+  { code:"FENMS 0121", name:"Data Structures and Algorithms", quizzes:[] },
+  { code:"IT 2001", name:"Web Programming", quizzes:[] },
+  { code:"IT 2002", name:"System Analysis and Design", quizzes:[] },
+  { code:"IT 2003", name:"Ethical and Legal Issues of IT", quizzes:[] },
+  { code:"IT 2004", name:"Parallel Programming", quizzes:[] },
 ];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 document.getElementById("subjects").innerHTML = SUBJECTS.map(s => `
@@ -72,7 +73,7 @@ document.getElementById("subjects").innerHTML = SUBJECTS.map(s => `
       <h2>${esc(s.name)}</h2>
     </div>
     ${s.quizzes.length
-      ? `<ul>${s.quizzes.map(q => `<li><a class="quiz" href="${esc(s.dir)}/${esc(q.file)}"><span>${esc(q.title)}</span><span class="meta">${esc(q.meta)}</span></a></li>`).join("")}</ul>`
+      ? `<ul>${s.quizzes.map(q => `<li><a class="quiz" href="${esc(encodeURIComponent(s.code + " - " + s.name))}/${esc(encodeURIComponent(q.file))}"><span>${esc(q.title)}</span><span class="meta">${esc(q.meta)}</span></a></li>`).join("")}</ul>`
       : `<p class="empty">Još nema kvizova.</p>`}
   </section>`).join("");
 </script>
