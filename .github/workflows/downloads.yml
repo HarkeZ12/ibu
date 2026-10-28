@@ -1,0 +1,42 @@
+# On every push to main, rebuilds the week and course ZIPs and publishes them
+# as assets of the "downloads" release, so each download link stays the same.
+name: Build downloads
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: downloads
+  cancel-in-progress: true
+
+jobs:
+  zips:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ZIPs
+        run: .github/scripts/build-zips.sh dist
+
+      - name: Publish to the downloads release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view downloads >/dev/null 2>&1; then
+            gh release create downloads --title "Downloads" \
+              --notes "ZIPs of every week and course, rebuilt automatically on each push. Links: https://github.com/${{ github.repository }}/releases/download/downloads/<file>.zip"
+          fi
+          shopt -s nullglob
+          files=(dist/*.zip)
+          if [ ${#files[@]} -gt 0 ]; then
+            gh release upload downloads "${files[@]}" --clobber
+          fi
+          # Remove ZIPs of weeks or courses that no longer exist.
+          for asset in $(gh release view downloads --json assets --jq '.assets[].name'); do
+            [ -f "dist/$asset" ] || gh release delete-asset downloads "$asset" --yes
+          done

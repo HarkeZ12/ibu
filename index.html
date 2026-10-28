@@ -43,6 +43,10 @@ a.quiz{display:flex; justify-content:space-between; gap:12px; align-items:baseli
 a.quiz:hover, a.quiz:focus-visible{border-color:var(--accent); background:var(--accent-soft); outline:none}
 a.quiz .meta{font-family:var(--f-mono); font-size:.8rem; color:var(--muted); white-space:nowrap}
 .empty{color:var(--muted); font-size:.95rem; margin:0}
+.downloads{display:flex; flex-wrap:wrap; gap:8px}
+a.dl{font-family:var(--f-mono); font-size:.8rem; text-decoration:none; color:var(--accent);
+  border:1px dashed var(--accent); border-radius:999px; padding:4px 12px; transition:background .15s}
+a.dl:hover, a.dl:focus-visible{background:var(--accent-soft); outline:none}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
 </style>
 </head>
@@ -59,6 +63,8 @@ a.quiz .meta{font-family:var(--f-mono); font-size:.8rem; color:var(--muted); whi
 // New quiz: add an entry to the course's "quizzes" list.
 // Each course folder is named "<code> - <name>", e.g. "IT 2001 - Web Programming".
 // "file" is the path inside the course folder, e.g. "week04/quiz/reading-04.html".
+// Download buttons appear by themselves for every week used in "file"; the ZIPs
+// are built by .github/workflows/downloads.yml.
 const SUBJECTS = [
   { code:"FENMS 0121", name:"Data Structures and Algorithms", quizzes:[{file:"week04/reading-material/reading-04-guide.html",title:"Reading 04 · Study guide",meta:"read"},{file:"week04/quiz/reading-04.html",title:"Reading 04 · Quiz",meta:"82 questions"}] },
   { code:"IT 2001", name:"Web Programming", quizzes:[] },
@@ -66,6 +72,9 @@ const SUBJECTS = [
   { code:"IT 2003", name:"Ethical and Legal Issues of IT", quizzes:[] },
   { code:"IT 2004", name:"Parallel Programming", quizzes:[] },
 ];
+const DOWNLOADS = "https://github.com/HarkeZ12/ibu/releases/download/downloads/";
+const zipUrl = (code, part) => DOWNLOADS + code.replace(/ /g, "-") + "-" + part + ".zip";
+const weeksOf = s => [...new Set(s.quizzes.map(q => q.file.split("/")[0]).filter(w => /^week\d+$/.test(w)))].sort();
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 document.getElementById("subjects").innerHTML = SUBJECTS.map(s => `
   <section class="subject">
@@ -76,6 +85,9 @@ document.getElementById("subjects").innerHTML = SUBJECTS.map(s => `
     ${s.quizzes.length
       ? `<ul>${s.quizzes.map(q => `<li><a class="quiz" href="${esc([s.code + " - " + s.name, ...q.file.split("/")].map(encodeURIComponent).join("/"))}"><span>${esc(q.title)}</span><span class="meta">${esc(q.meta)}</span></a></li>`).join("")}</ul>`
       : `<p class="empty">No quizzes yet.</p>`}
+    ${weeksOf(s).length
+      ? `<div class="downloads">${weeksOf(s).map(w => `<a class="dl" href="${esc(zipUrl(s.code, w))}">↓ ${esc(w.replace(/^week0*/, "Week "))} (.zip)</a>`).join("")}<a class="dl" href="${esc(zipUrl(s.code, "all"))}">↓ Whole course (.zip)</a></div>`
+      : ""}
   </section>`).join("");
 </script>
 </body>
