@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="bs">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IBU kvizovi</title>
+<title>IBU Quizzes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -50,17 +50,17 @@ a.quiz .meta{font-family:var(--f-mono); font-size:.8rem; color:var(--muted); whi
 <div class="wrap">
   <header style="display:flex;flex-direction:column;gap:10px">
     <span class="eyebrow">International Burch University · 2026/2027</span>
-    <h1>IBU kvizovi</h1>
-    <p class="lede">Kvizovi za ponavljanje gradiva po predmetima. Svako pitanje ima pet ponuđenih odgovora, a nakon odgovora dobiješ objašnjenje.</p>
+    <h1>IBU Quizzes</h1>
+    <p class="lede">Revision quizzes by course. Every question has five options, with a learn mode or an exam mode that shows the explanations at the end.</p>
   </header>
   <main id="subjects" style="display:flex;flex-direction:column;gap:16px"></main>
 </div>
 <script>
-// Novi kviz: dodaj red u "quizzes" odgovarajućeg predmeta.
-// Folder predmeta se zove "<code> - <name>", npr. "IT 2001 - Web Programming".
-// "file" je putanja unutar foldera predmeta, npr. "week-04/reading-04.html".
+// New quiz: add an entry to the course's "quizzes" list.
+// Each course folder is named "<code> - <name>", e.g. "IT 2001 - Web Programming".
+// "file" is the path inside the course folder, e.g. "week04/quiz/reading-04.html".
 const SUBJECTS = [
-  { code:"FENMS 0121", name:"Data Structures and Algorithms", quizzes:[] },
+  { code:"FENMS 0121", name:"Data Structures and Algorithms", quizzes:[{file:"week04/reading-material/reading-04-guide.html",title:"Reading 04 · Study guide",meta:"read"},{file:"week04/quiz/reading-04.html",title:"Reading 04 · Quiz",meta:"82 questions"}] },
   { code:"IT 2001", name:"Web Programming", quizzes:[] },
   { code:"IT 2002", name:"System Analysis and Design", quizzes:[] },
   { code:"IT 2003", name:"Ethical and Legal Issues of IT", quizzes:[] },
@@ -75,7 +75,7 @@ document.getElementById("subjects").innerHTML = SUBJECTS.map(s => `
     </div>
     ${s.quizzes.length
       ? `<ul>${s.quizzes.map(q => `<li><a class="quiz" href="${esc([s.code + " - " + s.name, ...q.file.split("/")].map(encodeURIComponent).join("/"))}"><span>${esc(q.title)}</span><span class="meta">${esc(q.meta)}</span></a></li>`).join("")}</ul>`
-      : `<p class="empty">Još nema kvizova.</p>`}
+      : `<p class="empty">No quizzes yet.</p>`}
   </section>`).join("");
 </script>
 </body>

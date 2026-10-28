@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reading 04 Study Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: graph paper; sticky contents rail on the left (wide screens), one reading column of ~68ch. */
+:root{
+  --paper:#eef2f0; --grid:#dbe3e0; --card:#fbfcfb; --ink:#17222b; --muted:#5a6872;
+  --line:#c9d3d0; --accent:#0b6b8a; --accent-soft:#d6e9ef;
+  --good:#1d7a46; --good-soft:#dcf0e3; --bad:#b3362c; --bad-soft:#f7dfdc; --warn:#9a6a00; --warn-soft:#f6ecd2;
+  --code-bg:#e4ebe9;
+  --s1:#0b6b8a; --s2:#1d7a46; --s3:#9a6a00; --s4:#b3362c; --s5:#6a4c93; --s6:#5a6872;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root{
+  --paper:#11181d; --grid:#1a242a; --card:#172127; --ink:#e3ebee; --muted:#93a3ad;
+  --line:#2c3a42; --accent:#4fb6d6; --accent-soft:#163541;
+  --good:#5cc98a; --good-soft:#163323; --bad:#ef7d72; --bad-soft:#3d1c19; --warn:#e2b54a; --warn-soft:#382c12;
+  --code-bg:#0f1519;
+  --s1:#4fb6d6; --s2:#5cc98a; --s3:#e2b54a; --s4:#ef7d72; --s5:#b49ae0; --s6:#93a3ad;
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+code, pre, .math, .formula, svg text, .cell, .num, .eyebrow{font-variant-ligatures:none; font-feature-settings:"calt" 0, "liga" 0}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth; scroll-padding-top:16px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{transition:none!important}}
+body{
+  margin:0;
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg,var(--grid) 1px, transparent 1px);
+  background-size:24px 24px;
+  color:var(--ink); font-family:var(--f-body); font-size:18px; line-height:1.65;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));
+  padding-right:max(16px, env(safe-area-inset-right, 0px));
+  padding-block:32px 80px;
+}
+.page{max-width:1120px; margin:0 auto; display:grid; grid-template-columns:230px minmax(0,1fr); gap:40px; align-items:start}
+@media (max-width:900px){ .page{grid-template-columns:minmax(0,1fr); gap:20px} }
+
+/* contents rail */
+nav.toc{position:sticky; top:20px; font-size:.92rem; line-height:1.4}
+nav.toc details{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px}
+nav.toc summary{font-family:var(--f-mono); font-size:.75rem; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); cursor:pointer}
+nav.toc ol{counter-reset:chapter; list-style:none; margin:10px 0 0; padding-left:1.4em; display:flex; flex-direction:column; gap:6px}
+nav.toc li:not(.part){counter-increment:chapter}
+nav.toc li:not(.part)::marker{content:counter(chapter) ". "}
+nav.toc a{color:var(--ink); text-decoration:none}
+nav.toc a:hover, nav.toc a.on{color:var(--accent)}
+nav.toc a.on{font-weight:700}
+nav.toc .part{font-family:var(--f-mono); font-size:.7rem; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; margin-top:8px; list-style:none; margin-left:-1.4em}
+@media (max-width:900px){ nav.toc{position:static} }
+
+main{min-width:0; display:flex; flex-direction:column; gap:28px}
+.back{font-family:var(--f-mono); font-size:.85rem; color:var(--accent)}
+header.hero{display:flex; flex-direction:column; gap:12px}
+.eyebrow{font-family:var(--f-mono); font-size:.75rem; text-transform:uppercase; letter-spacing:.12em; color:var(--muted)}
+h1,h2,h3{font-family:var(--f-display); text-wrap:balance; margin:0; letter-spacing:-0.01em; line-height:1.15}
+h1{font-size:clamp(2.1rem, 6vw, 3.3rem); font-weight:800}
+h1 .amp{color:var(--accent)}
+h2{font-size:clamp(1.5rem, 3.5vw, 2rem); font-weight:800}
+h3{font-size:1.2rem; font-weight:700; margin-top:6px}
+.lede{color:var(--muted); max-width:62ch; margin:0; font-size:1.1rem}
+.hero-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:6px}
+.btn{display:inline-block; font-family:var(--f-body); font-weight:700; font-size:1rem; border-radius:10px; padding:11px 20px; background:var(--accent); color:#fff; text-decoration:none; border:0; cursor:pointer}
+@media (prefers-color-scheme: dark){ .btn{color:#0c1418} }
+.btn:focus-visible, a:focus-visible, button:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+
+section.chap{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:28px clamp(18px, 4vw, 36px); display:flex; flex-direction:column; gap:16px}
+section.chap > p, section.chap li{max-width:68ch}
+section.chap p{margin:0}
+.num{font-family:var(--f-mono); font-size:.8rem; color:var(--accent); letter-spacing:.08em}
+.chap-head{display:flex; flex-direction:column; gap:4px}
+.part-label{font-family:var(--f-mono); font-size:.75rem; text-transform:uppercase; letter-spacing:.14em; color:var(--muted); padding-top:12px; border-top:1px dashed var(--line)}
+ul.tight, ol.tight{margin:0; padding-left:1.3em; display:flex; flex-direction:column; gap:6px}
+code{font-family:var(--f-mono); font-size:.86em; background:var(--code-bg); border-radius:4px; padding:1px 5px}
+pre{margin:0; background:var(--code-bg); border-radius:10px; padding:14px 16px; overflow-x:auto; font-family:var(--f-mono); font-size:.84rem; line-height:1.55}
+pre code{background:none; padding:0}
+.k{color:var(--accent); font-weight:600}
+.cm{color:var(--muted)}
+b, strong{font-weight:700}
+.math{font-family:var(--f-mono); font-size:.92em; white-space:normal; overflow-wrap:anywhere}
+.formula{font-family:var(--f-mono); font-size:1.02rem; background:var(--accent-soft); border-radius:10px; padding:12px 16px; text-align:center; overflow-x:auto}
+
+/* callouts */
+.callout{border-radius:12px; padding:14px 18px; display:flex; flex-direction:column; gap:6px; border:1px solid}
+.callout .tag{font-family:var(--f-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.12em; font-weight:600}
+.callout.key{background:var(--accent-soft); border-color:var(--accent)} .callout.key .tag{color:var(--accent)}
+.callout.trap{background:var(--warn-soft); border-color:var(--warn)} .callout.trap .tag{color:var(--warn)}
+.callout.story{background:transparent; border-color:var(--line); border-style:dashed} .callout.story .tag{color:var(--muted)}
+
+/* tables */
+.tbl{overflow-x:auto; border:1px solid var(--line); border-radius:12px}
+table{border-collapse:collapse; width:100%; font-size:.95rem; font-variant-numeric:tabular-nums}
+th, td{text-align:left; padding:9px 14px; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-family:var(--f-mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:600; background:var(--paper)}
+tr:last-child td{border-bottom:0}
+td.r, th.r{text-align:right}
+td.math, td .math{white-space:nowrap; overflow-wrap:normal}
+
+/* figures */
+figure{margin:0; display:flex; flex-direction:column; gap:8px}
+figcaption{font-size:.88rem; color:var(--muted); max-width:68ch}
+svg{display:block; max-width:100%; height:auto}
+svg text{font-family:var(--f-mono); fill:var(--muted)}
+.fig-box{border:1px solid var(--line); border-radius:12px; padding:14px; background:var(--paper); overflow-x:auto}
+
+/* array cells */
+.arr{display:flex; gap:4px; flex-wrap:nowrap}
+.cell{min-width:44px; height:44px; display:grid; place-items:center; border:1px solid var(--line); border-radius:8px; font-family:var(--f-mono); font-size:.88rem; background:var(--card); position:relative; transition:background .2s, opacity .2s, border-color .2s}
+.cell.out{opacity:.3}
+.cell.mid{border:2px solid var(--accent); background:var(--accent-soft); font-weight:600}
+.cell.hit{border:2px solid var(--good); background:var(--good-soft); font-weight:600}
+.cell.sorted{background:var(--good-soft); border-color:var(--good)}
+.cell.swap{background:var(--warn-soft); border-color:var(--warn)}
+.idx{display:flex; gap:4px}
+.idx span{min-width:44px; text-align:center; font-family:var(--f-mono); font-size:.7rem; color:var(--muted)}
+.ptrs{display:flex; gap:4px; min-height:18px}
+.ptrs span{min-width:44px; text-align:center; font-family:var(--f-mono); font-size:.68rem; color:var(--accent); font-weight:600}
+
+/* stepper */
+.stepper{display:flex; flex-direction:column; gap:12px}
+.stepper .controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.stepper input{font:inherit; font-family:var(--f-mono); width:6.5rem; padding:8px 10px; border:1px solid var(--line); border-radius:8px; background:var(--card); color:var(--ink)}
+.stepper .msg{font-family:var(--f-mono); font-size:.88rem; min-height:1.5em}
+.btn.small{padding:8px 14px; font-size:.92rem}
+.btn.ghost{background:transparent; color:var(--ink); border:1px solid var(--line)}
+
+.passes{display:flex; flex-direction:column; gap:8px}
+.pass{display:grid; grid-template-columns:8.5rem auto; gap:12px; align-items:center}
+.pass .lbl{font-family:var(--f-mono); font-size:.78rem; color:var(--muted)}
+
+/* cheat sheet */
+.cheat{display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px}
+.cheat div{border:1px solid var(--line); border-radius:12px; padding:14px 16px; display:flex; flex-direction:column; gap:4px; background:var(--paper)}
+.cheat b{font-family:var(--f-display); font-size:1.02rem}
+.cheat span{font-size:.95rem; color:var(--muted)}
+.cheat .math{color:var(--ink)}
+
+@media (max-width:520px){ .cell, .idx span, .ptrs span{min-width:34px} .cell{height:38px; font-size:.78rem} .arr, .idx, .ptrs{gap:3px} #probeTree{min-width:560px} .pass{grid-template-columns:1fr} }
+.legend{display:flex; flex-wrap:wrap; gap:6px 16px; font-family:var(--f-mono); font-size:.78rem}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.legend i{width:14px; height:3px; border-radius:2px; display:inline-block}
+footer.end{display:flex; flex-direction:column; gap:12px; align-items:flex-start}
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav class="toc" aria-label="Contents">
+  <details open id="tocBox">
+    <summary>Contents</summary>
+    <ol id="tocList">
+      <li class="part">Part 1 · Analysis</li>
+      <li><a href="#why">Why not a stopwatch</a></li>
+      <li><a href="#counting">Counting operations</a></li>
+      <li><a href="#growth">Order of growth</a></li>
+      <li><a href="#bounds">O, Ω and Θ</a></li>
+      <li><a href="#cases">Best, worst, average</a></li>
+      <li><a href="#amortised">Amortised cost</a></li>
+      <li><a href="#space">Space</a></li>
+      <li><a href="#doubling">The doubling test</a></li>
+      <li class="part">Part 2 · Searching</li>
+      <li><a href="#linear">Linear search</a></li>
+      <li><a href="#binary">Binary search</a></li>
+      <li><a href="#beyond">Sort first? Lists, ranges, STL</a></li>
+      <li class="part">Part 3 · Sorting</li>
+      <li><a href="#bubble">Bubble sort</a></li>
+      <li class="part">Review</li>
+      <li><a href="#cheat">Cheat sheet</a></li>
+    </ol>
+  </details>
+</nav>
+
+<main>
+  <a class="back" href="../../../index.html">← All courses</a>
+
+  <header class="hero">
+    <span class="eyebrow">FENMS 0121 · Data Structures &amp; Algorithms · Week 04</span>
+    <h1>Analysis, Search <span class="amp">&amp;</span> Bubble Sort</h1>
+    <p class="lede">Everything from Reading 04 in one place: the Chapter 5 and 6 book chapters and the study notes, explained in plain words with worked examples. Read it top to bottom, or jump to a section from the contents.</p>
+    <div class="hero-actions">
+      <a class="btn" href="../quiz/reading-04.html">Take the quiz instead</a>
+    </div>
+  </header>
+
+  <!-- ===================== PART 1 ===================== -->
+  <span class="part-label">Part 1 · Analysis of algorithms</span>
+
+  <section class="chap" id="why">
+    <div class="chap-head"><span class="num">01</span><h2>Why not just use a stopwatch?</h2></div>
+    <p>An <b>algorithm</b> is a set of clear, unambiguous instructions that solves a problem. It takes <b>zero or more inputs</b>, must produce <b>at least one output</b>, every step must be simple enough for a computer to carry out, and it must <b>finish in finite time</b>. A good algorithm is also correct for every input, deterministic (same input, same result) and efficient.</p>
+    <p>Most problems can be solved in many ways, so we need to compare solutions. Timing a program sounds natural, but a stopwatch answers a very narrow question: how long <i>this</i> program took, on <i>this</i> machine, for <i>this</i> input. Change any of the three and the number changes. Worse, you can only time a program after you have written it and waited for it to finish.</p>
+    <div class="callout story">
+      <span class="tag">Case study · N-body simulation</span>
+      <p>Simulating stars that all pull on each other means computing the force for every pair of bodies: a loop inside a loop, about <span class="math">N²</span> work. For 10⁸ bodies that is roughly 5·10¹⁵ pair calculations, which at a billion per second is <b>about 58 days for one step</b> (the notes count N² instead of N(N−1)/2 and get 116 days).</p>
+      <p>The Barnes–Hut algorithm treats a distant cluster of stars as one body at its centre of mass. That turns the work into about <span class="math">N log N</span> ≈ 2.7·10⁹ steps: <b>under 3 seconds</b> on the same machine. Same hardware, same simulation, different algorithm.</p>
+    </div>
+    <div class="callout key">
+      <span class="tag">Key idea</span>
+      <p>We want to predict cost from the <b>shape of the code</b>, before it runs, in a way that still holds on a different machine.</p>
+    </div>
+  </section>
+
+  <section class="chap" id="counting">
+    <div class="chap-head"><span class="num">02</span><h2>Counting operations</h2></div>
+    <p>Instead of seconds, we pick <b>one operation</b> and count how many times it runs as a function of the input size <span class="math">N</span>. We usually pick the operation in the <b>innermost loop</b> (a comparison, an array access, following a pointer), because it runs most often. Any two sensible choices differ only by a constant factor, which we will throw away anyway.</p>
+
+    <h3>A loop inside a loop</h3>
+<pre><code><span class="cm">// How many pairs of positions hold values that sum to zero?</span>
+<span class="k">for</span> (int i = 0; i &lt; len; ++i)
+    <span class="k">for</span> (int j = i + 1; j &lt; len; ++j)   <span class="cm">// starts at i + 1</span>
+        <span class="k">if</span> (arr[i] + arr[j] == 0) ++found;</code></pre>
+    <p>For a given <code>i</code>, the inner loop runs <span class="math">N − 1 − i</span> times. Adding the rows up:</p>
+    <div class="formula">(N−1) + (N−2) + … + 1 + 0 = N(N−1) / 2</div>
+    <figure>
+      <div class="fig-box"><svg id="pairGrid" viewBox="0 0 520 300" role="img" aria-label="An 8 by 8 grid of pairs with the cells above the diagonal shaded"></svg></div>
+      <figcaption>Every cell is a pair (i, j) for N = 8. The code only visits the cells above the diagonal: 7 + 6 + … + 1 = 28 = 8·7/2. It skips the diagonal (a position paired with itself) and everything below it (the same pair in the other order).</figcaption>
+    </figure>
+    <p>The trick for the sum: write it forwards and backwards and add column by column. Every column adds up to <span class="math">N</span>, there are <span class="math">N − 1</span> columns, so two copies give <span class="math">N(N−1)</span> and one copy is half of that.</p>
+    <div class="callout trap">
+      <span class="tag">Exam trap</span>
+      <p>If <code>j</code> started at 0, the code would visit all <span class="math">N²</span> cells, check every pair twice and pair each element with itself. Starting at <code>i + 1</code> saves just over half the work, but the count still grows about <b>4× when N doubles</b>. A saving in the constant is not a change in the order of growth.</p>
+    </div>
+
+    <h3>One more loop, one more factor of N</h3>
+    <p>Three nested loops with <code>i &lt; j &lt; k</code> make <span class="math">N(N−1)(N−2)/6</span> comparisons. The 6 is there because three positions can be written in 3! = 6 orders and the loops only produce the increasing one. For N = 1000 that is about 166 million comparisons, 333 times more than the double loop.</p>
+
+    <h3>Loops that halve</h3>
+<pre><code><span class="k">while</span> (n &gt; 1) { n /= 2; ++steps; }</code></pre>
+    <p>Starting at <span class="math">N</span> and halving: N, N/2, N/4, … After <span class="math">k</span> steps we are at <span class="math">N/2ᵏ</span>, and we stop when that reaches 1. So the loop runs <span class="math">⌊lg N⌋</span> times, where <span class="math">lg</span> means log base 2.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>N</th><th class="r">halvings until 1</th></tr></thead>
+      <tbody><tr><td>1,000</td><td class="r">9</td></tr><tr><td>1,000,000</td><td class="r">19</td></tr><tr><td>1,000,000,000</td><td class="r">29</td></tr></tbody>
+    </table></div>
+    <p>Multiply the input by a thousand and the loop needs only about ten more steps.</p>
+    <div class="callout key">
+      <span class="tag">Does the log base matter?</span>
+      <p><span class="math">log_b N = lg N / lg b</span>, so changing the base <b>multiplies</b> by a constant (lg N ≈ 3.32 · log₁₀ N). Constants are dropped, so inside O and Θ the base does not matter. The book writes <span class="math">lg N</span> for an exact count of halvings and <span class="math">log N</span> inside O and Θ.</p>
+    </div>
+  </section>
+
+  <section class="chap" id="growth">
+    <div class="chap-head"><span class="num">03</span><h2>Order of growth</h2></div>
+    <p>Exact counts like <span class="math">½N² − ½N</span> are more precise than we need. We simplify in two steps:</p>
+    <ol class="tight">
+      <li><b>Drop the lower-order terms.</b> At N = 1000, ½N² is 500,000 and ½N is only 500. The biggest term takes over as N grows.</li>
+      <li><b>Drop the leading coefficient.</b> The ½ depends on how the loop was written and on the machine. What matters is N² versus N.</li>
+    </ol>
+    <p>What is left is the <b>order of growth</b>: the highest-order term without its coefficient.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Count</th><th>Order of growth</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td class="math">N(N−1)/2</td><td class="math">N²</td><td>expand, keep ½N², drop ½</td></tr>
+        <tr><td class="math">2N³ + 12N² + 3N − 10</td><td class="math">N³</td><td>N³ is the highest term</td></tr>
+        <tr><td class="math">lg N + 5N</td><td class="math">N</td><td>N eventually leaves lg N behind</td></tr>
+        <tr><td class="math">N³/1000 + 1000N²</td><td class="math">N³</td><td>even though 1000N² is bigger until N = 10⁶</td></tr>
+      </tbody>
+    </table></div>
+    <p><b>Tilde vs order of growth.</b> <span class="math">f(N) ∼ g(N)</span> means <span class="math">f(N)/g(N) → 1</span>. The tilde keeps the coefficient (<span class="math">½N² − ½N ∼ ½N²</span>), which helps predict running time. The order of growth throws the coefficient away too, which helps sort algorithms into classes.</p>
+
+    <h3>The usual classes, and what doubling N does</h3>
+    <figure>
+      <div class="fig-box"><svg id="growthChart" viewBox="0 0 560 320" role="img" aria-label="Chart of six growth functions up to N equals 16"></svg></div>
+      <div class="legend" id="growthLegend"></div>
+      <figcaption>The six common growth rates up to N = 16, clipped at 40 steps. 2ᴺ leaves the chart by N = 6, while lg N has not reached 5 even at N = 16.</figcaption>
+    </figure>
+    <div class="tbl"><table>
+      <thead><tr><th>Name</th><th>Growth</th><th>When N doubles, time…</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td>constant</td><td class="math">1</td><td>stays the same</td><td>array access, stack push</td></tr>
+        <tr><td>logarithmic</td><td class="math">log N</td><td>one more step</td><td>halving loop, binary search</td></tr>
+        <tr><td>linear</td><td class="math">N</td><td>doubles</td><td>linear search, list get(i)</td></tr>
+        <tr><td>linearithmic</td><td class="math">N log N</td><td>a bit more than doubles</td><td>merge sort</td></tr>
+        <tr><td>quadratic</td><td class="math">N²</td><td>×4</td><td>double loop, bubble sort</td></tr>
+        <tr><td>cubic</td><td class="math">N³</td><td>×8</td><td>triple loop</td></tr>
+        <tr><td>exponential</td><td class="math">2ᴺ</td><td>is squared</td><td>naive recursive Fibonacci</td></tr>
+      </tbody>
+    </table></div>
+    <p><b>What counts as "good"?</b> Rule of thumb: below N² works at scale, N² and above is trouble. But it depends on the problem. For comparison sorting, <span class="math">N log N</span> is the best possible. For looking something up, even <span class="math">N</span> is too slow and <span class="math">log N</span> is the target.</p>
+    <h3>How big an input fits in the time?</h3>
+    <p>Assume a billion basic steps per second.</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Growth</th><th class="r">in 1 second</th><th class="r">in 1 hour</th></tr></thead>
+      <tbody>
+        <tr><td class="math">N</td><td class="r">1,000,000,000</td><td class="r">3,600,000,000,000</td></tr>
+        <tr><td class="math">N log N</td><td class="r">39,620,077</td><td class="r">98,574,774,544</td></tr>
+        <tr><td class="math">N²</td><td class="r">31,622</td><td class="r">1,897,366</td></tr>
+        <tr><td class="math">N³</td><td class="r">1,000</td><td class="r">15,326</td></tr>
+        <tr><td class="math">2ᴺ</td><td class="r">29</td><td class="r">41</td></tr>
+        <tr><td class="math">N!</td><td class="r">12</td><td class="r">15</td></tr>
+      </tbody>
+    </table></div>
+    <p>3600 times more time takes a linear algorithm from a billion items to 3.6 trillion, but an exponential one only from 29 to 41 items, and a factorial one from 12 to 15. A faster machine divides the time by a constant; it does not fix bad growth.</p>
+  </section>
+
+  <section class="chap" id="bounds">
+    <div class="chap-head"><span class="num">04</span><h2>Upper, lower and tight bounds: O, Ω, Θ</h2></div>
+    <p>Start with something that is not code. A restaurant charges <b>200 € for the room plus 25 € per guest</b>: <span class="math">f(N) = 200 + 25N</span>. A friend asks how expensive the dinner will be. You could answer in three ways:</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Answer</th><th>Kind of promise</th><th>Notation</th></tr></thead>
+      <tbody>
+        <tr><td>"At most 40 € per guest"</td><td><b>upper bound</b>: never above 40N</td><td class="math">O(N)</td></tr>
+        <tr><td>"At least 20 € per guest"</td><td><b>lower bound</b>: never below 20N</td><td class="math">Ω(N)</td></tr>
+        <tr><td>"Between 20 and 40 € per guest"</td><td><b>tight bound</b>: both at once</td><td class="math">Θ(N)</td></tr>
+      </tbody>
+    </table></div>
+    <p>The lower promise always holds. The upper one fails for small groups: 5 guests pay 325 €, which is 65 € each, because the room is shared by so few people. <span class="math">200 + 25N ≤ 40N</span> only becomes true at <b>N = 14</b>. So the upper promise needs small print: "for groups of 14 or more". That small print is <span class="math">n₀</span>. The 40 € could just as well be 50 €; what carries the information is "per guest", the growth class.</p>
+
+    <h3>The definitions</h3>
+    <ul class="tight">
+      <li><b>f is O(g)</b> if there are constants <span class="math">c &gt; 0</span> and <span class="math">n₀</span> with <span class="math">f(N) ≤ c·g(N)</span> for all <span class="math">N ≥ n₀</span>. Grows <i>no faster</i> than g (like ≤).</li>
+      <li><b>f is Ω(g)</b> if there are <span class="math">c &gt; 0</span> and <span class="math">n₀</span> with <span class="math">f(N) ≥ c·g(N)</span> for all <span class="math">N ≥ n₀</span>. Grows <i>no slower</i> than g (like ≥).</li>
+      <li><b>f is Θ(g)</b> if it is both: <span class="math">c₁·g(N) ≤ f(N) ≤ c₂·g(N)</span> for all <span class="math">N ≥ n₀</span>. Grows <i>at the same rate</i> (like =).</li>
+    </ul>
+    <figure>
+      <div class="fig-box"><svg id="bandChart" viewBox="0 0 560 280" role="img" aria-label="A wobbly function held between two multiples of g after n zero"></svg></div>
+      <figcaption>Before n₀ the function can do anything. From n₀ on it stays between c₁·g(N) and c₂·g(N), which makes it Θ(g).</figcaption>
+    </figure>
+    <ul class="tight">
+      <li><b>Why the constant c?</b> So the bound survives a faster or slower machine or a rewritten loop. If c had to be 1, a program would stop being O(N²) when moved to a machine 3× slower.</li>
+      <li><b>Why n₀?</b> So small inputs are exempt, like the small dinner groups.</li>
+      <li><b>Comparing growth, not values:</b> 100N is O(N) because we may choose c = 100.</li>
+    </ul>
+    <div class="callout story">
+      <span class="tag">Worked example</span>
+      <p>Show <span class="math">f(N) = 2N² + 20N</span> is Θ(N²). Lower: <span class="math">2N² ≤ f(N)</span> always, so c₁ = 2. Upper: <span class="math">2N² + 20N ≤ 3N²</span> ⇔ <span class="math">20N ≤ N²</span> ⇔ <span class="math">N ≥ 20</span>. So c₁ = 2, c₂ = 3, n₀ = 20 works. f is also O(N³) and Ω(N), both true but not tight, and it is <i>not</i> O(N).</p>
+    </div>
+    <div class="callout trap">
+      <span class="tag">Exam trap</span>
+      <p>"Merge sort is O(N²)" is <b>true but weak</b>, like saying a marathon takes less than a week. The informative statement is Θ(N log N). The book prefers Θ whenever it is known.</p>
+    </div>
+
+    <h3>Bounds on a problem, and "optimal"</h3>
+    <p>A lower bound can also describe a <b>problem</b>: a claim about every algorithm that could ever solve it, including ones not invented yet. Any sort that works by comparing pairs needs about <span class="math">N lg N</span> comparisons on some input: <span class="math">Ω(N log N)</span>.</p>
+    <p>An algorithm is <b>optimal</b> when its cost matches a proved lower bound on the problem, within a constant factor. Merge sort is Θ(N log N), so it is optimal, although another comparison sort may still have a smaller constant or use less memory.</p>
+    <p>Open problem example: matrix multiplication. The obvious algorithm is Θ(N³), the best known is about <span class="math">N^2.37</span>, and the best proved lower bound is only Ω(N²) (you have to read the input). Nobody knows where between them the truth is.</p>
+    <div class="callout story">
+      <span class="tag">History</span>
+      <p>Paul Bachmann used O in number theory in 1894 and Edmund Landau popularised it. Donald Knuth brought O, Ω and Θ into computer science in 1976. Writing <span class="math">f = O(g)</span> is a convention: O(g) is a set of functions and the line means "f belongs to O(g)".</p>
+    </div>
+  </section>
+
+  <section class="chap" id="cases">
+    <div class="chap-head"><span class="num">05</span><h2>Which input? Best, worst and average case</h2></div>
+    <p>Two inputs of the same size can cost very different amounts. So every cost claim also has to say which input it is about:</p>
+    <ul class="tight">
+      <li><b>Worst case:</b> the most expensive input of size N. A guarantee: it never does worse.</li>
+      <li><b>Best case:</b> the cheapest input. Rarely useful, because you do not choose the input.</li>
+      <li><b>Average case:</b> the cost averaged over inputs. Only meaningful once you say how inputs are distributed (usually: all equally likely).</li>
+    </ul>
+    <div class="callout trap">
+      <span class="tag">The most common misconception</span>
+      <p>"O is the worst case, Ω the best case, Θ the average case" is <b>wrong</b>. Choosing a case and choosing a symbol are <b>two separate decisions</b>. Each case is its own function of N and can get an O, Ω or Θ bound, for example "linear search is Θ(N) in the worst case and Θ(1) in the best case". O and worst case appear together so often only because an upper bound on the worst case is a promise for <i>every</i> input.</p>
+    </div>
+    <p>Example: a stack on a resizing array. Most pushes write one element, Θ(1), the best case. Occasionally the array is full, and the push allocates a twice-as-big array and copies everything, Θ(N), the worst case. Calling push "O(N)" is true but misleading, which leads us to amortised cost.</p>
+  </section>
+
+  <section class="chap" id="amortised">
+    <div class="chap-head"><span class="num">06</span><h2>Amortised cost</h2></div>
+    <p>The <b>amortised cost</b> of an operation is the total cost of a sequence of operations divided by the number of operations. It spreads rare expensive operations over the cheap ones.</p>
+    <figure>
+      <div class="fig-box"><svg id="amortChart" viewBox="0 0 560 260" role="img" aria-label="Cost of ten insertions into an array that starts at capacity 4"></svg></div>
+      <figcaption>Ten insertions into a dynamic array that starts at capacity 4 and doubles when full. Insertion 5 copies 4 elements, insertion 9 copies 8. Total: 10 writes + 12 copies = 22, or 2.2 per insertion.</figcaption>
+    </figure>
+    <div class="callout key">
+      <span class="tag">Proposition</span>
+      <p>Starting at capacity 1 and doubling when full, <b>N pushes cost fewer than 3N</b> units (one per write, one per copied element). So a push is <b>Θ(1) amortised</b>, even though a single push can be Θ(N).</p>
+    </div>
+    <p><b>Why:</b> N writes cost N. The copies are <span class="math">1 + 2 + 4 + … + 2ᵏ = 2ᵏ⁺¹ − 1</span>, a geometric sum where each term is bigger than all the previous ones together. Since <span class="math">2ᵏ &lt; N</span>, the copies total less than 2N. Writes plus copies: under 3N. The spikes get bigger, but they also get rarer at exactly the same rate.</p>
+    <p><b>Accounting method</b> (same result, different argument): charge every push 3 units. 1 pays for the write, 2 go into a savings account. When a capacity-c array fills, the c/2 pushes since the last doubling have saved c units, exactly what copying c elements costs.</p>
+    <div class="tbl"><table>
+      <thead><tr><th></th><th>Amortised</th><th>Average case</th></tr></thead>
+      <tbody>
+        <tr><td>Averaged over</td><td>a <b>sequence of operations</b></td><td>a distribution of <b>inputs</b></td></tr>
+        <tr><td>Guarantee</td><td>holds for <b>every</b> sequence</td><td>a particular input can be unlucky</td></tr>
+        <tr><td>Each single operation fast?</td><td colspan="2">not promised by either</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout trap">
+      <span class="tag">Exam traps</span>
+      <ul class="tight">
+        <li>Growing by a <b>fixed</b> amount (e.g. +100 slots) is not enough: the copies form an arithmetic sum ≈ N²/200, so the amortised cost is <b>Θ(N)</b>. Doubling is what makes the sum geometric.</li>
+        <li>If every operation has a deadline (audio, control systems), an occasional Θ(N) push can still be a problem. A linked stack is the safer choice there.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chap" id="space">
+    <div class="chap-head"><span class="num">07</span><h2>Space</h2></div>
+    <p>Memory is analysed the same way, with the same notation. <b>Space complexity</b> normally means the <b>extra (auxiliary) memory</b> beyond the input, because you had to have the input anyway.</p>
+    <ul class="tight">
+      <li><b>Θ(1), in-place:</b> a few variables, nothing that grows with N. The pair and triple loops, linear search, iterative binary search and bubble sort.</li>
+      <li><b>Θ(N):</b> e.g. merge sort's auxiliary array. Writing back into the input does not make it in-place.</li>
+      <li><b>The recursion stack:</b> every pending call is a stack frame, so recursion d levels deep costs Θ(d) even if the code never allocates. A recursive walk down a linked list is N deep. Recursive binary search is lg N deep.</li>
+    </ul>
+    <p>Time and space often trade against each other, for example keeping a <code>size</code> counter in a list so <code>count()</code> is Θ(1) instead of Θ(N).</p>
+  </section>
+
+  <section class="chap" id="doubling">
+    <div class="chap-head"><span class="num">08</span><h2>The doubling test</h2></div>
+    <p>Analysis on paper can be wrong, so we check it by measuring. Run the program on size N, then on 2N, and divide. If <span class="math">T(N) = aN^b</span>:</p>
+    <div class="formula">T(2N) / T(N) = a(2N)^b / aN^b = 2^b &nbsp;&nbsp;⇒&nbsp;&nbsp; b = lg( T(2N) / T(N) )</div>
+    <p>The unknown constant <span class="math">a</span> (machine, compiler) cancels out. Ratio ≈ 2 means linear, ≈ 4 quadratic, ≈ 8 cubic. A ratio a little <b>above</b> 2 that slowly creeps down to 2 is the signature of <span class="math">N log N</span>, since its ratio is <span class="math">2(1 + 1/lg N)</span>.</p>
+    <div class="tbl"><table>
+      <thead><tr><th class="r">N</th><th class="r">seconds</th><th class="r">ratio</th><th class="r">lg ratio</th></tr></thead>
+      <tbody>
+        <tr><td class="r">2,000</td><td class="r">0.0001</td><td class="r">–</td><td class="r">–</td></tr>
+        <tr><td class="r">4,000</td><td class="r">0.0004</td><td class="r">3.87</td><td class="r">1.95</td></tr>
+        <tr><td class="r">8,000</td><td class="r">0.0014</td><td class="r">3.95</td><td class="r">1.98</td></tr>
+        <tr><td class="r">16,000</td><td class="r">0.0056</td><td class="r">4.03</td><td class="r">2.01</td></tr>
+        <tr><td class="r">32,000</td><td class="r">0.0223</td><td class="r">3.97</td><td class="r">1.99</td></tr>
+        <tr><td class="r">64,000</td><td class="r">0.0891</td><td class="r">4.00</td><td class="r">2.00</td></tr>
+      </tbody>
+    </table></div>
+    <p>The book's measurement of the double loop: the exponent settles on 2, matching the N² we counted. On log-log axes a power law is a straight line whose slope is b.</p>
+    <div class="callout trap">
+      <span class="tag">Small inputs lie</span>
+      <ul class="tight">
+        <li>The triple loop's first ratio was 5.04, not 8. The cause is the fixed start-up cost of the inner loop, paid about N²/2 times, which dominates while N is small. That is n₀ showing up in a measurement.</li>
+        <li>The single pass was noisy at first because the processor was still warming up to full clock speed.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===================== PART 2 ===================== -->
+  <span class="part-label">Part 2 · Searching</span>
+
+  <section class="chap" id="linear">
+    <div class="chap-head"><span class="num">09</span><h2>Linear search</h2></div>
+    <p>The search problem: given an array and a <b>key</b>, return an index where the key is, or <b>−1</b> if it is absent. Linear (sequential) search compares the key with each element from left to right.</p>
+<pre><code><span class="k">int</span> linear_search(<span class="k">const</span> Data* arr, <span class="k">int</span> len, <span class="k">const</span> Data&amp; key) {
+    <span class="k">for</span> (int i = 0; i &lt; len; ++i)
+        <span class="k">if</span> (arr[i] == key) <span class="k">return</span> i;   <span class="cm">// found it</span>
+    <span class="k">return</span> -1;                          <span class="cm">// fell off the end</span>
+}</code></pre>
+    <ul class="tight">
+      <li><b>Why −1?</b> No array has index −1. A missing key is an ordinary answer, so it gets an ordinary return value, unlike pop on an empty stack, which is a bug and throws.</li>
+      <li><b>Why pass <code>len</code>?</b> An array passed to a function decays to a pointer, and a pointer carries only an address. <code>sizeof(arr)</code> inside the function gives the size of the pointer.</li>
+    </ul>
+    <div class="tbl"><table>
+      <thead><tr><th>Case</th><th>Comparisons</th><th>Bound</th></tr></thead>
+      <tbody>
+        <tr><td>Best: key at index 0</td><td>1</td><td class="math">Θ(1)</td></tr>
+        <tr><td>Worst: key last, or absent</td><td>N</td><td class="math">Θ(N)</td></tr>
+        <tr><td>Average (key present, uniform)</td><td>(1+2+…+N)/N = (N+1)/2</td><td class="math">Θ(N)</td></tr>
+        <tr><td>Space</td><td>one loop counter</td><td class="math">Θ(1)</td></tr>
+      </tbody>
+    </table></div>
+    <p>Example: in <code>[10, 50, 30, 70, 80, 60, 20, 90, 40]</code>, searching for 20 returns <b>6 after 7 comparisons</b> (indices start at 0). Searching for 25 checks all 9 and returns −1. Finding out something is absent costs as much as the worst place it could be.</p>
+    <div class="callout key">
+      <span class="tag">When it is the right choice</span>
+      <p>No sorting, no preparation, works on unsorted data, linked lists and streams, and reads memory in order (a small constant). Great for one-off questions. For many searches on a large collection, sorting first can pay off.</p>
+    </div>
+  </section>
+
+  <section class="chap" id="binary">
+    <div class="chap-head"><span class="num">10</span><h2>Binary search</h2></div>
+    <p>If the array is <b>sorted</b>, one comparison tells you much more. If the key is smaller than the middle element, it cannot be anywhere to the right of it. So compare with the middle and throw away half of what is left, every time.</p>
+<pre><code><span class="k">int</span> binary_search(<span class="k">const</span> Data* arr, <span class="k">int</span> len, <span class="k">const</span> Data&amp; key) {
+    <span class="k">int</span> low = 0, high = len - 1;
+    <span class="k">while</span> (low &lt;= high) {                  <span class="cm">// interval not empty</span>
+        <span class="k">int</span> mid = low + (high - low) / 2;   <span class="cm">// never (low + high) / 2</span>
+        <span class="k">if</span> (key == arr[mid])     <span class="k">return</span> mid;
+        <span class="k">else if</span> (key &lt; arr[mid]) high = mid - 1;  <span class="cm">// only lower</span>
+        <span class="k">else</span>                     low  = mid + 1;  <span class="cm">// only higher</span>
+    }
+    <span class="k">return</span> -1;
+}</code></pre>
+
+    <h3>Try it</h3>
+    <div class="stepper fig-box" id="bsDemo">
+      <div class="idx" id="bsIdx"></div>
+      <div class="arr" id="bsArr"></div>
+      <div class="ptrs" id="bsPtrs"></div>
+      <div class="controls">
+        <label for="bsKey" style="font-weight:600">Key</label>
+        <input id="bsKey" type="number" value="37" inputmode="numeric">
+        <button class="btn small" id="bsStep" type="button">Next step</button>
+        <button class="btn small ghost" id="bsReset" type="button">Reset</button>
+      </div>
+      <div class="msg" id="bsMsg" role="status"></div>
+    </div>
+    <p>Searching for 37 probes 23, then 42, then finds 37 at index 4: three probes. Searching for 120 probes 23, 42, 202 and ends with <b>low = 6, high = 5</b>: the interval has crossed, so the answer is −1. Linear search would have spent all 8 comparisons on that miss.</p>
+
+    <h3>Every detail matters</h3>
+    <ul class="tight">
+      <li><b><code>low &lt;= high</code>, not <code>&lt;</code>:</b> when <code>low == high</code> one element is still left and must be checked. With <code>&lt;</code> it would be skipped.</li>
+      <li><b><code>mid - 1</code> and <code>mid + 1</code>:</b> both branches move strictly past <code>mid</code>, so the interval shrinks every pass. With <code>high = mid</code>, a one-element interval and a smaller key would loop forever.</li>
+      <li><b>Unsorted input:</b> it still terminates, but it can confidently return −1 for a key that is right there.</li>
+    </ul>
+    <div class="callout story">
+      <span class="tag">The midpoint bug that hid for 20 years</span>
+      <p><code>(low + high) / 2</code> overflows when the array has over about a billion elements: the sum passes 2,147,483,647, signed overflow is undefined behaviour, and in practice you read at a negative index. Jon Bentley's 1986 <i>Programming Pearls</i> version had it, despite a correctness proof, and so did Java's library, until it broke a program in 2006. The proof reasoned about mathematical integers, which never overflow, and nobody in 1986 had 4 GB to test with. <code>low + (high − low) / 2</code> gives the same midpoint and cannot overflow.</p>
+    </div>
+
+    <h3>Why it is correct</h3>
+    <div class="callout key">
+      <span class="tag">Invariant</span>
+      <p>At the top of every pass: <b>if the key is anywhere in the array, it is at some index between low and high.</b> It holds at the start (the whole array). Each branch only discards indices that cannot hold the key, because the array is sorted. When <code>low &gt; high</code> the interval is empty, so the key is not there and −1 is correct.</p>
+    </div>
+
+    <h3>How many comparisons?</h3>
+    <p>At most <span class="math">⌊lg N⌋ + 1</span>: the number of halvings plus the final check of the last remaining element.</p>
+    <figure>
+      <div class="fig-box"><svg id="probeTree" viewBox="0 0 620 220" role="img" aria-label="Binary tree of the positions binary search can probe in an array of 15"></svg></div>
+      <figcaption>Every position binary search can probe in an array of 15, by the step at which it is probed. 15 positions fit in 4 levels, so at most 4 comparisons. Doubling to 31 adds only one level. About half of the positions are leaves, which is why the average successful search is only about one comparison less than the worst.</figcaption>
+    </figure>
+    <div class="tbl"><table>
+      <thead><tr><th class="r">N</th><th class="r">linear (worst)</th><th class="r">binary (worst)</th></tr></thead>
+      <tbody>
+        <tr><td class="r">100</td><td class="r">100</td><td class="r">7</td></tr>
+        <tr><td class="r">193 (UN states)</td><td class="r">193</td><td class="r">8</td></tr>
+        <tr><td class="r">1,000</td><td class="r">1,000</td><td class="r">10</td></tr>
+        <tr><td class="r">1,000,000</td><td class="r">1,000,000</td><td class="r">20</td></tr>
+        <tr><td class="r">1,000,000,000</td><td class="r">1,000,000,000</td><td class="r">30</td></tr>
+      </tbody>
+    </table></div>
+    <p>Best case: the key is the first midpoint, 1 comparison. Space: three integers, Θ(1). The recursive version uses Θ(log N) stack frames, so the iterative one is preferred.</p>
+  </section>
+
+  <section class="chap" id="beyond">
+    <div class="chap-head"><span class="num">11</span><h2>Sort first? Linked lists, ranges and the STL</h2></div>
+    <h3>Is it worth sorting first?</h3>
+    <p>Answering <span class="math">k</span> searches on an unsorted array:</p>
+    <ul class="tight">
+      <li>Linear search every time: about <span class="math">kN/2</span> comparisons.</li>
+      <li>Sort once, then binary search: about <span class="math">N lg N + k lg N</span>.</li>
+    </ul>
+    <p>Sorting wins once <span class="math">k ≈ 2 lg N</span>. That is small: about <b>40 searches for a million elements</b> (measured: 45, because <code>std::sort</code> makes about 1.13 N lg N comparisons). But keeping an array sorted costs <b>Θ(N) per insertion</b>, because everything after the insertion point must shift. Collections that change often use trees or hash tables instead.</p>
+
+    <h3>Binary search wants random access</h3>
+    <p>An array reaches <code>arr[mid]</code> in one step. A linked list must walk from the head. Using <code>get(mid)</code> from the head on every probe makes binary search <b>Θ(N log N)</b> pointer steps: <b>worse than a plain linear scan</b>. An algorithm's cost depends on the data structure under it.</p>
+
+    <h3>Searching for a range</h3>
+    <p>An IP geolocation database stores non-overlapping ranges sorted by start address, not one row per address. To find which range holds an address, we want the <b>last range that starts at or before the key</b>:</p>
+<pre><code><span class="k">int</span> floor_index(<span class="k">const</span> Data* arr, <span class="k">int</span> len, <span class="k">const</span> Data&amp; key) {
+    <span class="k">int</span> low = 0, high = len - 1, best = -1;
+    <span class="k">while</span> (low &lt;= high) {
+        <span class="k">int</span> mid = low + (high - low) / 2;
+        <span class="k">if</span> (arr[mid] &lt;= key) { best = mid; low = mid + 1; } <span class="cm">// candidate, look right</span>
+        <span class="k">else</span>                   high = mid - 1;
+    }
+    <span class="k">return</span> best;   <span class="cm">// last element ≤ key, or -1</span>
+}</code></pre>
+    <p>Then check <code>i &gt;= 0 &amp;&amp; key &lt;= ends[i]</code>. The <code>i &gt;= 0</code> guard must come first: if the key is before every range, <code>floor_index</code> returns −1, and there is no valid <code>ends[i]</code> to read. Otherwise, the end check tells you whether the address is inside the candidate range or in a gap. This works only because the ranges do not overlap. Addresses are stored as numbers (<span class="math">w·256³ + x·256² + y·256 + z</span>), because as strings "10.0.0.1" would sort before "9.0.0.1". With 4.6 million ranges, a lookup reads at most 23 rows.</p>
+
+    <h3>In the standard library</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Function</th><th>Returns</th></tr></thead>
+      <tbody>
+        <tr><td><code>std::find</code></td><td>linear search; iterator to the first match, or <code>last</code></td></tr>
+        <tr><td><code>std::binary_search</code></td><td>only a <b>bool</b>, despite its name</td></tr>
+        <tr><td><code>std::lower_bound</code></td><td>first element <b>not less</b> than the value (the one you usually want)</td></tr>
+        <tr><td><code>std::upper_bound</code></td><td>first element <b>strictly greater</b> than the value</td></tr>
+        <tr><td><code>std::equal_range</code></td><td>both bounds: all copies of a repeated key</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout trap">
+      <span class="tag">Exam traps</span>
+      <ul class="tight">
+        <li>The binary ones need a range ordered for the comparison (for <code>lower_bound</code>: everything less than the key first). Breaking that is <b>undefined behaviour</b>, not a visible error.</li>
+        <li><code>std::lower_bound</code> on a <code>std::list</code> makes Θ(log N) comparisons but <b>Θ(N) iterator steps</b>. The guarantee is about comparisons.</li>
+      </ul>
+    </div>
+
+    <h3>Search across the structures</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>Structure</th><th>Search</th><th>Insert</th><th>Needs</th></tr></thead>
+      <tbody>
+        <tr><td>unsorted array</td><td class="math">Θ(N)</td><td class="math">Θ(1)</td><td>nothing</td></tr>
+        <tr><td>sorted array</td><td class="math">Θ(log N)</td><td class="math">Θ(N)</td><td>sorted order</td></tr>
+        <tr><td>linked list</td><td class="math">Θ(N)</td><td class="math">Θ(1)</td><td>nothing</td></tr>
+        <tr><td>binary search tree</td><td class="math">Θ(log N)</td><td class="math">Θ(log N)</td><td>balance</td></tr>
+        <tr><td>hash table</td><td class="math">Θ(1) avg</td><td class="math">Θ(1) avg</td><td>a hash function; no ordering</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <!-- ===================== PART 3 ===================== -->
+  <span class="part-label">Part 3 · Sorting</span>
+
+  <section class="chap" id="bubble">
+    <div class="chap-head"><span class="num">12</span><h2>Bubble sort</h2></div>
+    <p>Sorting rearranges N items into order. <b>Bubble sort</b> walks from left to right comparing <b>neighbours</b>, and swaps them if the first is greater. After one pass the largest element has "bubbled" to the end, so each next pass can stop one place earlier. If a whole pass makes no swaps, the array is sorted and we can stop early.</p>
+<pre><code><span class="k">for</span> (int end = n - 1; end &gt; 0; --end) {
+    <span class="k">bool</span> swapped = <span class="k">false</span>;
+    <span class="k">for</span> (int j = 0; j &lt; end; ++j)
+        <span class="k">if</span> (a[j] &gt; a[j + 1]) { swap(a[j], a[j + 1]); swapped = <span class="k">true</span>; }
+    <span class="k">if</span> (!swapped) <span class="k">break</span>;   <span class="cm">// early stop</span>
+}</code></pre>
+    <figure>
+      <div class="fig-box"><div class="passes" id="bubblePasses"></div></div>
+      <figcaption>Bubble sort on [-2, 45, 0, 11, -9]. In pass 1, 45 swaps with 0, 11 and -9 and ends up last. Green cells are already in their final place; each pass makes one comparison fewer.</figcaption>
+    </figure>
+    <div class="tbl"><table>
+      <thead><tr><th>Case</th><th>What happens</th><th>Cost</th></tr></thead>
+      <tbody>
+        <tr><td>Worst: reverse-sorted</td><td>every element crosses the array; N(N−1)/2 comparisons and as many swaps</td><td class="math">Θ(N²)</td></tr>
+        <tr><td>Average: random</td><td>about half the pairs are out of order, ≈ N²/4 swaps</td><td class="math">Θ(N²)</td></tr>
+        <tr><td>Best: already sorted</td><td>with early stop: one pass, N − 1 comparisons, no swaps</td><td class="math">Θ(N)</td></tr>
+        <tr><td>Best without early stop</td><td>still does every pass</td><td class="math">Θ(N²)</td></tr>
+        <tr><td>Space</td><td>swaps in place</td><td class="math">Θ(1)</td></tr>
+      </tbody>
+    </table></div>
+    <p>Using a strict <code>&gt;</code> means equal neighbours are never swapped, so their relative order is kept (the sort is <b>stable</b>). With <code>&gt;=</code> it would not be.</p>
+    <div class="callout story">
+      <span class="tag">How slow is quadratic?</span>
+      <p>Measured: 14 μs for 100 elements, 1 ms for 1,000, 113 ms for 10,000 and 14 s for 100,000. For a million? N² growth means 10× the elements takes 10² = 100× longer: about <b>1,400 seconds, or 23 minutes</b>. That is why optimal algorithms matter.</p>
+    </div>
+  </section>
+
+  <span class="part-label">Review</span>
+
+  <section class="chap" id="cheat">
+    <div class="chap-head"><span class="num">13</span><h2>Cheat sheet</h2></div>
+    <div class="cheat">
+      <div><b>Double loop, j from i+1</b><span class="math">N(N−1)/2 → N²</span></div>
+      <div><b>Triple loop, i&lt;j&lt;k</b><span class="math">N(N−1)(N−2)/6 → N³</span></div>
+      <div><b>Halving loop</b><span class="math">⌊lg N⌋ iterations</span></div>
+      <div><b>Order of growth</b><span>highest term, no coefficient</span></div>
+      <div><b>Doubling ratio</b><span>2 linear · 4 quadratic · 8 cubic · just above 2 N log N</span></div>
+      <div><b>O / Ω / Θ</b><span>≤ / ≥ / = on growth, with c and n₀</span></div>
+      <div><b>Case vs bound</b><span>separate choices; worst-case O is just the most common</span></div>
+      <div><b>Optimal</b><span>matches a proved lower bound on the problem</span></div>
+      <div><b>Doubling array push</b><span>Θ(N) worst, <span class="math">Θ(1)</span> amortised, &lt; 3N for N pushes</span></div>
+      <div><b>Space</b><span>extra beyond input; recursion depth d costs Θ(d)</span></div>
+      <div><b>Linear search</b><span>best 1 · avg (N+1)/2 · worst N · works on anything</span></div>
+      <div><b>Binary search</b><span>sorted + random access · ≤ ⌊lg N⌋+1 · 20 for 10⁶</span></div>
+      <div><b>Midpoint</b><span class="math">low + (high − low) / 2</span></div>
+      <div><b>Sort first?</b><span>after ≈ 2 lg N searches (~40 for 10⁶)</span></div>
+      <div><b>lower_bound</b><span>first ≥ value · binary_search → bool</span></div>
+      <div><b>Bubble sort</b><span>Θ(N²) worst/avg · Θ(N) best with early stop · Θ(1) space</span></div>
+    </div>
+  </section>
+
+  <footer class="end">
+    <p class="lede">Done reading? Check yourself with 82 questions.</p>
+    <a class="btn" href="../quiz/reading-04.html">Take the Reading 04 quiz</a>
+  </footer>
+</main>
+</div>
+
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function el(tag, attrs, parent, text){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(text!=null) e.textContent=text; if(parent) parent.appendChild(e); return e; }
+
+/* 1. pair grid, N = 8 */
+(function(){
+  const s=document.getElementById("pairGrid"), n=8, c=30, x0=40, y0=30;
+  for(let j=0;j<n;j++) el("text",{x:x0+j*c+c/2,y:y0-8,"text-anchor":"middle","font-size":11},s,j);
+  for(let i=0;i<n;i++) el("text",{x:x0-10,y:y0+i*c+c/2+4,"text-anchor":"end","font-size":11},s,i);
+  el("text",{x:x0+n*c/2,y:y0-20,"text-anchor":"middle","font-size":11},s,"j");
+  el("text",{x:x0-28,y:y0+n*c/2,"text-anchor":"middle","font-size":11},s,"i");
+  for(let i=0;i<n;i++) for(let j=0;j<n;j++){
+    const on=j>i, diag=i===j;
+    el("rect",{x:x0+j*c+1,y:y0+i*c+1,width:c-2,height:c-2,rx:4,fill:on?"var(--accent)":diag?"var(--line)":"var(--card)",stroke:"var(--line)","fill-opacity":on?.85:1},s);
+  }
+  const tx=x0+n*c+28;
+  el("text",{x:tx,y:y0+2*c+c/2+4,"font-size":12},s,"row i = 2 visits");
+  el("text",{x:tx,y:y0+2*c+c/2+20,"font-size":12},s,"8 − 1 − 2 = 5 cells");
+  el("text",{x:tx,y:y0+5*c+4,"font-size":12},s,"shaded: 7+6+…+1 = 28");
+  el("text",{x:tx,y:y0+5*c+20,"font-size":12},s,"= ½·N(N−1) of 64");
+})();
+
+/* 2. growth chart */
+(function(){
+  const s=document.getElementById("growthChart"), W=560,H=320, L=46,R=20,T=16,B=36, xmax=16, ymax=40;
+  const X=v=>L+(v/xmax)*(W-L-R), Y=v=>H-B-(v/ymax)*(H-T-B);
+  for(let y=0;y<=ymax;y+=10){ el("line",{x1:L,x2:W-R,y1:Y(y),y2:Y(y),stroke:"var(--line)","stroke-width":1},s); el("text",{x:L-8,y:Y(y)+4,"text-anchor":"end","font-size":11},s,y); }
+  for(let x=0;x<=xmax;x+=4) el("text",{x:X(x),y:H-B+18,"text-anchor":"middle","font-size":11},s,x);
+  el("text",{x:(W+L)/2,y:H-4,"text-anchor":"middle","font-size":11},s,"N");
+  const fs=[["1",()=>1,"--s6"],["lg N",n=>Math.log2(n),"--s5"],["N",n=>n,"--s2"],["N lg N",n=>n*Math.log2(n),"--s1"],["N²",n=>n*n,"--s3"],["2ᴺ",n=>2**n,"--s4"]];
+  const clip=el("clipPath",{id:"gclip"},el("defs",{},s)); el("rect",{x:L,y:T,width:W-L-R,height:H-T-B},clip);
+  const leg=document.getElementById("growthLegend");
+  for(const [name,f,col] of fs){
+    let d=""; for(let n=1;n<=xmax;n+=0.1){ d+=(d?"L":"M")+X(n).toFixed(1)+" "+Y(Math.min(f(n),ymax*1.5)).toFixed(1); }
+    el("path",{d,fill:"none",stroke:`var(${col})`,"stroke-width":2.5,"clip-path":"url(#gclip)","stroke-linecap":"round"},s);
+    leg.insertAdjacentHTML("beforeend",`<span><i style="background:var(${col})"></i>${name}</span>`);
+  }
+})();
+
+/* 3. Θ band */
+(function(){
+  const s=document.getElementById("bandChart"), W=560,H=280,L=30,R=90,T=14,B=40, xmax=10, ymax=135;
+  const X=v=>L+(v/xmax)*(W-L-R), Y=v=>H-B-(v/ymax)*(H-T-B);
+  const g=n=>n*n, c1=0.55, c2=1.25, n0=3.6;
+  const f=n=> g(n)*(0.9+0.18*Math.sin(n*2.4)) + 16*Math.exp(-((n-1.8)**2)) + 1;
+  el("rect",{x:X(n0),y:T,width:X(xmax)-X(n0),height:H-T-B,fill:"var(--accent-soft)"},s);
+  el("line",{x1:X(n0),x2:X(n0),y1:T,y2:H-B,stroke:"var(--accent)","stroke-dasharray":"4 4"},s);
+  el("line",{x1:L,x2:X(xmax),y1:H-B,y2:H-B,stroke:"var(--line)"},s);
+  const path=(fn,col,w,dash)=>{let d="";for(let n=0;n<=xmax;n+=0.05)d+=(d?"L":"M")+X(n).toFixed(1)+" "+Y(Math.min(fn(n),ymax)).toFixed(1);el("path",{d,fill:"none",stroke:col,"stroke-width":w,"stroke-dasharray":dash||""},s);};
+  path(n=>c2*g(n),"var(--s4)",2,"6 4"); path(n=>c1*g(n),"var(--s2)",2,"6 4"); path(f,"var(--ink)",2.5);
+  el("text",{x:X(xmax)+6,y:Y(c2*g(xmax))+4,"font-size":12},s,"c₂·g(N)");
+  el("text",{x:X(xmax)+6,y:Y(f(xmax))+4,"font-size":12,fill:"var(--ink)"},s,"f(N)");
+  el("text",{x:X(xmax)+6,y:Y(c1*g(xmax))+4,"font-size":12},s,"c₁·g(N)");
+  el("text",{x:X(n0),y:H-B+16,"text-anchor":"middle","font-size":12},s,"n₀");
+  el("text",{x:X(n0/2),y:H-B+30,"text-anchor":"middle","font-size":11},s,"no promise here");
+  el("text",{x:X((n0+xmax)/2),y:H-B+30,"text-anchor":"middle","font-size":11},s,"f stays inside the band");
+})();
+
+/* 4. amortised bars: capacity 4, 10 inserts */
+(function(){
+  const s=document.getElementById("amortChart"), W=560,H=260,L=40,R=20,T=16,B=40, n=10, ymax=10;
+  const costs=[1,1,1,1,5,1,1,1,9,1];
+  const bw=(W-L-R)/n, Y=v=>H-B-(v/ymax)*(H-T-B);
+  for(let y=0;y<=ymax;y+=2){ el("line",{x1:L,x2:W-R,y1:Y(y),y2:Y(y),stroke:"var(--line)"},s); el("text",{x:L-8,y:Y(y)+4,"text-anchor":"end","font-size":11},s,y); }
+  let tot=0, avg=[];
+  costs.forEach((c,i)=>{ const x=L+i*bw+bw*.18, w=bw*.64;
+    el("rect",{x,y:Y(1),width:w,height:Y(0)-Y(1),fill:"var(--s1)",rx:2},s);
+    if(c>1) el("rect",{x,y:Y(c),width:w,height:Y(1)-Y(c),fill:"var(--s3)",rx:2},s);
+    el("text",{x:x+w/2,y:H-B+16,"text-anchor":"middle","font-size":11},s,i+1);
+    if(c>1) el("text",{x:x+w/2,y:Y(c)-6,"text-anchor":"middle","font-size":11,fill:"var(--ink)"},s,`${c-1} copies`);
+    tot+=c; avg.push([L+i*bw+bw/2, tot/(i+1)]); });
+  el("path",{d:avg.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+Y(p[1]).toFixed(1)).join(""),fill:"none",stroke:"var(--s4)","stroke-width":2.5},s);
+  const last=avg[avg.length-1]; el("circle",{cx:last[0],cy:Y(last[1]),r:4,fill:"var(--s4)"},s);
+  el("text",{x:last[0]-14,y:Y(last[1])+22,"text-anchor":"end","font-size":11,fill:"var(--s4)"},s,"running average 2.2");
+  el("text",{x:(W+L)/2,y:H-6,"text-anchor":"middle","font-size":11},s,"insertion number   ·   blue = write, amber = copies");
+})();
+
+/* 5. probe tree for 15 */
+(function(){
+  const s=document.getElementById("probeTree"), W=620, top=24, dy=52;
+  const nodes=[]; (function build(lo,hi,d){ if(lo>hi)return; const m=lo+((hi-lo)>>1); nodes.push({m,d,lo,hi}); build(lo,m-1,d+1); build(m+1,hi,d+1); })(0,14,0);
+  const X=m=>86+m*((W-110)/14), Y=d=>top+d*dy;
+  for(const nd of nodes){ for(const ch of nodes) if(ch.d===nd.d+1 && ch.m>=nd.lo && ch.m<=nd.hi && ((ch.m<nd.m && ch.hi===nd.m-1)||(ch.m>nd.m && ch.lo===nd.m+1))) el("line",{x1:X(nd.m),y1:Y(nd.d),x2:X(ch.m),y2:Y(ch.d),stroke:"var(--line)","stroke-width":1.5},s); }
+  for(const nd of nodes){ el("circle",{cx:X(nd.m),cy:Y(nd.d),r:14,fill:nd.d===3?"var(--card)":"var(--accent-soft)",stroke:"var(--accent)"},s); el("text",{x:X(nd.m),y:Y(nd.d)+4,"text-anchor":"middle","font-size":11,fill:"var(--ink)"},s,nd.m); }
+  for(let d=0;d<4;d++) el("text",{x:2,y:Y(d)+4,"font-size":10},s,`probe ${d+1}`);
+})();
+
+/* 6. binary search stepper */
+(function(){
+  const A=[-5,-1,8,23,37,42,202,634];
+  const idx=document.getElementById("bsIdx"), arr=document.getElementById("bsArr"), ptrs=document.getElementById("bsPtrs"), msg=document.getElementById("bsMsg"), keyIn=document.getElementById("bsKey");
+  idx.innerHTML=A.map((_,i)=>`<span>${i}</span>`).join("");
+  let low,high,mid,done,steps;
+  function draw(){
+    arr.innerHTML=A.map((v,i)=>{ let c="cell"; if(i<low||i>high) c+=" out"; if(i===mid) c+= done==="hit"?" hit":" mid"; return `<div class="${c}">${v}</div>`; }).join("");
+    ptrs.innerHTML=A.map((_,i)=>{ const t=[]; if(i===low&&low<=high)t.push("L"); if(i===mid&&done!=="miss")t.push("M"); if(i===high&&low<=high)t.push("H"); return `<span>${t.join(" ")}</span>`; }).join("");
+  }
+  function reset(){ keyIn.removeAttribute("aria-invalid"); low=0; high=A.length-1; mid=-1; done=null; steps=0; msg.textContent=`Interval [${low}, ${high}]. Press "Next step".`; draw(); }
+  function step(){
+    if(keyIn.value.trim()==="" || !keyIn.validity.valid || !Number.isFinite(Number(keyIn.value))){
+      keyIn.setAttribute("aria-invalid","true");
+      msg.textContent="Enter a valid integer key before continuing.";
+      return;
+    }
+    keyIn.removeAttribute("aria-invalid");
+    const key=Number(keyIn.value);
+    if(done){ reset(); return; }
+    if(low>high){ done="miss"; mid=-1; msg.textContent=`low = ${low} > high = ${high}: interval is empty, return −1 after ${steps} comparisons.`; draw(); return; }
+    mid=low+Math.floor((high-low)/2); steps++;
+    if(A[mid]===key){ done="hit"; msg.textContent=`Probe ${steps}: arr[${mid}] = ${A[mid]} equals ${key}. Found at index ${mid}.`; draw(); return; }
+    const was=`Probe ${steps}: mid = ${mid}, arr[${mid}] = ${A[mid]}. `;
+    if(key<A[mid]){ high=mid-1; msg.textContent=was+`${key} < ${A[mid]}, so high = ${high}.`; }
+    else { low=mid+1; msg.textContent=was+`${key} > ${A[mid]}, so low = ${low}.`; }
+    draw(); mid=-1;
+  }
+  document.getElementById("bsStep").addEventListener("click",step);
+  document.getElementById("bsReset").addEventListener("click",reset);
+  keyIn.addEventListener("input",reset);
+  reset();
+})();
+
+/* 7. bubble sort passes */
+(function(){
+  const box=document.getElementById("bubblePasses"); let a=[-2,45,0,11,-9]; const n=a.length;
+  const row=(label,vals,sortedFrom,swapped)=>`<div class="pass"><span class="lbl">${label}</span><div class="arr">${vals.map((v,i)=>`<div class="cell${i>=sortedFrom?" sorted":swapped.has(i)?" swap":""}">${v}</div>`).join("")}</div></div>`;
+  let html=row("start",a,n,new Set());
+  for(let end=n-1;end>0;end--){ const sw=new Set(); let any=false;
+    for(let j=0;j<end;j++) if(a[j]>a[j+1]){ [a[j],a[j+1]]=[a[j+1],a[j]]; sw.add(j); sw.add(j+1); any=true; }
+    html+=row(`pass ${n-end} · ${end} cmp`,a,end,sw); if(!any) break; }
+  box.innerHTML=html;
+})();
+
+/* 8. highlight current section in contents */
+(function(){
+  const links=[...document.querySelectorAll("#tocList a")], map=new Map(links.map(a=>[a.getAttribute("href").slice(1),a]));
+  if(window.matchMedia("(max-width:900px)").matches) document.getElementById("tocBox").open=false;
+  if(!("IntersectionObserver" in window)) return;
+  const io=new IntersectionObserver(es=>{ for(const e of es) if(e.isIntersecting){ links.forEach(a=>a.classList.remove("on")); map.get(e.target.id)?.classList.add("on"); } },{rootMargin:"-30% 0px -60% 0px"});
+  document.querySelectorAll("section.chap").forEach(s=>io.observe(s));
+})();
+</script>
+</body>
+</html>

@@ -1,10 +1,10 @@
-# IBU kvizovi
+# IBU Quizzes
 
-Kvizovi za ponavljanje gradiva sa International Burch University (2026/2027).
+Revision quizzes for courses at International Burch University (2026/2027).
 
-**Otvori kvizove:** https://harkez12.github.io/ibu/
+**Open the quizzes:** https://harkez12.github.io/ibu/
 
-Predmeti:
+Courses:
 
 - FENMS 0121 - Data Structures and Algorithms
 - IT 2001 - Web Programming
@@ -12,4 +12,6 @@ Predmeti:
 - IT 2003 - Ethical and Legal Issues of IT
 - IT 2004 - Parallel Programming
 
-Svaki kviz je jedan HTML fajl u folderu svog predmeta. Novi kviz se dodaje i u listu `SUBJECTS` u `index.html`.
+Each quiz is a single HTML file in its course folder, grouped by week, with a `quiz/` and a `reading-material/` folder inside each week (for example `week04/quiz/`). A new quiz also needs an entry in the `SUBJECTS` list in `index.html`.
+
+Reading 04: 82 questions, learn mode and exam mode, an explanation for every option, and retrying wrong answers, the whole quiz or weak topics. An unfinished attempt and topic statistics are saved in the browser's localStorage and do not move between devices. If the browser blocks storage, the quiz still works without saving. A topic counts as weak below 80% correct across finished attempts.
