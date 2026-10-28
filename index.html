@@ -58,6 +58,7 @@ a.quiz .meta{font-family:var(--f-mono); font-size:.8rem; color:var(--muted); whi
 <script>
 // Novi kviz: dodaj red u "quizzes" odgovarajućeg predmeta.
 // Folder predmeta se zove "<code> - <name>", npr. "IT 2001 - Web Programming".
+// "file" je putanja unutar foldera predmeta, npr. "week-04/reading-04.html".
 const SUBJECTS = [
   { code:"FENMS 0121", name:"Data Structures and Algorithms", quizzes:[] },
   { code:"IT 2001", name:"Web Programming", quizzes:[] },
@@ -73,7 +74,7 @@ document.getElementById("subjects").innerHTML = SUBJECTS.map(s => `
       <h2>${esc(s.name)}</h2>
     </div>
     ${s.quizzes.length
-      ? `<ul>${s.quizzes.map(q => `<li><a class="quiz" href="${esc(encodeURIComponent(s.code + " - " + s.name))}/${esc(encodeURIComponent(q.file))}"><span>${esc(q.title)}</span><span class="meta">${esc(q.meta)}</span></a></li>`).join("")}</ul>`
+      ? `<ul>${s.quizzes.map(q => `<li><a class="quiz" href="${esc([s.code + " - " + s.name, ...q.file.split("/")].map(encodeURIComponent).join("/"))}"><span>${esc(q.title)}</span><span class="meta">${esc(q.meta)}</span></a></li>`).join("")}</ul>`
       : `<p class="empty">Još nema kvizova.</p>`}
   </section>`).join("");
 </script>
