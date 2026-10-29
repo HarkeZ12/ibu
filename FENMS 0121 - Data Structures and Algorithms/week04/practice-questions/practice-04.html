@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Practice 04 Questions</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<style>
+/* Moodle (Boost) quiz look: info box on the left, light-blue question text, Check button, feedback box. */
+:root{
+  --page:#f4f6f8; --surface:#ffffff; --ink:#1d2125; --muted:#6a737b; --line:#dee2e6; --line-strong:#c4cbd2;
+  --primary:#0f6cbf; --primary-ink:#ffffff; --primary-soft:#e7f1fa;
+  --formulation:#e7f3f5; --formulation-ink:#001a1e;
+  --outcome:#fcefdc; --outcome-ink:#5c4320;
+  --info:#f8f9fa;
+  --btn:#ced4da; --btn-ink:#1d2125; --btn-hover:#b8c1ca;
+  --good:#357a32; --good-soft:#d7e4d6; --bad:#ca3120; --bad-soft:#f4d6d2; --part:#f0ad4e;
+  --code-ink:#b02a62; --pre-bg:#fbfcfc;
+  --cell:#ffffff; --cell-locked:#eef1f4;
+  --p-low:#1f6fd1; --p-mid:#d9730d; --p-high:#8a3ffc; --p-i:#0e8a7d;
+  --f-ui:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --f-mono:ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --page:#14181c; --surface:#1c2228; --ink:#e4e8ec; --muted:#9aa5ae; --line:#323b44; --line-strong:#47525d;
+  --primary:#4ea1ea; --primary-ink:#06131f; --primary-soft:#173049;
+  --formulation:#17323a; --formulation-ink:#e1f0f3;
+  --outcome:#3a2f1c; --outcome-ink:#f3dfbf;
+  --info:#20272e;
+  --btn:#3a444e; --btn-ink:#e4e8ec; --btn-hover:#4a5561;
+  --good:#6cc067; --good-soft:#1f3a1f; --bad:#f07a6b; --bad-soft:#45201b; --part:#f0ad4e;
+  --code-ink:#f08bb5; --pre-bg:#12171b;
+  --cell:#232a31; --cell-locked:#1a2026;
+  --p-low:#5aa2ff; --p-mid:#ff9f45; --p-high:#b98bff; --p-i:#3fd0bf;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --page:#14181c; --surface:#1c2228; --ink:#e4e8ec; --muted:#9aa5ae; --line:#323b44; --line-strong:#47525d;
+  --primary:#4ea1ea; --primary-ink:#06131f; --primary-soft:#173049;
+  --formulation:#17323a; --formulation-ink:#e1f0f3;
+  --outcome:#3a2f1c; --outcome-ink:#f3dfbf;
+  --info:#20272e;
+  --btn:#3a444e; --btn-ink:#e4e8ec; --btn-hover:#4a5561;
+  --good:#6cc067; --good-soft:#1f3a1f; --bad:#f07a6b; --bad-soft:#45201b; --part:#f0ad4e;
+  --code-ink:#f08bb5; --pre-bg:#12171b;
+  --cell:#232a31; --cell-locked:#1a2026;
+  --p-low:#5aa2ff; --p-mid:#ff9f45; --p-high:#b98bff; --p-i:#3fd0bf;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:72px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0; background:var(--page); color:var(--ink); font-family:var(--f-ui); font-size:16px; line-height:1.6}
+a{color:var(--primary)}
+code, pre, .cell, .chip{font-variant-ligatures:none}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--primary); outline-offset:2px}
+
+/* top bar */
+.navbar{position:sticky; top:0; z-index:20; background:var(--surface); border-bottom:1px solid var(--line); box-shadow:0 2px 4px rgba(0,0,0,.06)}
+.navbar-in{max-width:1280px; margin:0 auto; height:56px; display:flex; align-items:center; gap:16px; padding:0 16px}
+.brand{font-weight:800; letter-spacing:.02em; color:var(--primary); text-decoration:none; font-size:1.15rem}
+.navbar .crumb{color:var(--muted); font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+.navbar .spacer{flex:1}
+.theme-btn{border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; padding:4px 10px; cursor:pointer; font-size:.85rem; white-space:nowrap; flex:none}
+
+.wrap{max-width:1280px; margin:0 auto; padding:24px 16px 80px}
+.page-head{margin-bottom:20px}
+.page-head .course{margin:0 0 4px; font-size:clamp(1.5rem, 4vw, 2rem); font-weight:700; line-height:1.2}
+.page-head .activity{margin:0; color:var(--muted); font-size:1.05rem}
+.page-head .lede{margin:12px 0 0; max-width:75ch; font-size:.95rem; color:var(--muted)}
+
+.layout{display:grid; grid-template-columns:minmax(0,1fr) 270px; gap:24px; align-items:start}
+@media (max-width: 980px){.layout{grid-template-columns:minmax(0,1fr)} .side{order:-1}}
+
+/* quiz navigation block */
+.side{position:sticky; top:76px}
+@media (max-width: 980px){.side{position:static}}
+.block{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px}
+.block h2{margin:0 0 12px; font-size:1.05rem}
+.qnav{display:flex; flex-wrap:wrap; gap:6px}
+.qnav a{width:38px; height:46px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; border:1px solid var(--line-strong); border-radius:4px; text-decoration:none; color:var(--ink); background:var(--surface); font-size:.9rem; overflow:hidden}
+.qnav a .n{flex:1; display:flex; align-items:center}
+.qnav a .bar{width:100%; height:12px; background:var(--cell-locked); border-top:1px solid var(--line)}
+.qnav a.answered .bar{background:var(--muted)}
+.qnav a.correct .bar{background:var(--good)}
+.qnav a.incorrect .bar{background:var(--bad)}
+.qnav a.partial .bar{background:var(--part)}
+.qnav a:hover{border-color:var(--primary)}
+.score{margin-top:14px; font-size:.95rem; display:flex; justify-content:space-between; gap:8px; border-top:1px solid var(--line); padding-top:12px}
+.score b{font-variant-numeric:tabular-nums}
+.side .reset-all{margin-top:12px; width:100%}
+.side .hint{margin:10px 0 0; font-size:.8rem; color:var(--muted)}
+
+/* question: one card per question, header bar on top, Check at the bottom of the card */
+.que{background:var(--surface); border:1px solid var(--line-strong); border-radius:10px; margin-bottom:36px; box-shadow:0 1px 3px rgba(0,0,0,.06); overflow:hidden}
+.que .info{display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; background:var(--info); border-bottom:1px solid var(--line); padding:10px clamp(14px, 3vw, 22px); font-size:.9rem; line-height:1.4}
+.que .info h3{margin:0; font-size:1.05rem; font-weight:400; margin-right:auto}
+.que .info h3 b{font-size:1.35rem; font-weight:700}
+.que .info .state{font-weight:600; padding:2px 10px; border-radius:12px; background:var(--cell-locked)}
+.que .info .state.correct{color:var(--good); background:var(--good-soft)}
+.que .info .state.incorrect{color:var(--bad); background:var(--bad-soft)}
+.que .info .state.partial{color:#b46f07}
+.que .info .grade{color:var(--muted)}
+.flag{background:none; border:0; padding:0; color:var(--primary); cursor:pointer; font-size:.85rem; display:inline-flex; align-items:center; gap:4px}
+.flag svg{width:14px; height:14px}
+.flag[aria-pressed="true"]{color:var(--bad); font-weight:600}
+.qnav a.is-flagged{border-color:var(--bad)}
+.que .content{display:flex; flex-direction:column; gap:16px; padding:18px clamp(14px, 3vw, 22px) 20px}
+.formulation{background:var(--formulation); color:var(--formulation-ink); border-radius:8px; padding:20px clamp(14px, 3vw, 24px); display:flex; flex-direction:column; gap:12px}
+.formulation p{margin:0; max-width:80ch}
+.formulation code{font-family:var(--f-mono); font-size:.88em; color:var(--code-ink)}
+.formulation pre{margin:0; background:var(--pre-bg); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:12px 14px; overflow-x:auto; font-size:.85rem; line-height:1.5}
+.formulation pre code{color:inherit; font-size:inherit}
+.formulation .examples{font-family:var(--f-mono); font-size:.92rem; line-height:1.8}
+.prompt{display:flex; gap:10px; align-items:baseline; font-size:.95rem; margin-top:4px}
+.prompt .regime{color:var(--muted); font-size:.85rem}
+
+/* code editor */
+.editor{border:1px solid var(--line-strong); border-radius:6px; overflow:hidden; background:var(--surface)}
+.editor textarea{display:block; width:100%; min-height:260px; border:0; padding:10px; font-family:var(--f-mono); font-size:14px; line-height:1.5; resize:vertical; background:var(--surface); color:var(--ink); tab-size:4}
+.editor .CodeMirror{height:auto; min-height:260px; font-family:var(--f-mono); font-size:14px; line-height:1.5; background:var(--surface); color:var(--ink)}
+.editor .CodeMirror-scroll{min-height:260px}
+.editor .CodeMirror-gutters{background:var(--info); border-right:1px solid var(--line)}
+.editor .CodeMirror-linenumber{color:var(--muted)}
+.editor .CodeMirror-cursor{border-left-color:var(--ink)}
+.editor .CodeMirror-selected{background:var(--primary-soft) !important}
+.cm-s-default .cm-keyword{color:#0033b3} .cm-s-default .cm-type,.cm-s-default .cm-variable-3{color:#00627a}
+.cm-s-default .cm-string{color:#067d17} .cm-s-default .cm-comment{color:#8c8c8c; font-style:italic}
+.cm-s-default .cm-number{color:#1750eb} .cm-s-default .cm-meta{color:#9e880d} .cm-s-default .cm-def{color:#00627a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cm-s-default{
+  --k:#7aa7ff}
+  :root:not([data-theme="light"]) .cm-s-default .cm-keyword{color:#cf8e6d} :root:not([data-theme="light"]) .cm-s-default .cm-type,:root:not([data-theme="light"]) .cm-s-default .cm-variable-3,:root:not([data-theme="light"]) .cm-s-default .cm-def{color:#56c1d6}
+  :root:not([data-theme="light"]) .cm-s-default .cm-string{color:#6aab73} :root:not([data-theme="light"]) .cm-s-default .cm-number{color:#2aacb8} :root:not([data-theme="light"]) .cm-s-default .cm-meta{color:#d5b778} :root:not([data-theme="light"]) .cm-s-default .cm-variable{color:#e4e8ec}
+}
+:root[data-theme="dark"] .cm-s-default .cm-keyword{color:#cf8e6d} :root[data-theme="dark"] .cm-s-default .cm-type,:root[data-theme="dark"] .cm-s-default .cm-variable-3,:root[data-theme="dark"] .cm-s-default .cm-def{color:#56c1d6}
+:root[data-theme="dark"] .cm-s-default .cm-string{color:#6aab73} :root[data-theme="dark"] .cm-s-default .cm-number{color:#2aacb8} :root[data-theme="dark"] .cm-s-default .cm-meta{color:#d5b778} :root[data-theme="dark"] .cm-s-default .cm-variable{color:#e4e8ec}
+
+/* buttons */
+.actions{display:flex; flex-wrap:wrap; gap:10px; align-items:center; border-top:1px solid var(--line); padding-top:16px}
+.actions .check{padding:9px 28px; font-weight:600; font-size:1rem}
+.btn{border:1px solid transparent; border-radius:6px; padding:7px 16px; cursor:pointer; background:var(--btn); color:var(--btn-ink); font-size:.95rem; line-height:1.4}
+.btn:hover{background:var(--btn-hover)}
+.btn.primary{background:var(--primary); color:var(--primary-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent; border-color:var(--line-strong)}
+.btn.ghost:hover{background:var(--info)}
+.btn[disabled]{opacity:.55; cursor:progress}
+.spin{display:inline-block; width:14px; height:14px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:spin .8s linear infinite; vertical-align:-2px; margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* feedback */
+.outcome{background:var(--outcome); color:var(--outcome-ink); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:10px; font-size:.95rem}
+.outcome[hidden]{display:none}
+.verdict{font-weight:700; display:flex; align-items:center; gap:8px}
+.verdict.ok{color:var(--good)} .verdict.no{color:var(--bad)}
+.verdict svg{width:20px; height:20px; flex:none}
+.outcome .marks{font-size:.9rem}
+.outcome pre{margin:0; white-space:pre-wrap; word-break:break-word; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:10px 12px; font-family:var(--f-mono); font-size:.8rem; max-height:320px; overflow:auto}
+.results{overflow-x:auto}
+.results table{border-collapse:collapse; width:100%; background:var(--surface); color:var(--ink); font-size:.85rem}
+.results th,.results td{border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top}
+.results th{background:var(--info); font-weight:600}
+.results td pre{border:0; padding:0; background:none; max-height:none; font-size:.8rem}
+.results tr.pass td.mark{color:var(--good); font-weight:700}
+.results tr.fail td{background:var(--bad-soft)}
+.results tr.fail td.mark{color:var(--bad); font-weight:700}
+.results td.mark{text-align:center; width:2.5em; font-size:1rem}
+
+/* solution */
+details.sol{border:1px solid var(--line); border-radius:8px; background:var(--surface)}
+details.sol > summary{cursor:pointer; padding:9px 16px; font-weight:600; color:var(--good); list-style-position:inside}
+details.sol[open] > summary{border-bottom:1px solid var(--line)}
+details.sol > div{padding:14px 16px; display:flex; flex-direction:column; gap:10px; font-size:.95rem}
+details.sol p{margin:0}
+details.sol pre{margin:0; background:var(--pre-bg); border:1px solid var(--line); border-radius:6px; padding:12px 14px; overflow-x:auto; font-family:var(--f-mono); font-size:.84rem; line-height:1.5}
+details.sol code{font-family:var(--f-mono); font-size:.88em}
+details.sol table{border-collapse:collapse; font-size:.9rem}
+details.sol th, details.sol td{border:1px solid var(--line); padding:5px 10px; text-align:center; font-family:var(--f-mono)}
+details.sol th{background:var(--info); font-family:var(--f-ui); font-weight:600}
+details.sol td.l{text-align:left; font-family:var(--f-ui)}
+
+/* algorithm trace widget */
+.trace{border:1px solid var(--line-strong); border-radius:6px; background:var(--surface); overflow:hidden}
+.t-toolbar{display:flex; justify-content:space-between; gap:8px; padding:8px; border-bottom:1px solid var(--line); background:var(--info); flex-wrap:wrap}
+.t-group{display:flex; gap:6px; flex-wrap:wrap}
+.tool{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); border-radius:6px; padding:5px 10px; cursor:pointer; font-size:.85rem}
+.tool:hover:not([disabled]){border-color:var(--primary); color:var(--primary)}
+.tool[disabled]{opacity:.45; cursor:default}
+.tool svg{width:16px; height:16px}
+.t-help{margin:0; padding:10px 14px; font-size:.85rem; color:var(--muted); border-bottom:1px solid var(--line); background:var(--surface)}
+.t-help[hidden]{display:none}
+.t-body{padding:12px; display:flex; flex-direction:column; gap:10px; overflow-x:auto}
+.step{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface); min-width:max-content}
+.step.initial{background:var(--cell-locked)}
+.step.ok{border-color:var(--good); box-shadow:inset 4px 0 0 var(--good)}
+.step.bad{border-color:var(--bad); box-shadow:inset 4px 0 0 var(--bad)}
+.stephead{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px}
+.steplabel{font-weight:600; font-size:.9rem}
+.steplabel .tag{font-weight:600; font-size:.75rem; margin-left:8px; padding:1px 7px; border-radius:10px}
+.steplabel .tag.ok{background:var(--good-soft); color:var(--good)}
+.steplabel .tag.bad{background:var(--bad-soft); color:var(--bad)}
+.stepactions{display:flex; gap:4px}
+.iconbtn{display:inline-flex; align-items:center; gap:4px; border:0; background:none; color:var(--muted); cursor:pointer; font-size:.78rem; padding:3px 6px; border-radius:4px}
+.iconbtn:hover{background:var(--info); color:var(--ink)}
+.iconbtn svg{width:14px; height:14px}
+.cols{display:flex; gap:6px}
+.col{display:flex; flex-direction:column; align-items:center; gap:4px; width:48px; flex:none; border-radius:6px; padding:2px 0}
+.col .idx{font-family:var(--f-mono); font-size:.7rem; color:var(--muted); line-height:1}
+.cell{width:46px; height:42px; display:flex; align-items:center; justify-content:center; border:1.5px solid var(--line-strong); border-radius:6px; background:var(--cell); font-family:var(--f-mono); font-size:.95rem; font-weight:600; user-select:none; touch-action:none}
+.cell.locked{background:var(--cell-locked); border-color:var(--line)}
+.cell input{width:100%; height:100%; border:0; background:transparent; text-align:center; font:inherit; color:inherit; padding:0; border-radius:5px}
+.cell input:focus{outline:2px solid var(--primary); outline-offset:-2px}
+.sortcell{cursor:grab}
+.lane{min-height:30px; width:100%; display:flex; flex-direction:column; align-items:center; gap:3px}
+.col.drop-hover{background:var(--primary-soft)}
+.cell.drop-hover{border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft)}
+.col.target-ready{cursor:pointer}
+.col.target-ready:hover{background:var(--primary-soft)}
+.chip{display:inline-flex; align-items:center; justify-content:center; min-width:42px; height:24px; padding:0 6px; border-radius:12px; border:0; color:#fff; font-family:var(--f-mono); font-size:.75rem; font-weight:700; cursor:grab; touch-action:none; user-select:none; box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.chip.low{background:var(--p-low)} .chip.mid{background:var(--p-mid)} .chip.high{background:var(--p-high)} .chip.i{background:var(--p-i)}
+:root[data-theme="dark"] .chip{color:#0b0f13}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip{color:#0b0f13}}
+.chip.selected{outline:3px solid var(--ink); outline-offset:2px}
+.tray{display:flex; align-items:center; gap:8px; margin-top:6px; padding:6px 8px; border:1px dashed var(--line-strong); border-radius:6px; min-height:38px; font-size:.78rem; color:var(--muted)}
+.tray.drop-hover{background:var(--primary-soft)}
+.target{margin-top:6px; font-size:.85rem; color:var(--muted)}
+.target b{color:var(--ink); font-family:var(--f-mono)}
+.drag-ghost{position:fixed; pointer-events:none; z-index:100; opacity:.9; transform:translate(-50%,-50%) scale(1.05)}
+.t-empty{font-size:.85rem; color:var(--muted); padding:4px 2px}
+
+.note{background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--primary); border-radius:6px; padding:10px 14px; font-size:.88rem; color:var(--muted)}
+.back{font-size:.9rem}
+footer.foot{margin-top:8px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:.85rem; color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="navbar">
+  <div class="navbar-in">
+    <a class="brand" href="../../../">LMS</a>
+    <span class="crumb">FENMS 0121 · Week 04 · 04.01. PRACTICE: Practice Questions</span>
+    <span class="spacer"></span>
+    <button class="theme-btn" type="button" id="themeBtn" aria-label="Toggle dark mode">Dark / light</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1 class="course">FENMS 0121 - Data Structures and Algorithms</h1>
+    <p class="activity">04.01. PRACTICE: Practice Questions</p>
+    <p class="lede">All eight questions on one page. Answer a question and press <b>Check</b>: code questions are compiled and run against test cases, trace questions are checked step by step. Your answers stay in this browser.</p>
+  </div>
+
+  <div class="layout">
+    <main id="quiz">
+
+      <!-- Q1 -->
+      <section class="que" id="q1" data-q="1">
+        <div class="info">
+          <h3>Question <b>1</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 20.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Implement the <strong>binary search</strong> algorithm that can work on a <code>LinkedList</code> object.</p>
+            <p>The LinkedList implementation is <a href="https://github.com/IBU-FENMS-034/FENMS_034_2024-25/blob/master/Week_02/include/LinkedList.tpp" target="_blank" rel="noopener">the same one from lectures and labs</a>; <strong>however</strong> the <code>get()</code> method, <code>[] overloading</code> and <code>iterators</code> have been <em>purposefully removed</em> from it.</p>
+            <p>The <code>binary_search()</code> method is set up so it can <em>access</em> <strong>private</strong> <em>members</em> of the <code>LinkedList</code> class (<code>head</code> and <code>size</code>).</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="code"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button><button class="btn ghost reset" type="button">Reset answer</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+<pre><code>template &lt;typename Data&gt;
+int binary_search(const LinkedList&lt;Data&gt;&amp; list, const Data&amp; key) {
+    int low = 0;
+    int high = list.size - 1;
+    Node&lt;Data&gt;* start = list.head;   // node at index low
+
+    while (low &lt;= high) {
+        int mid = low + (high - low) / 2;
+
+        Node&lt;Data&gt;* cur = start;      // walk from low to mid
+        for (int i = low; i &lt; mid; ++i)
+            cur = cur-&gt;next;
+
+        if (cur-&gt;data == key)
+            return mid;
+        if (cur-&gt;data &lt; key) {
+            low = mid + 1;
+            start = cur-&gt;next;
+        } else {
+            high = mid - 1;
+        }
+    }
+    return -1;
+}</code></pre>
+            <p>A list has no random access, so reaching <code>mid</code> means walking node by node. Keeping a pointer to the node at <code>low</code> means each walk starts there instead of at <code>head</code>.</p>
+            <p>There are O(log n) comparisons, but the walking adds up to about n/2 + n/4 + … ≈ n steps, so the whole search is O(n). On a linked list, binary search is no faster than linear search.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q2 -->
+      <section class="que" id="q2" data-q="2">
+        <div class="info">
+          <h3>Question <b>2</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 30.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Implement the <strong>bubble sort</strong> algorithm that can work on a <code>LinkedList</code> object.</p>
+            <p>The LinkedList implementation is <a href="https://github.com/IBU-FENMS-034/FENMS_034_2024-25/blob/master/Week_02/include/LinkedList.tpp" target="_blank" rel="noopener">the same one from lectures and labs</a>; <strong>however</strong> the <code>get()</code> method, <code>[] overloading</code> and <code>iterators</code> have been <em>purposefully removed</em> from it.</p>
+            <p>The <code>bubble_sort()</code> method is set up so it can <em>access</em> <strong>private</strong> <em>members</em> of the <code>LinkedList</code> class (<code>head</code> and <code>size</code>).</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="code"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button><button class="btn ghost reset" type="button">Reset answer</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+<pre><code>template &lt;typename Data&gt;
+void bubble_sort(LinkedList&lt;Data&gt;&amp; list) {
+    for (int i = 0; i &lt; list.size; i++) {
+        bool swapped = false;
+        Node&lt;Data&gt;* cur = list.head;
+        for (int j = 1; j &lt; list.size - i; j++) {
+            if (cur-&gt;next-&gt;data &lt; cur-&gt;data) {
+                swap(cur-&gt;data, cur-&gt;next-&gt;data);
+                swapped = true;
+            }
+            cur = cur-&gt;next;
+        }
+        if (!swapped) break;
+    }
+}</code></pre>
+            <p>This is the optimized <code>bubble_sort()</code> from Lab 04 with <code>arr[j-1]</code> and <code>arr[j]</code> replaced by <code>cur</code> and <code>cur-&gt;next</code>. Only the stored values are swapped, and the links between nodes stay as they are.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q3 -->
+      <section class="que" id="q3" data-q="3">
+        <div class="info">
+          <h3>Question <b>3</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 25.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>In software development, <strong>semantic versioning</strong> (numbers like <code>1.2.10</code> or <code>2.0.1</code>) is used to indicate the state or progress of software releases.</p>
+            <p>A version typically consists of three numbers, in this order: <strong>major</strong>, <strong>minor</strong>, and <strong>patch</strong> numbers.<br>Example: <code>3.0.4</code> → 3 (<em>major</em>), 0 (<em>minor</em>), 4 (<em>patch</em>).</p>
+            <p>In the preloaded code, you have a basic struct <code>Version</code> for keeping track of version numbers. Your task is to implement <strong>overloads</strong> for <em>all</em> <strong>comparison</strong> <em>operators</em> (<code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>), and enable a direct comparison between two <code>Version</code> instances.</p>
+            <p>Versions are compared like this:<br>– First compare the major number.<br>– If major numbers are equal, compare minor.<br>– If those are also equal, compare patch.</p>
+            <p>Some examples:</p>
+            <p class="examples"><strong>2</strong>.0.1 &gt; <strong>1</strong>.10.5<br>1.<strong>4</strong>.0 &gt; 1.<strong>3</strong>.20<br>1.1.<strong>4</strong> &gt; 1.1.<strong>3</strong></p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="code"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button><button class="btn ghost reset" type="button">Reset answer</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+<pre><code>struct Version {
+    int major;
+    int minor;
+    int patch;
+
+    Version(int _ma, int _mi, int _pa): major(_ma), minor(_mi), patch(_pa) {}
+
+    friend bool operator==(const Version&amp; a, const Version&amp; b) {
+        return a.major == b.major &amp;&amp; a.minor == b.minor &amp;&amp; a.patch == b.patch;
+    }
+    friend bool operator!=(const Version&amp; a, const Version&amp; b) {
+        return !(a == b);
+    }
+    friend bool operator&lt;(const Version&amp; a, const Version&amp; b) {
+        if (a.major != b.major) return a.major &lt; b.major;
+        if (a.minor != b.minor) return a.minor &lt; b.minor;
+        return a.patch &lt; b.patch;
+    }
+    friend bool operator&gt;(const Version&amp; a, const Version&amp; b) {
+        return b &lt; a;
+    }
+    friend bool operator&lt;=(const Version&amp; a, const Version&amp; b) {
+        return !(b &lt; a);
+    }
+    friend bool operator&gt;=(const Version&amp; a, const Version&amp; b) {
+        return !(a &lt; b);
+    }
+};</code></pre>
+            <p>Only <code>==</code> and <code>&lt;</code> contain real logic, and the other four are built from them, like the <code>Student</code> struct in Lab 04.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q4 -->
+      <section class="que" id="q4" data-q="4">
+        <div class="info">
+          <h3>Question <b>4</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 5.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider <code>binary_search()</code> from Lab 04:</p>
+<pre><code>template&lt;typename Data&gt;
+int Search::binary_search(const Data *elements, const size_t size, const Data &amp;key) {
+    int low = 0;
+    int high = size - 1;
+    while (low &lt;= high) {
+        int mid = low + (high - low) / 2;
+        if (key == elements[mid]) {
+            return mid;
+        } else if (key &lt; elements[mid]) {
+            high = mid - 1;
+        } else {
+            low = mid + 1;
+        }
+    }
+    return -1;
+}</code></pre>
+            <p>The function is called with the sorted array <code>{4, 9, 13, 20, 26, 31, 38, 45, 52, 60, 71}</code> and the key <b>33</b>.</p>
+            <p>Add one iteration for each value of <code>mid</code> computed, and place <code>low</code>, <code>mid</code> and <code>high</code> as they are when <code>mid</code> is computed.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>Iteration</th><th>low</th><th>mid</th><th>high</th><th>Comparison</th></tr>
+              <tr><td>1</td><td>0 (4)</td><td>5 (31)</td><td>10 (71)</td><td class="l">33 &gt; 31, so low = 6</td></tr>
+              <tr><td>2</td><td>6 (38)</td><td>8 (52)</td><td>10 (71)</td><td class="l">33 &lt; 52, so high = 7</td></tr>
+              <tr><td>3</td><td>6 (38)</td><td>6 (38)</td><td>7 (45)</td><td class="l">33 &lt; 38, so high = 5</td></tr>
+            </table>
+            <p>Now low (6) &gt; high (5), so the loop stops and the function returns −1. In iteration 3, (7 − 6) / 2 is 0 because integer division drops the remainder.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q5 -->
+      <section class="que" id="q5" data-q="5">
+        <div class="info">
+          <h3>Question <b>5</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 5.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider the optimized <code>bubble_sort()</code> from Lab 04:</p>
+<pre><code>template&lt;typename Data&gt;
+void Sort::bubble_sort(Data *arr, const int len) {
+    for (int i = 0; i &lt; len; i++) {
+        bool swapped = false;
+        for (int j = 1; j &lt; len - i; j++) {
+            if (arr[j] &lt; arr[j - 1]) {
+                swap(arr, j, j - 1);
+                swapped = true;
+            }
+        }
+        if (!swapped) {
+            break;
+        }
+    }
+}</code></pre>
+            <p>The function is called on the array <code>{29, 10, 14, 37, 13, 5, 22, 8}</code>.</p>
+            <p>Show the array only after the <b>2nd</b> and after the <b>5th</b> iteration of the outer loop. Drag a cell onto another to swap them, or type the values.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>After</th><th>Array</th></tr>
+              <tr><td>1st</td><td>10 14 29 13 5 22 8 37</td></tr>
+              <tr><td><b>2nd</b></td><td><b>10 14 13 5 22 8 29 37</b></td></tr>
+              <tr><td>3rd</td><td>10 13 5 14 8 22 29 37</td></tr>
+              <tr><td>4th</td><td>10 5 13 8 14 22 29 37</td></tr>
+              <tr><td><b>5th</b></td><td><b>5 10 8 13 14 22 29 37</b></td></tr>
+            </table>
+            <p>Each pass moves the largest remaining value to the end, so after pass <em>k</em> the last <em>k</em> cells are final.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q6 -->
+      <section class="que" id="q6" data-q="6">
+        <div class="info">
+          <h3>Question <b>6</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 5.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider the optimized <code>bubble_sort()</code> from Lab 04:</p>
+<pre><code>template&lt;typename Data&gt;
+void Sort::bubble_sort(Data *arr, const int len) {
+    for (int i = 0; i &lt; len; i++) {
+        bool swapped = false;
+        for (int j = 1; j &lt; len - i; j++) {
+            if (arr[j] &lt; arr[j - 1]) {
+                swap(arr, j, j - 1);
+                swapped = true;
+            }
+        }
+        if (!swapped) {
+            break;
+        }
+    }
+}</code></pre>
+            <p>The <code>Student</code> struct from Lab 04 overloads its comparison operators:</p>
+<pre><code>struct Student {
+    const char* name;
+    const char* department;
+    double gpa;
+    // constructor omitted
+    friend bool operator&lt;(const Student &amp;s1, const Student &amp;s2) { return s1.gpa &lt; s2.gpa; }
+    friend bool operator==(const Student &amp;s1, const Student &amp;s2) { return s1.gpa == s2.gpa; }
+    // remaining operators are built from &lt; and ==
+};</code></pre>
+            <p>The following code is executed:</p>
+<pre><code>Student students[] = {
+    Student("Amina", "IT", 78),
+    Student("Kenan", "IT", 92),
+    Student("Lejla", "IT", 65),
+    Student("Tarik", "IT", 88),
+    Student("Sara", "IT", 71),
+    Student("Emir", "IT", 84)
+};
+Sort::bubble_sort(students, 6);</code></pre>
+            <p>The array below shows the <code>gpa</code> of each student. Show the <code>gpa</code> values after each iteration of the outer loop that makes at least one swap. Drag a cell onto another to swap them, or type the values.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>Iteration</th><th>GPAs</th></tr>
+              <tr><td>1</td><td>78 65 88 71 84 92</td></tr>
+              <tr><td>2</td><td>65 78 71 84 88 92</td></tr>
+              <tr><td>3</td><td>65 71 78 84 88 92</td></tr>
+            </table>
+            <p>Pass 4 makes no swap, so <code>break</code> runs and it is not listed. The answer has three iterations.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q7 -->
+      <section class="que" id="q7" data-q="7">
+        <div class="info">
+          <h3>Question <b>7</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 5.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider <code>linear_search()</code> from Lab 04:</p>
+<pre><code>template&lt;typename Data&gt;
+int Search::linear_search(const Data* elements, const int size, const Data&amp; key) {
+    for (int i = 0; i &lt; size; i++) {
+        if (elements[i] == key) {
+            return i;
+        }
+    }
+    return -1;
+}</code></pre>
+            <p>The function is called with the array <code>{9, 3, 17, 11, 6}</code> and the key <b>10</b>.</p>
+            <p>Add one iteration for each element compared with the key, and place <code>i</code> on that element.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <p>10 is not in the array, so every element is compared: five iterations with <code>i</code> = 0, 1, 2, 3, 4 (values 9, 3, 17, 11, 6). The function returns −1.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q8 -->
+      <section class="que" id="q8" data-q="8">
+        <div class="info">
+          <h3>Question <b>8</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 5.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider <code>binary_search()</code> from Lab 04:</p>
+<pre><code>template&lt;typename Data&gt;
+int Search::binary_search(const Data *elements, const size_t size, const Data &amp;key) {
+    int low = 0;
+    int high = size - 1;
+    while (low &lt;= high) {
+        int mid = low + (high - low) / 2;
+        if (key == elements[mid]) {
+            return mid;
+        } else if (key &lt; elements[mid]) {
+            high = mid - 1;
+        } else {
+            low = mid + 1;
+        }
+    }
+    return -1;
+}</code></pre>
+            <p>The function is called with the sorted array <code>{4, 9, 13, 20, 26, 31, 38, 45, 52, 60, 71}</code> and the key <b>45</b>.</p>
+            <p>Add one iteration for each value of <code>mid</code> computed, and place <code>low</code>, <code>mid</code> and <code>high</code> as they are when <code>mid</code> is computed.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>Iteration</th><th>low</th><th>mid</th><th>high</th><th>Comparison</th></tr>
+              <tr><td>1</td><td>0 (4)</td><td>5 (31)</td><td>10 (71)</td><td class="l">45 &gt; 31, so low = 6</td></tr>
+              <tr><td>2</td><td>6 (38)</td><td>8 (52)</td><td>10 (71)</td><td class="l">45 &lt; 52, so high = 7</td></tr>
+              <tr><td>3</td><td>6 (38)</td><td>6 (38)</td><td>7 (45)</td><td class="l">45 &gt; 38, so low = 7</td></tr>
+              <tr><td>4</td><td>7 (45)</td><td>7 (45)</td><td>7 (45)</td><td class="l">45 == 45, found</td></tr>
+            </table>
+            <p>Four iterations. The function returns index 7.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <p class="note">Code questions are checked by compiling your answer together with the course's <code>LinkedList</code> and a set of test cases on <a href="https://godbolt.org" target="_blank" rel="noopener">Compiler Explorer</a> (GCC 13, C++17), so <b>Check</b> on questions 1–3 needs an internet connection. These test cases were written for this page and are not the hidden LMS tests.</p>
+      <footer class="foot"><a class="back" href="../../../">← All courses</a><span>FENMS 0121 · Week 04</span></footer>
+    </main>
+
+    <aside class="side">
+      <div class="block">
+        <h2>Quiz navigation</h2>
+        <nav class="qnav" id="qnav" aria-label="Questions"></nav>
+        <div class="score"><span>Marks</span><b id="score">0.00 / 100.00</b></div>
+        <button class="btn ghost reset-all" type="button" id="resetAll">Start again</button>
+        <p class="hint">Answers are saved in this browser only.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script>
+(() => {
+"use strict";
+
+/* ---------- question setup ---------- */
+const LL_PREFIX = "#include <iostream>\n#include <fstream>\n#include <string>\n#include <cmath>\n#include <vector>\n#include <algorithm>\n\nusing namespace std;\n#define SEPARATOR \"#<ab@17943918#@>#\"\n\ntemplate<typename Data>\nstruct Node {\n    Data data;\n    Node *next{};\n\n    Node() = default;\n    explicit Node(Data data) : data(data) {}\n};\n\ntemplate<typename Data>\nclass LinkedList;\n\ntemplate<typename Data>\n__DECL__\n\ntemplate <typename Data>\nclass LinkedList {\nprivate:\n    Node<Data>* head{};\n    int size{0};\npublic:\n    // constructors\n    LinkedList() = default;\n    LinkedList(std::initializer_list<Data> list);\n    // copy semantics\n    LinkedList(const LinkedList<Data>& src);\n    LinkedList<Data>& operator=(const LinkedList<Data>& src);\n    // move semantics\n    LinkedList(LinkedList<Data>&& src) noexcept;\n    LinkedList<Data>& operator=(LinkedList<Data>&& src) noexcept;\n    // destructor\n    ~LinkedList();\n\n    void add_to_front(const Data& data);\n    void add_to_back(const Data& data);\n    void remove_from_front();\n    void remove_from_back();\n    int count() const;\n    void reverse();\n    Node<Data>* get_head() const;\n    __FRIEND__\n    \n};\n\ntemplate<typename Data>\nvoid LinkedList<Data>::add_to_front(const Data& data) {\n    Node<Data>* new_node = new Node<Data>();\n    new_node->data = data;\n    new_node->next = head;\n    head = new_node;\n    ++size;\n}\n\ntemplate<typename Data>\nvoid LinkedList<Data>::remove_from_front() {\n    if (head == nullptr) {\n        throw std::out_of_range(\"List is empty\");\n    }\n    const Node<Data>* temp = head;\n    head = head->next;\n    delete temp;\n    --size;\n}\n\ntemplate<typename Data>\nvoid LinkedList<Data>::add_to_back(const Data& data) {\n    Node<Data>* new_node = new Node<Data>();\n    new_node->data = data;\n\n    if (head == nullptr) {\n        head = new_node;\n    } else {\n        Node<Data>* temp = head;\n        while (temp->next != nullptr) {\n            temp = temp->next;\n        }\n        temp->next = new_node;\n    }\n    ++size;\n}\n\ntemplate<typename Data>\nvoid LinkedList<Data>::remove_from_back() {\n    if (head == nullptr) {\n        throw std::out_of_range(\"List is empty\");\n    } else if (head->next == nullptr) {\n        delete head;\n        head = nullptr;\n    } else {\n        Node<Data>* temp = head;\n        while (temp->next->next != nullptr) {\n            temp = temp->next;\n        }\n        delete temp->next;\n        temp->next = nullptr;\n    }\n    --size;\n}\n\ntemplate<typename Data>\nint LinkedList<Data>::count() const {\n    return size;\n}\n\ntemplate<typename Data>\nNode<Data>* LinkedList<Data>::get_head() const {\n    return head;\n}\n\ntemplate<typename Data>\nvoid LinkedList<Data>::reverse() {\n    Node<Data>* current = head;\n    Node<Data>* prev = nullptr;\n\n    while (current != nullptr) {\n        Node<Data>* next = current->next;\n        current->next = prev;\n        prev = current;\n        current = next;\n    }\n    head = prev;\n}\n\ntemplate<typename Data>\nLinkedList<Data>::~LinkedList() {\n    while (head != nullptr) {\n        const Node<Data>* temp = head;\n        head = head->next;\n        delete temp;\n    }\n}\n\ntemplate<typename Data>\nLinkedList<Data>::LinkedList(const LinkedList<Data> &src) {\n    Node<Data>* current = src.head;\n    while (current != nullptr) {\n        add_to_back(current->data);\n        current = current->next;\n    }\n}\n\ntemplate<typename Data>\nLinkedList<Data> &LinkedList<Data>::operator=(const LinkedList<Data> &src) {\n    // Prevent self-assignment\n    if (this != &src) {\n        // Clean up old data\n        while (head != nullptr) {\n            remove_from_front();\n        }\n\n        // Add new data\n        Node<Data>* current = src.head;\n        while (current != nullptr) {\n            add_to_back(current->data);\n            current = current->next;\n        }\n    }\n    return *this;\n\n    // Alternative way:\n    // if (this != &src) {\n    //     LinkedList<Data> temp(src);\n    //     std::swap(head, temp.head);\n    //     std::swap(size, temp.size);\n    // }\n    // return *this;\n}\n\ntemplate<typename Data>\nLinkedList<Data>::LinkedList(LinkedList<Data> &&src) noexcept {\n    head = src.head;\n    size = src.size;\n\n    src.head = nullptr;\n    src.size = 0;\n\n    // Alternative way:\n    // std::swap(head, src.head);\n    // std::swap(size, src.size);\n}\n\ntemplate<typename Data>\nLinkedList<Data> &LinkedList<Data>::operator=(LinkedList<Data> &&src) noexcept {\n    // Prevent self-assignment\n    if (this != &src) {\n        // Clean up old resources\n        while (head != nullptr) {\n            remove_from_front();\n        }\n\n        // Change ownership\n        head = src.head;\n        size = src.size;\n\n        src.head = nullptr;\n        src.size = 0;\n    }\n    return *this;\n\n    // Alternative way:\n    // if (this != &src) {\n    //     std::swap(head, src.head);\n    //     std::swap(size, src.size);\n    // }\n    // return *this;\n}\n\ntemplate<typename Data>\nLinkedList<Data>::LinkedList(std::initializer_list<Data> list) {\n    for (auto it = list.begin(); it != list.end(); ++it) {\n        add_to_back(*it);\n    }\n}\n\n";
+const LL_DECL = {
+  1: ["int binary_search(const LinkedList<Data>& list, const Data& key);", "friend int binary_search<>(const LinkedList<Data>& list, const Data& key);"],
+  2: ["void bubble_sort(LinkedList<Data>& list);", "friend void bubble_sort<>(LinkedList<Data>& list);"]
+};
+const SEP = "#<ab@17943918#@>#";
+const PRINT_LIST = (t) => `\nfor (Node<${t}>* n = list.get_head(); n != nullptr; n = n->next) cout << n->data << " ";`;
+
+const QUESTIONS = {
+  1: {kind:"code", marks:20,
+      preload:"template <typename Data>\nint binary_search(const LinkedList<Data>& list, const Data& key) {\n    // your code\n}\n",
+      tests:[
+        {code:"LinkedList<int> list{7}; cout << binary_search(list, 7) << \" \" << binary_search(list, 8);", expected:"0 -1"},
+        {code:"LinkedList<int> list{1, 3, 5, 7, 9, 11};\ncout << binary_search(list, 7);", expected:"3"},
+        {code:"LinkedList<int> list{1, 3, 5, 7, 9, 11};\ncout << binary_search(list, 1) << \" \" << binary_search(list, 11);", expected:"0 5"},
+        {code:"LinkedList<int> list{2, 4, 6, 8};\ncout << binary_search(list, 5);", expected:"-1"},
+        {code:"LinkedList<int> list;\ncout << binary_search(list, 42);", expected:"-1"},
+        {code:"LinkedList<string> list{\"apple\", \"kiwi\", \"mango\", \"pear\"};\ncout << binary_search(list, string(\"mango\"));", expected:"2"}
+      ]},
+  2: {kind:"code", marks:30,
+      preload:"template <typename Data>\nvoid bubble_sort(LinkedList<Data>& list) {\n    // your code\n}\n",
+      tests:[
+        {code:"LinkedList<int> list{7}; bubble_sort(list);" + PRINT_LIST("int"), expected:"7 "},
+        {code:"LinkedList<int> list{1, 2, 3, 4}; bubble_sort(list);" + PRINT_LIST("int"), expected:"1 2 3 4 "},
+        {code:"LinkedList<int> list{5, 1, 4, 2, 8};\nbubble_sort(list);" + PRINT_LIST("int"), expected:"1 2 4 5 8 "},
+        {code:"LinkedList<int> list{9, 7, 5, 3, 1};\nbubble_sort(list);" + PRINT_LIST("int"), expected:"1 3 5 7 9 "},
+        {code:"LinkedList<int> list{3, 1, 3, 2, 1};\nbubble_sort(list);" + PRINT_LIST("int"), expected:"1 1 2 3 3 "},
+        {code:"LinkedList<int> list;\nbubble_sort(list);\ncout << list.count();", expected:"0"},
+        {code:"LinkedList<string> list{\"pear\", \"apple\", \"mango\"};\nbubble_sort(list);" + PRINT_LIST("string"), expected:"apple mango pear "}
+      ]},
+  3: {kind:"code", marks:25,
+      preload:"struct Version {\n    int major;\n    int minor;\n    int patch;\n    \n    Version(int _ma, int _mi, int _pa): major(_ma), minor(_mi), patch(_pa) {}\n    \n    // Overload all six comparison operators\n    // == , != , < , > , <= ,  >=\n    \n};\n",
+      tests:[
+        {code:"Version a(1, 9, 9), b(2, 0, 0); cout << boolalpha << (a < b) << \" \" << (b > a) << \" \" << (a <= b) << \" \" << (b >= a) << \" \" << (a > b) << \" \" << (b < a) << \" \" << (a >= b) << \" \" << (b <= a);", expected:"true true true true false false false false"},
+        {code:"Version a(1, 2, 9), b(1, 3, 0); cout << boolalpha << (a < b) << \" \" << (b > a);", expected:"true true"},
+        {code:"Version a(1, 2, 3), b(1, 2, 4); cout << boolalpha << (a < b) << \" \" << (b > a);", expected:"true true"},
+        {code:"Version a(2, 0, 1), b(1, 10, 5);\ncout << boolalpha << (a > b) << \" \" << (a < b);", expected:"true false"},
+        {code:"Version a(1, 4, 0), b(1, 3, 20);\ncout << boolalpha << (a > b) << \" \" << (a >= b) << \" \" << (a <= b);", expected:"true true false"},
+        {code:"Version a(1, 1, 4), b(1, 1, 3);\ncout << boolalpha << (a > b) << \" \" << (b < a);", expected:"true true"},
+        {code:"Version a(3, 0, 4), b(3, 0, 4);\ncout << boolalpha << (a == b) << \" \" << (a != b) << \" \" << (a <= b) << \" \" << (a >= b) << \" \" << (a < b);", expected:"true false true true false"},
+        {code:"Version a(0, 9, 9), b(1, 0, 0);\ncout << boolalpha << (a < b) << \" \" << (a != b) << \" \" << (a == b);", expected:"true true false"}
+      ]},
+  4: {kind:"trace", marks:5, algo:"binary_search", data:[4,9,13,20,26,31,38,45,52,60,71], target:33, ask:"all"},
+  5: {kind:"trace", marks:5, algo:"bubble_sort", data:[29,10,14,37,13,5,22,8], ask:[2,5]},
+  6: {kind:"trace", marks:5, algo:"bubble_sort", data:[78,92,65,88,71,84], ask:"all"},
+  7: {kind:"trace", marks:5, algo:"linear_search", data:[9,3,17,11,6], target:10, ask:"all"},
+  8: {kind:"trace", marks:5, algo:"binary_search", data:[4,9,13,20,26,31,38,45,52,60,71], target:45, ask:"all"}
+};
+const TOTAL = Object.values(QUESTIONS).reduce((s, q) => s + q.marks, 0);
+
+/* ---------- storage (per browser, optional) ---------- */
+const KEY = "ibu-dsa-w04-practice-v1";
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { saved = {}; }
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {} }
+function qsave(n, patch) { saved[n] = Object.assign({}, saved[n], patch); persist(); }
+
+/* ---------- theme ---------- */
+const root = document.documentElement;
+try { const t = localStorage.getItem(KEY + "-theme"); if (t) root.dataset.theme = t; } catch (e) {}
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem(KEY + "-theme", root.dataset.theme); } catch (e) {}
+});
+
+/* ---------- helpers ---------- */
+const $ = (sel, el = document) => el.querySelector(sel);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ICON = {
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  undo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>',
+  redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>',
+  help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  no:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+};
+
+/* ---------- grading state / navigation ---------- */
+const results = {}; // n -> {fraction}
+function setState(n, status, fraction) {
+  const sec = document.getElementById("q" + n), q = QUESTIONS[n];
+  const st = $(".state", sec), gr = $(".grade", sec);
+  st.className = "state";
+  if (status === "graded") {
+    const cls = fraction >= 1 ? "correct" : fraction > 0 ? "partial" : "incorrect";
+    st.classList.add(cls);
+    st.textContent = fraction >= 1 ? "Correct" : fraction > 0 ? "Partially correct" : "Incorrect";
+    gr.textContent = `Mark ${(fraction * q.marks).toFixed(2)} out of ${q.marks.toFixed(2)}`;
+    results[n] = {fraction};
+  } else {
+    st.textContent = status === "answered" ? "Answer saved" : "Not complete";
+    gr.textContent = `Marked out of ${q.marks.toFixed(2)}`;
+    delete results[n];
+  }
+  renderNav();
+}
+function renderNav() {
+  const nav = document.getElementById("qnav");
+  nav.innerHTML = Object.keys(QUESTIONS).map((n) => {
+    const r = results[n];
+    let cls = r ? (r.fraction >= 1 ? "correct" : r.fraction > 0 ? "partial" : "incorrect") : (saved[n] && saved[n].touched ? "answered" : "");
+    if (saved[n] && saved[n].flag) cls += " is-flagged";
+    const label = r ? (r.fraction >= 1 ? "correct" : "not fully correct") : "not checked";
+    return `<a href="#q${n}" class="${cls}" aria-label="Question ${n}, ${label}"><span class="n">${n}</span><span class="bar"></span></a>`;
+  }).join("");
+  const got = Object.entries(results).reduce((s, [n, r]) => s + r.fraction * QUESTIONS[n].marks, 0);
+  document.getElementById("score").textContent = `${got.toFixed(2)} / ${TOTAL.toFixed(2)}`;
+}
+function verdictHtml(ok, text) {
+  return `<div class="verdict ${ok ? "ok" : "no"}">${ok ? ICON.ok : ICON.no}<span>${esc(text)}</span></div>`;
+}
+function markInvalid(n) {
+  if (results[n]) { setState(n, "answered"); const o = $(`#q${n} .outcome`); o.hidden = true; qsave(n, {graded: null}); }
+}
+
+/* ---------- flags ---------- */
+document.querySelectorAll(".que").forEach((sec) => {
+  const n = sec.dataset.q, b = $(".flag", sec);
+  const paint = () => { const on = !!(saved[n] && saved[n].flag); b.setAttribute("aria-pressed", on); $("span", b).textContent = on ? "Remove flag" : "Flag question"; };
+  b.addEventListener("click", () => { qsave(n, {flag: !(saved[n] && saved[n].flag)}); paint(); renderNav(); });
+  paint();
+});
+
+/* ---------- code questions ---------- */
+function buildProgram(n, answer) {
+  const q = QUESTIONS[n];
+  let prefix;
+  if (n == 3) prefix = '#include <iostream>\n#include <string>\n#include <cmath>\n#include <vector>\n#include <algorithm>\n\nusing namespace std;\n#define SEPARATOR "' + SEP + '"\n';
+  else prefix = LL_PREFIX.replace("__DECL__", LL_DECL[n][0]).replace("__FRIEND__", LL_DECL[n][1]);
+  const main = "\nint main() {\n" + q.tests.map((t) => "    {\n" + t.code.split("\n").map((l) => "        " + l).join("\n") + "\n    }\n").join('    cout << SEPARATOR << endl;\n') + "    return 0;\n}\n";
+  return {source: prefix + "\n" + answer + "\n" + main, offset: (prefix + "\n").split("\n").length - 1};
+}
+const stripAnsi = (s) => s.replace(/\x1b\[[0-9;]*[A-Za-z]/g, "");
+
+async function runCode(n, answer) {
+  const {source, offset} = buildProgram(n, answer);
+  const body = {source, options:{userArguments:"-std=c++17 -O1", executeParameters:{args:[], stdin:""}, compilerOptions:{executorRequest:true}, filters:{execute:true}, tools:[], libraries:[]}, lang:"c++", allowStoreCodeDebug:false};
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+  let r;
+  try {
+  const res = await fetch("https://godbolt.org/api/compiler/g132/compile", {signal:controller.signal, method:"POST", headers:{"Content-Type":"application/json", "Accept":"application/json"}, body:JSON.stringify(body)});
+  if (!res.ok) throw new Error("Compiler Explorer answered " + res.status);
+  r = await res.json();
+  } catch (err) {
+    if (controller.signal.aborted) throw new Error("The compiler request timed out after 30 seconds. Please try again.");
+    throw err;
+  } finally { clearTimeout(timer); }
+  const fixLines = (txt) => txt.replace(/(?:<source>|example\.cpp|\/app\/example\.cpp):(\d+)(:\d+)?/g, (m, l, c) => {
+    const ln = +l - offset; return ln >= 1 ? `your answer, line ${ln}${c || ""}` : `preloaded code, line ${l}${c || ""}`;
+  });
+  const build = r.buildResult || r;
+  const buildErr = stripAnsi((build.stderr || []).map((x) => x.text).join("\n"));
+  if ((build.code !== undefined && build.code !== 0) || r.didExecute === false && buildErr) {
+    return {compileError: fixLines(buildErr) || "Compilation failed."};
+  }
+  const out = (r.stdout || []).map((x) => x.text).join("\n");
+  const parts = out.split(SEP).map((s) => s.replace(/^\n/, "").replace(/\n$/, ""));
+  return {parts, didExecute:r.didExecute, exitCode: r.code, timedOut: r.timedOut, stderr: stripAnsi((r.stderr || []).map((x) => x.text).join("\n"))};
+}
+
+function mountCode(sec, n) {
+  const q = QUESTIONS[n], host = $(".answer", sec);
+  host.innerHTML = '<div class="editor"><textarea spellcheck="false" aria-label="Answer for question ' + n + '"></textarea></div>';
+  const ta = $("textarea", host);
+  ta.value = (saved[n] && typeof saved[n].code === "string") ? saved[n].code : q.preload;
+  let cm = null;
+  if (window.CodeMirror) {
+    cm = CodeMirror.fromTextArea(ta, {mode:"text/x-c++src", lineNumbers:true, indentUnit:4, tabSize:4, indentWithTabs:false, matchBrackets:true, viewportMargin:Infinity,
+      extraKeys:{Tab:(c) => c.somethingSelected() ? c.indentSelection("add") : c.replaceSelection("    ", "end")}});
+  } else {
+    ta.addEventListener("keydown", (e) => { if (e.key === "Tab") { e.preventDefault(); const s = ta.selectionStart; ta.setRangeText("    ", s, ta.selectionEnd, "end"); ta.dispatchEvent(new Event("input")); } });
+  }
+  const getVal = () => cm ? cm.getValue() : ta.value;
+  const setVal = (v) => cm ? cm.setValue(v) : (ta.value = v);
+  let revision = 0;
+  const onChange = () => { revision++; qsave(n, {code:getVal(), touched:true}); markInvalid(n); renderNav(); };
+  cm ? cm.on("change", onChange) : ta.addEventListener("input", onChange);
+
+  const out = $(".outcome", sec), btn = $(".check", sec);
+  const compilerNote = document.createElement("p");
+  compilerNote.className = "note";
+  compilerNote.textContent = "Check sends your code to Compiler Explorer (godbolt.org) to compile and run it. Internet is required; requests time out after 30 seconds.";
+  $(".actions", sec).after(compilerNote);
+  $(".reset", sec).addEventListener("click", () => { revision++; setVal(q.preload); qsave(n, {code:q.preload, touched:false, graded:null}); setState(n, "none"); out.hidden = true; });
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true; btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Checking…';
+    out.hidden = false; out.innerHTML = '<div class="marks">Compiling and running your code…</div>';
+    try {
+      const checkedRevision = revision;
+      const r = await runCode(n, getVal());
+      if (checkedRevision !== revision) {
+        out.hidden = true;
+        return;
+      }
+      if (r.compileError) {
+        out.innerHTML = verdictHtml(false, "Syntax error(s)") + `<pre>${esc(r.compileError)}</pre><div class="marks">Marks for this submission: 0.00/${q.marks.toFixed(2)}.</div>`;
+        setState(n, "graded", 0); qsave(n, {graded:0});
+      } else {
+        let pass = 0;
+        const rows = q.tests.map((t, i) => {
+          const got = r.parts[i] !== undefined ? r.parts[i] : "";
+          const ok = got === t.expected; if (ok) pass++;
+          return `<tr class="${ok ? "pass" : "fail"}"><td class="mark">${ok ? "✓" : "✗"}</td><td><pre>${esc(t.code)}</pre></td><td><pre>${esc(t.expected)}</pre></td><td><pre>${esc(got)}</pre></td></tr>`;
+        }).join("");
+        const all = pass === q.tests.length && r.parts.length === q.tests.length &&
+          r.didExecute === true && r.exitCode === 0 && !r.timedOut;
+        let extra = "";
+        if (r.timedOut) extra = "<pre>Your program ran for too long and was stopped (infinite loop?).</pre>";
+        else if (r.exitCode && r.exitCode !== 0) extra = `<pre>Program stopped with exit code ${esc(r.exitCode)}${r.stderr ? "\n" + esc(r.stderr) : ""} (a crash, e.g. following a null pointer).</pre>`;
+        out.innerHTML = verdictHtml(all, all ? "Passed all tests!" : `Output matched ${pass} of ${q.tests.length} tests; submission failed`) + extra +
+          `<div class="results"><table><thead><tr><th></th><th>Test</th><th>Expected</th><th>Got</th></tr></thead><tbody>${rows}</tbody></table></div>` +
+          `<div class="marks">Marks for this submission: ${(all ? q.marks : 0).toFixed(2)}/${q.marks.toFixed(2)}.</div>`;
+        setState(n, "graded", all ? 1 : 0); qsave(n, {graded: all ? 1 : 0});
+      }
+    } catch (err) {
+      out.innerHTML = verdictHtml(false, "Could not reach the compiler") + `<div class="marks">Check needs an internet connection to Compiler Explorer (godbolt.org). ${esc(err.message || "")}</div>`;
+    } finally {
+      btn.disabled = false; btn.textContent = "Check";
+    }
+  });
+  if (saved[n] && typeof saved[n].graded === "number") { setState(n, "graded", saved[n].graded); out.hidden = false; out.innerHTML = '<div class="marks">Checked earlier. Press <b>Check</b> again to see the test results.</div>'; }
+  else if (saved[n] && saved[n].touched) setState(n, "answered");
+}
+
+/* ---------- algorithm trace questions ---------- */
+function expectedSteps(q) {
+  const a = q.data;
+  if (q.algo === "binary_search") {
+    const steps = []; let low = 0, high = a.length - 1;
+    while (low <= high) {
+      const mid = low + Math.floor((high - low) / 2);
+      steps.push({low, mid, high});
+      if (q.target === a[mid]) break;
+      else if (q.target < a[mid]) high = mid - 1; else low = mid + 1;
+    }
+    return steps;
+  }
+  if (q.algo === "linear_search") {
+    const steps = [];
+    for (let i = 0; i < a.length; i++) { steps.push({i}); if (a[i] === q.target) break; }
+    return steps;
+  }
+  // optimized bubble sort, one snapshot per outer iteration
+  const arr = a.slice(), passes = [];
+  for (let i = 0; i < arr.length; i++) {
+    let swapped = false;
+    for (let j = 1; j < arr.length - i; j++) if (arr[j] < arr[j - 1]) { [arr[j], arr[j - 1]] = [arr[j - 1], arr[j]]; swapped = true; }
+    if (!swapped) break;
+    passes.push(arr.slice());
+  }
+  if (q.ask === "all") return passes.map((p) => ({arr:p}));
+  return q.ask.map((k) => ({arr: (passes[k - 1] || passes[passes.length - 1] || a).slice()}));
+}
+
+function mountTrace(sec, n) {
+  const q = QUESTIONS[n], host = $(".answer", sec), out = $(".outcome", sec);
+  const isSort = q.algo === "bubble_sort";
+  const ptrs = q.algo === "binary_search" ? ["low", "mid", "high"] : q.algo === "linear_search" ? ["i"] : [];
+  const fixed = Array.isArray(q.ask);
+  const blank = () => isSort ? {arr: q.data.slice()} : Object.fromEntries(ptrs.map((p) => [p, null]));
+  let steps = (saved[n] && Array.isArray(saved[n].steps)) ? saved[n].steps : (fixed ? q.ask.map(blank) : []);
+  if (fixed && steps.length !== q.ask.length) steps = q.ask.map(blank);
+  let undo = [], redo = [], marks = null, selected = null; // selected = {step, ptr}
+
+  const help = isSort
+    ? "Drag a cell onto another cell to swap the two values, or click a cell and type a value. Each row is the array right after that iteration of the outer loop."
+    : `Click “Add iteration” for each ${q.algo === "linear_search" ? "comparison" : "value of mid"}. Drag the ${ptrs.map((p) => p).join(", ")} marker${ptrs.length > 1 ? "s" : ""} onto a cell (or click a marker, then click a cell). Drop a marker back on the tray to remove it. With a marker focused, use Left/Right arrows to move it, Enter to confirm, Escape to cancel, or Delete to remove it.`;
+
+  host.innerHTML = `<div class="trace">
+    <div class="t-toolbar" role="toolbar">
+      <div class="t-group">
+        ${fixed ? "" : `<button class="tool add" type="button">${ICON.plus}<span>Add iteration</span></button>`}
+        <button class="tool undo" type="button" disabled>${ICON.undo}<span>Undo</span></button>
+        <button class="tool redo" type="button" disabled>${ICON.redo}<span>Redo</span></button>
+      </div>
+      <div class="t-group"><button class="tool helpbtn" type="button" aria-expanded="false">${ICON.help}<span>Help</span></button></div>
+    </div>
+    <p class="t-help" hidden>${esc(help)}</p>
+    <div class="t-body"></div>
+  </div>`;
+  const body = $(".t-body", host);
+
+  function commit(mutator) {
+    undo.push(JSON.stringify(steps)); if (undo.length > 100) undo.shift(); redo = [];
+    mutator(); changed();
+  }
+  function changed() {
+    qsave(n, {steps, touched:true}); marks = null; markInvalid(n); render(); renderNav();
+  }
+  function label(i) { return fixed ? `After iteration ${q.ask[i]}` : `Iteration ${i + 1}`; }
+
+  function render() {
+    const idxRow = (show) => q.data.map((_, i) => `<span class="idx">${show ? i : ""}</span>`);
+    let h = `<div class="step initial"><div class="stephead"><span class="steplabel">Initial</span></div><div class="cols">` +
+      q.data.map((v, i) => `<div class="col"><span class="idx">${i}</span><span class="cell locked">${v}</span></div>`).join("") + `</div>` +
+      (q.target !== undefined ? `<div class="target">Target: <b>${q.target}</b></div>` : "") + `</div>`;
+    if (!steps.length) h += `<div class="t-empty">No iterations yet. Click <b>Add iteration</b> to add the first one.</div>`;
+    steps.forEach((s, si) => {
+      const m = marks ? marks[si] : null;
+      h += `<div class="step ${m === true ? "ok" : m === false ? "bad" : ""}" data-step="${si}">
+        <div class="stephead"><span class="steplabel">${label(si)}${m === true ? '<span class="tag ok">correct</span>' : m === false ? '<span class="tag bad">wrong</span>' : ""}</span>
+          <div class="stepactions">
+            <button class="iconbtn copyprev" type="button" title="Make this step the same as the one before it">${ICON.copy}<span>Copy previous</span></button>
+            ${fixed ? "" : `<button class="iconbtn remove" type="button" title="Remove ${label(si)}">${ICON.trash}<span>Remove</span></button>`}
+          </div></div><div class="cols">`;
+      if (isSort) {
+        h += s.arr.map((v, i) => `<div class="col"><span class="idx">${i}</span><span class="cell sortcell" data-i="${i}"><input inputmode="numeric" value="${esc(v)}" aria-label="${label(si)}, position ${i}"></span></div>`).join("") + `</div>`;
+      } else {
+        h += q.data.map((v, i) => `<div class="col ${selected && selected.step === si ? "target-ready" : ""}" data-i="${i}"><span class="idx">${i}</span><span class="cell locked">${v}</span><div class="lane">${ptrs.filter((p) => s[p] === i).map((p) => chip(si, p)).join("")}</div></div>`).join("") + `</div>`;
+        const loose = ptrs.filter((p) => s[p] === null || s[p] === undefined);
+        h += `<div class="tray" data-tray="1">${loose.length ? loose.map((p) => chip(si, p)).join("") : "<span>Drop a marker here to remove it</span>"}</div>`;
+      }
+      h += `</div>`;
+    });
+    body.innerHTML = h;
+    $(".undo", host).disabled = !undo.length; $(".redo", host).disabled = !redo.length;
+  }
+  function chip(si, p) {
+    const sel = selected && selected.step === si && selected.ptr === p;
+    return `<button class="chip ${p}${sel ? " selected" : ""}" type="button" data-step="${si}" data-ptr="${p}" aria-pressed="${sel}">${p}</button>`;
+  }
+
+  // toolbar
+  const addBtn = $(".add", host);
+  if (addBtn) addBtn.addEventListener("click", () => commit(() => steps.push(blank())));
+  $(".undo", host).addEventListener("click", () => { if (!undo.length) return; redo.push(JSON.stringify(steps)); steps = JSON.parse(undo.pop()); changed(); });
+  $(".redo", host).addEventListener("click", () => { if (!redo.length) return; undo.push(JSON.stringify(steps)); steps = JSON.parse(redo.pop()); changed(); });
+  $(".helpbtn", host).addEventListener("click", (e) => { const p = $(".t-help", host); p.hidden = !p.hidden; e.currentTarget.setAttribute("aria-expanded", !p.hidden); });
+
+  body.addEventListener("click", (e) => {
+    const stepEl = e.target.closest(".step[data-step]"); if (!stepEl) return;
+    const si = +stepEl.dataset.step;
+    if (e.target.closest(".copyprev")) {
+      commit(() => { steps[si] = si === 0 ? (isSort ? {arr:q.data.slice()} : blank()) : JSON.parse(JSON.stringify(steps[si - 1])); });
+      return;
+    }
+    if (e.target.closest(".remove")) { commit(() => steps.splice(si, 1)); selected = null; return; }
+    if (isSort) return;
+    const c = e.target.closest(".chip");
+    if (c) {
+      if (suppressClick) return;
+      selected = (selected && selected.step === si && selected.ptr === c.dataset.ptr) ? null : {step:si, ptr:c.dataset.ptr, index:steps[si][c.dataset.ptr] ?? 0};
+      render(); const again = body.querySelector(`.chip[data-step="${si}"][data-ptr="${c.dataset.ptr}"]`); if (again) again.focus();
+      return;
+    }
+    if (selected && selected.step === si) {
+      const col = e.target.closest(".col[data-i]"), tray = e.target.closest(".tray");
+      if (col) { const p = selected.ptr; selected = null; commit(() => { steps[si][p] = +col.dataset.i; }); }
+      else if (tray) { const p = selected.ptr; selected = null; commit(() => { steps[si][p] = null; }); }
+    }
+  });
+  body.addEventListener("keydown", (e) => {
+    const c = e.target.closest(".chip");
+    if (!c || isSort) return;
+    const si = +c.dataset.step, p = c.dataset.ptr;
+    const focusMarker = () => body.querySelector(`.chip[data-step="${si}"][data-ptr="${p}"]`)?.focus();
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      if (!selected || selected.step !== si || selected.ptr !== p)
+        selected = {step:si, ptr:p, index:steps[si][p] ?? (e.key === "ArrowRight" ? -1 : q.data.length)};
+      selected.index = Math.max(0, Math.min(q.data.length - 1, selected.index + (e.key === "ArrowRight" ? 1 : -1)));
+      render();
+      body.querySelector(`.step[data-step="${si}"] .col[data-i="${selected.index}"]`).classList.add("drop-hover");
+      focusMarker();
+    } else if (e.key === "Enter" && selected && selected.step === si && selected.ptr === p) {
+      e.preventDefault(); const index = selected.index; selected = null;
+      commit(() => { steps[si][p] = index; }); focusMarker();
+    } else if (e.key === "Delete" || e.key === "Backspace") {
+      e.preventDefault(); selected = null; commit(() => { steps[si][p] = null; }); focusMarker();
+    } else if (e.key === "Escape" && selected) {
+      e.preventDefault(); selected = null; render(); focusMarker();
+    }
+  });
+
+  // sort cells: typing
+  body.addEventListener("change", (e) => {
+    const inp = e.target.closest(".sortcell input"); if (!inp) return;
+    const si = +inp.closest(".step").dataset.step, i = +inp.closest(".cell").dataset.i;
+    const v = inp.value.trim(); const num = Number(v);
+    commit(() => { steps[si].arr[i] = v === "" ? "" : (Number.isFinite(num) ? num : v); });
+  });
+
+  // pointer drag (chips onto cells, sort cells onto sort cells)
+  let drag = null, suppressClick = false;
+  body.addEventListener("pointerdown", (e) => {
+    const c = e.target.closest(".chip"), sc = e.target.closest(".sortcell");
+    if (!c && !sc) return;
+    if (e.button !== 0) return;
+    const stepEl = e.target.closest(".step[data-step]");
+    drag = {el: c || sc, kind: c ? "chip" : "cell", step: +stepEl.dataset.step, ptr: c ? c.dataset.ptr : null, i: sc ? +sc.dataset.i : null, x: e.clientX, y: e.clientY, active:false, ghost:null, over:null};
+  });
+  window.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    if (!drag.active) {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+      drag.active = true;
+      const g = drag.el.cloneNode(true); g.classList.add("drag-ghost"); g.classList.remove("selected");
+      if (drag.kind === "cell") { const inp = drag.el.querySelector("input"); g.innerHTML = esc(inp ? inp.value : ""); if (inp) inp.blur(); }
+      document.body.appendChild(g); drag.ghost = g;
+    }
+    e.preventDefault();
+    drag.ghost.style.left = e.clientX + "px"; drag.ghost.style.top = e.clientY + "px";
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    let over = null;
+    if (under) {
+      const st = under.closest(`.step[data-step="${drag.step}"]`);
+      if (st && host.contains(st)) over = drag.kind === "chip" ? (under.closest(".col[data-i]") || under.closest(".tray")) : under.closest(".sortcell");
+    }
+    if (over !== drag.over) { if (drag.over) drag.over.classList.remove("drop-hover"); if (over) over.classList.add("drop-hover"); drag.over = over; }
+  }, {passive:false});
+  window.addEventListener("pointerup", () => {
+    if (!drag) return;
+    const d = drag; drag = null;
+    if (!d.active) return;
+    d.ghost.remove(); if (d.over) d.over.classList.remove("drop-hover");
+    suppressClick = true; setTimeout(() => { suppressClick = false; }, 0);
+    if (!d.over) return;
+    if (d.kind === "chip") {
+      const to = d.over.classList.contains("tray") ? null : +d.over.dataset.i;
+      selected = null;
+      commit(() => { steps[d.step][d.ptr] = to; });
+    } else {
+      const j = +d.over.dataset.i; if (j === d.i) return;
+      commit(() => { const a = steps[d.step].arr; [a[d.i], a[j]] = [a[j], a[d.i]]; });
+    }
+  });
+  window.addEventListener("pointercancel", () => { if (drag && drag.ghost) drag.ghost.remove(); if (drag && drag.over) drag.over.classList.remove("drop-hover"); drag = null; });
+
+  // check
+  $(".check", sec).addEventListener("click", () => {
+    const exp = expectedSteps(q);
+    const same = (a, b) => isSort ? a.arr.length === b.arr.length && a.arr.every((v, i) => Number(v) === b.arr[i] && String(v).trim() !== "") : ptrs.every((p) => a[p] === b[p]);
+    marks = steps.map((s, i) => i < exp.length && same(s, exp[i]));
+    const right = marks.filter(Boolean).length;
+    const all = right === exp.length && steps.length === exp.length;
+    const lines = [];
+    if (!all) {
+      if (steps.length < exp.length) lines.push(`Some iterations are missing: you have ${steps.length}.`);
+      else if (steps.length > exp.length) lines.push(`There are too many iterations: you have ${steps.length}.`);
+      const wrong = marks.map((m, i) => m ? null : label(i)).filter(Boolean);
+      if (wrong.length) lines.push(`Not correct: ${wrong.join(", ")}.`);
+      if (!isSort) { const missing = steps.some((s) => ptrs.some((p) => s[p] === null || s[p] === undefined)); if (missing) lines.push("Some markers are still on the tray."); }
+    }
+    out.hidden = false;
+    out.innerHTML = verdictHtml(all, all ? "Correct trace!" : "Not quite right") +
+      (lines.length ? `<div>${lines.map(esc).join("<br>")}</div>` : "") +
+      `<div class="marks">Marks for this submission: ${(all ? q.marks : 0).toFixed(2)}/${q.marks.toFixed(2)}.</div>`;
+    render();
+    setState(n, "graded", all ? 1 : 0); qsave(n, {graded: all ? 1 : 0});
+  });
+
+  render();
+  if (saved[n] && typeof saved[n].graded === "number") $(".check", sec).click();
+  else if (saved[n] && saved[n].touched) setState(n, "answered");
+}
+
+/* ---------- boot ---------- */
+document.querySelectorAll(".que").forEach((sec) => {
+  const n = sec.dataset.q;
+  QUESTIONS[n].kind === "code" ? mountCode(sec, n) : mountTrace(sec, n);
+});
+document.getElementById("resetAll").addEventListener("click", () => {
+  if (!confirm("Clear all your answers on this page and start again?")) return;
+  saved = {}; persist(); location.reload();
+});
+renderNav();
+})();
+</script>
+</body>
+</html>
