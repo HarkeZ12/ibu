@@ -1,0 +1,2073 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Use Case Diagrams</title>
+<meta name="description" content="IT 2002 System Analysis and Design, Reading 05: Use Cases and Use Case Diagrams. Full study guide and a multiple-choice quiz.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: animated diagram-shape canvas behind everything; translucent "glass" panels on top.
+   Two views share one page: Reading (TOC + article) and Quiz (setup → question → results). */
+:root{
+  --bg:#eef1f8; --bg2:#dfe5f3;
+  --panel:rgba(255,255,255,.70); --panel-solid:#ffffff; --panel-edge:rgba(40,60,120,.14);
+  --ink:#141a2e; --muted:#55607a; --line:rgba(40,60,120,.16);
+  --accent:#3451d1; --accent-ink:#ffffff; --accent-soft:rgba(52,81,209,.11);
+  --amber:#b77a00; --amber-soft:rgba(240,180,40,.16);
+  --good:#1b7a45; --good-soft:rgba(27,122,69,.12); --bad:#b8352b; --bad-soft:rgba(184,53,43,.11);
+  --blob1:rgba(110,140,255,.38); --blob2:rgba(255,190,90,.30); --blob3:rgba(90,210,190,.26);
+  --shape:40,60,140;
+  --shadow:0 10px 40px -18px rgba(20,30,70,.35);
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0a0f1e; --bg2:#121a33;
+  --panel:rgba(16,23,44,.68); --panel-solid:#141c36; --panel-edge:rgba(150,175,255,.13);
+  --ink:#e7ebf7; --muted:#9ba7c4; --line:rgba(150,175,255,.14);
+  --accent:#8aa6ff; --accent-ink:#0a0f1e; --accent-soft:rgba(138,166,255,.13);
+  --amber:#ffcf6a; --amber-soft:rgba(255,200,90,.12);
+  --good:#62d79c; --good-soft:rgba(98,215,156,.13); --bad:#ff8a8f; --bad-soft:rgba(255,120,130,.12);
+  --blob1:rgba(80,100,255,.30); --blob2:rgba(255,170,60,.16); --blob3:rgba(40,200,170,.18);
+  --shape:150,175,255;
+  --shadow:0 14px 50px -20px rgba(0,0,0,.7);
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0a0f1e; --bg2:#121a33;
+  --panel:rgba(16,23,44,.68); --panel-solid:#141c36; --panel-edge:rgba(150,175,255,.13);
+  --ink:#e7ebf7; --muted:#9ba7c4; --line:rgba(150,175,255,.14);
+  --accent:#8aa6ff; --accent-ink:#0a0f1e; --accent-soft:rgba(138,166,255,.13);
+  --amber:#ffcf6a; --amber-soft:rgba(255,200,90,.12);
+  --good:#62d79c; --good-soft:rgba(98,215,156,.13); --bad:#ff8a8f; --bad-soft:rgba(255,120,130,.12);
+  --blob1:rgba(80,100,255,.30); --blob2:rgba(255,170,60,.16); --blob3:rgba(40,200,170,.18);
+  --shape:150,175,255;
+  --shadow:0 14px 50px -20px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth; scroll-padding-top:84px}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--f-body); font-size:18px; line-height:1.68;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+a{color:var(--accent)}
+code,kbd,.mono{font-family:var(--f-mono); font-size:.86em; font-variant-ligatures:none}
+.st{font-family:var(--f-mono); font-size:.84em; color:var(--accent); white-space:nowrap; font-weight:600}
+
+/* ---------- animated background ---------- */
+.backdrop{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 0%, var(--bg2), var(--bg) 70%)}
+.blob{position:absolute; width:62vmax; height:62vmax; border-radius:50%; filter:blur(70px); opacity:1; will-change:transform}
+.b1{background:radial-gradient(circle, var(--blob1), transparent 65%); top:-22vmax; left:-18vmax; animation:drift1 34s ease-in-out infinite alternate}
+.b2{background:radial-gradient(circle, var(--blob2), transparent 65%); bottom:-30vmax; right:-20vmax; animation:drift2 41s ease-in-out infinite alternate}
+.b3{background:radial-gradient(circle, var(--blob3), transparent 65%); top:30%; left:40%; width:44vmax; height:44vmax; animation:drift3 29s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(22vw,18vh) scale(1.15)}}
+@keyframes drift2{to{transform:translate(-26vw,-14vh) scale(1.1)}}
+@keyframes drift3{to{transform:translate(-30vw,20vh) scale(.85)}}
+#shapes{position:absolute; inset:0; width:100%; height:100%}
+.grain{position:absolute; inset:0; opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+/* ---------- glass ---------- */
+.glass{background:var(--panel); border:1px solid var(--panel-edge); border-radius:20px; box-shadow:var(--shadow);
+  -webkit-backdrop-filter:blur(8px) saturate(1.2); backdrop-filter:blur(8px) saturate(1.2)}
+
+/* ---------- top bar ---------- */
+.top{position:sticky; top:0; z-index:20; padding:10px max(16px, env(safe-area-inset-left)) 0}
+.bar{max-width:1180px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 10px 8px 16px; border-radius:16px; position:relative; overflow:hidden}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); min-width:0; margin-right:auto}
+.brand svg{flex:none}
+.brand b{font-family:var(--f-display); font-weight:700; font-size:1rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.brand small{display:block; font-family:var(--f-mono); font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); line-height:1.2}
+.tabs{display:flex; background:var(--accent-soft); border-radius:12px; padding:4px; gap:2px}
+.tab{appearance:none; border:0; background:transparent; color:var(--ink); font:600 .95rem var(--f-body); padding:7px 16px; border-radius:9px; cursor:pointer; transition:background .2s, color .2s}
+.tab[aria-selected="true"]{background:var(--accent); color:var(--accent-ink)}
+.icon-btn{appearance:none; border:1px solid var(--line); background:transparent; color:var(--ink); width:40px; height:40px; border-radius:11px; display:grid; place-items:center; cursor:pointer; flex:none}
+.icon-btn:hover{background:var(--accent-soft)}
+.progress{position:absolute; left:0; bottom:0; height:3px; width:0; background:linear-gradient(90deg, var(--accent), var(--amber)); transition:width .15s linear}
+@media (max-width:560px){ .brand small{display:none} .brand b{font-size:.92rem} .tab{padding:7px 11px} .brand svg{display:none}}
+
+/* ---------- shell ---------- */
+main{position:relative; z-index:1; padding:20px max(16px, env(safe-area-inset-left)) 80px}
+.shell{max-width:1180px; margin:0 auto}
+
+/* hero */
+.hero{padding:clamp(28px,5vw,56px); display:grid; gap:22px; margin-bottom:22px; position:relative; overflow:hidden}
+.eyebrow{font-family:var(--f-mono); font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 14px}
+.eyebrow span{display:inline-flex; align-items:center; gap:6px}
+.eyebrow .dot{width:7px; height:7px; border-radius:50%; background:var(--amber)}
+h1,h2,h3,h4{font-family:var(--f-display); letter-spacing:-.015em; text-wrap:balance; margin:0}
+h1{font-size:clamp(2.3rem, 6.4vw, 4.4rem); line-height:1; font-weight:800; max-width:16ch}
+h1 em{font-style:normal; background:linear-gradient(100deg, var(--accent), var(--amber)); -webkit-background-clip:text; background-clip:text; color:transparent}
+.lede{font-size:1.18rem; color:var(--muted); max-width:58ch; margin:0}
+.cta{display:flex; flex-wrap:wrap; gap:12px}
+.btn{appearance:none; border:1px solid var(--line); background:var(--panel-solid); color:var(--ink); font:600 1rem var(--f-body); padding:12px 20px; border-radius:13px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:transform .15s, background .2s, border-color .2s}
+.btn:hover{transform:translateY(-1px); border-color:var(--accent)}
+.btn.primary{background:var(--accent); color:var(--accent-ink); border-color:transparent}
+.btn:disabled{opacity:.45; cursor:not-allowed; transform:none}
+.stats{display:flex; flex-wrap:wrap; gap:10px}
+.stat{padding:8px 14px; border-radius:12px; background:var(--accent-soft); font-size:.92rem; color:var(--muted)}
+.stat b{color:var(--ink); font-family:var(--f-display); font-size:1.05rem; margin-right:4px}
+.hero-art{position:absolute; right:36px; top:50%; transform:translateY(-50%); width:min(36%, 360px); opacity:.9; pointer-events:none}
+@media (max-width:860px){.hero-art{display:none}}
+
+/* ---------- reading ---------- */
+.reading{display:grid; grid-template-columns:250px minmax(0,1fr); gap:22px; align-items:start}
+@media (max-width:980px){.reading{grid-template-columns:minmax(0,1fr)}}
+.toc{position:sticky; top:86px; padding:18px 14px; max-height:calc(100vh - 110px); overflow:auto; font-size:.92rem}
+.toc h4{font-size:.74rem; font-family:var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:0 8px 8px}
+.toc ol{list-style:none; margin:0; padding:0; counter-reset:t}
+.toc a{display:flex; gap:8px; padding:6px 8px; border-radius:9px; color:var(--muted); text-decoration:none; line-height:1.3}
+.toc a::before{counter-increment:t; content:counter(t); font-family:var(--f-mono); font-size:.78em; color:var(--accent); min-width:1.4em; padding-top:.15em}
+.toc a:hover{background:var(--accent-soft); color:var(--ink)}
+.toc a.on{background:var(--accent-soft); color:var(--ink); font-weight:600}
+.toc .quiz-link{margin-top:12px; display:block; width:100%; justify-content:center}
+@media (max-width:980px){.toc{position:static; max-height:none} .toc ol{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
+
+article{display:flex; flex-direction:column; gap:22px; min-width:0}
+.sec{padding:clamp(22px,4vw,44px)}
+.sec > * + *{margin-top:16px}
+.sec h2{font-size:clamp(1.6rem,3.4vw,2.2rem); line-height:1.1; display:flex; align-items:baseline; gap:14px}
+.sec h2 .n{font-family:var(--f-mono); font-size:.5em; color:var(--accent); background:var(--accent-soft); padding:4px 9px; border-radius:8px; letter-spacing:0}
+.sec h3{font-size:1.28rem; margin-top:30px; color:var(--ink)}
+.sec h3 .n{color:var(--accent); font-family:var(--f-mono); font-size:.8em; margin-right:6px}
+.sec p, .sec li{max-width:72ch}
+.sec ul, .sec ol{padding-left:1.3em}
+.sec li + li{margin-top:6px}
+.sec li::marker{color:var(--accent)}
+.steps{list-style:none; padding:0!important; counter-reset:s; display:grid; gap:10px}
+.steps li{counter-increment:s; position:relative; padding:12px 14px 12px 54px; background:var(--accent-soft); border-radius:12px; max-width:none}
+.steps li::before{content:counter(s); position:absolute; left:14px; top:12px; width:28px; height:28px; border-radius:50%; background:var(--accent); color:var(--accent-ink); display:grid; place-items:center; font:700 .9rem var(--f-display)}
+.steps li b{display:block}
+.callout{border-radius:14px; padding:14px 18px; border-left:4px solid var(--accent); background:var(--accent-soft)}
+.callout.key{border-color:var(--amber); background:var(--amber-soft)}
+.callout.warn{border-color:var(--bad); background:var(--bad-soft)}
+.callout.story{border-color:var(--good); background:var(--good-soft); font-style:italic}
+.callout .lbl{font-style:normal; font-family:var(--f-mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; display:block; margin-bottom:4px; color:var(--muted)}
+.tbl{overflow-x:auto; border-radius:14px; border:1px solid var(--line)}
+table{border-collapse:collapse; width:100%; font-size:.95rem; line-height:1.45; background:var(--panel-solid)}
+caption{caption-side:top; text-align:left; font-family:var(--f-mono); font-size:.74rem; letter-spacing:.06em; color:var(--muted); padding:0 0 8px}
+th,td{padding:10px 14px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line)}
+th{font-family:var(--f-display); font-weight:700; background:var(--accent-soft); font-size:.92rem}
+tr:last-child td{border-bottom:0}
+td.y{color:var(--good); font-weight:700} td.no{color:var(--bad); font-weight:700}
+.tblcap{font-family:var(--f-mono); font-size:.76rem; color:var(--muted); margin-bottom:-6px}
+figure{margin:0}
+.fig button{appearance:none; border:0; padding:clamp(8px,2vw,16px); background:#fff; border-radius:14px; width:100%; cursor:zoom-in; display:block; box-shadow:0 0 0 1px var(--line); transition:transform .2s}
+.fig button:hover{transform:scale(1.008)}
+.fig img{width:100%; height:auto; display:block}
+.fig figcaption{font-size:.9rem; color:var(--muted); margin-top:8px}
+.fig figcaption b{color:var(--ink); font-family:var(--f-display)}
+.staff{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px}
+.staff div{background:var(--accent-soft); border-radius:12px; padding:10px 14px; font-size:.92rem; line-height:1.35}
+.staff small{font-family:var(--f-mono); font-size:.66rem; letter-spacing:.1em; color:var(--muted); display:block}
+.takeaways{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; list-style:none; padding:0!important}
+.takeaways li{background:var(--accent-soft); border-radius:14px; padding:14px 16px; max-width:none; margin:0!important}
+.end-cta{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(22px,4vw,44px)}
+.end-cta h3{font-size:1.4rem}
+
+.reveal{opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease}
+.reveal.in{opacity:1; transform:none}
+
+/* ---------- quiz ---------- */
+.quiz{max-width:820px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+.qcard{padding:clamp(20px,4vw,36px); display:flex; flex-direction:column; gap:18px}
+.qcard h2{font-size:clamp(1.5rem,3.4vw,2rem)}
+.muted{color:var(--muted)}
+.label{font-family:var(--f-mono); font-size:.74rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block}
+.seg{display:flex; flex-wrap:wrap; gap:8px}
+.chip{appearance:none; border:1px solid var(--line); background:var(--panel-solid); color:var(--ink); font:600 .92rem var(--f-body); padding:8px 14px; border-radius:999px; cursor:pointer; transition:background .15s, border-color .15s}
+.chip[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink); border-color:transparent}
+.chip small{opacity:.7; font-weight:400; margin-left:4px}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.row.between{justify-content:space-between}
+.qhead{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; font-size:.92rem}
+.counter{font-family:var(--f-mono); color:var(--muted)}
+.tag{font-family:var(--f-mono); font-size:.72rem; letter-spacing:.06em; padding:4px 10px; border-radius:999px; background:var(--amber-soft); color:var(--amber)}
+.live{font-family:var(--f-mono); font-size:.86rem}
+.live .g{color:var(--good)} .live .r{color:var(--bad)}
+.qbar{height:6px; border-radius:6px; background:var(--accent-soft); overflow:hidden}
+.qbar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--amber)); transition:width .35s ease}
+.question{font-family:var(--f-display); font-size:clamp(1.2rem,2.6vw,1.5rem); line-height:1.3; font-weight:700; margin:0}
+.opts{display:grid; gap:10px; list-style:none; padding:0; margin:0}
+.opt{appearance:none; width:100%; text-align:left; border:1.5px solid var(--line); background:var(--panel-solid); color:var(--ink); font:400 1.02rem/1.45 var(--f-body); padding:13px 16px; border-radius:14px; cursor:pointer; display:flex; gap:14px; align-items:flex-start; transition:border-color .15s, background .15s, transform .15s}
+.opt:hover:not(:disabled){border-color:var(--accent); transform:translateX(3px)}
+.opt .k{flex:none; width:30px; height:30px; border-radius:9px; display:grid; place-items:center; background:var(--accent-soft); font:700 .85rem var(--f-mono); color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.correct{border-color:var(--good); background:var(--good-soft)}
+.opt.correct .k{background:var(--good); color:#fff}
+.opt.wrong{border-color:var(--bad); background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad); color:#fff}
+.opt.dim{opacity:.55}
+.opt.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.explain{border-radius:14px; padding:14px 18px; background:var(--accent-soft); border-left:4px solid var(--accent); animation:pop .3s ease}
+.explain.ok{border-color:var(--good); background:var(--good-soft)}
+.explain.no{border-color:var(--bad); background:var(--bad-soft)}
+.explain b{font-family:var(--f-display)}
+@keyframes pop{from{opacity:0; transform:translateY(6px)}}
+.hint{font-size:.82rem; color:var(--muted)}
+kbd{border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:1px 6px; background:var(--panel-solid)}
+.result-top{display:flex; gap:24px; align-items:center; flex-wrap:wrap}
+.ring{--p:0; width:140px; height:140px; border-radius:50%; flex:none; display:grid; place-items:center;
+  background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--accent-soft) 0)}
+.ring div{width:112px; height:112px; border-radius:50%; background:var(--panel-solid); display:grid; place-items:center; text-align:center; line-height:1.1}
+.ring b{font:800 2rem var(--f-display)} .ring small{color:var(--muted); font-size:.8rem}
+.topics{display:grid; gap:8px}
+.trow{display:grid; grid-template-columns:minmax(0,1fr) 120px 52px; gap:10px; align-items:center; font-size:.92rem}
+.trow .tb{height:8px; border-radius:8px; background:var(--accent-soft); overflow:hidden}
+.trow .tb i{display:block; height:100%; background:var(--good)}
+.trow .tb i.mid{background:var(--amber)} .trow .tb i.low{background:var(--bad)}
+.trow span:last-child{font-family:var(--f-mono); text-align:right; color:var(--muted)}
+.review{display:grid; gap:12px}
+.ritem{border:1px solid var(--line); border-radius:14px; padding:14px 16px; background:var(--panel-solid)}
+.ritem p{margin:4px 0}
+.ritem .q{font-weight:700}
+.ritem .you{color:var(--bad)} .ritem .ans{color:var(--good)}
+.ritem .why{color:var(--muted); font-size:.94rem}
+.best{font-size:.9rem}
+
+/* lightbox */
+dialog.lb{border:0; padding:0; background:transparent; max-width:min(1200px,96vw); width:100%}
+dialog.lb::backdrop{background:rgba(5,8,20,.82); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px)}
+dialog.lb img{width:100%; height:auto; background:#fff; border-radius:14px; display:block}
+dialog.lb p{color:#e7ebf7; text-align:center; font-size:.95rem; margin:10px 0 0}
+dialog.lb button{position:absolute; top:8px; right:8px; background:rgba(0,0,0,.6); color:#fff; border:0; width:38px; height:38px; border-radius:10px; font-size:1.2rem; cursor:pointer}
+
+footer{position:relative; z-index:1; text-align:center; color:var(--muted); font-size:.85rem; padding:0 16px 40px}
+footer a{color:var(--muted)}
+
+@media (prefers-reduced-motion: reduce){
+  .blob{animation:none} .reveal{opacity:1; transform:none; transition:none} html{scroll-behavior:auto}
+  .opt, .btn, .fig button{transition:none}
+}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+  <canvas id="shapes"></canvas>
+  <div class="grain"></div>
+</div>
+
+<header class="top">
+  <div class="bar glass">
+    <a class="brand" href="../../index.html" title="All courses">
+      <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><ellipse cx="15" cy="15" rx="13" ry="8" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent)"/><circle cx="15" cy="15" r="2.5" fill="var(--amber)"/></svg>
+      <span><small>IT 2002 · Week 05</small><b>Use Case Diagrams</b></span>
+    </a>
+    <div class="tabs" role="tablist" aria-label="View">
+      <button class="tab" role="tab" id="tab-read" aria-selected="true" aria-controls="view-read">Reading</button>
+      <button class="tab" role="tab" id="tab-quiz" aria-selected="false" aria-controls="view-quiz">Quiz</button>
+    </div>
+    <button class="icon-btn" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="progress" id="progress"></div>
+  </div>
+</header>
+
+<main>
+<div class="shell">
+
+<!-- ======================= READING ======================= -->
+<section id="view-read" role="tabpanel" aria-labelledby="tab-read">
+  <div class="hero glass">
+    <div class="eyebrow"><span><i class="dot"></i>IT 2002 · System Analysis and Design</span><span>Reading 05</span><span>2026/2027</span></div>
+    <h1>Use Cases and <em>Use Case Diagrams</em></h1>
+    <p class="lede">Who uses the system and what it does for them: how to find actors and use cases, and how to draw use case diagrams.</p>
+    <div class="cta">
+      <a class="btn primary" href="#s1">Start reading ↓</a>
+      <button class="btn" data-go="quiz">Take the quiz →</button>
+    </div>
+    <div class="stats">
+      <span class="stat"><b>10</b>chapters</span>
+      <span class="stat"><b>16</b>figures</span>
+      <span class="stat"><b id="qcount-hero">—</b>quiz questions</span>
+      <span class="stat"><b>~35</b>min read</span>
+    </div>
+    <svg class="hero-art" viewBox="0 0 360 260" aria-hidden="true" fill="none" stroke-width="2.2">
+      <rect x="90" y="14" width="200" height="232" rx="10" stroke="rgb(var(--shape))" stroke-opacity=".45"/>
+      <ellipse cx="190" cy="66" rx="70" ry="24" stroke="var(--accent)" fill="var(--accent-soft)"/>
+      <ellipse cx="190" cy="136" rx="70" ry="24" stroke="var(--accent)" fill="var(--accent-soft)"/>
+      <ellipse cx="190" cy="206" rx="70" ry="24" stroke="var(--amber)" fill="var(--amber-soft)"/>
+      <g stroke="currentColor" style="color:var(--ink)"><circle cx="34" cy="92" r="10"/><path d="M34 102v28M18 112h32M34 130l-12 18M34 130l12 18"/></g>
+      <path d="M52 108 120 72M52 116 120 132" stroke="var(--ink)" stroke-opacity=".7"/>
+      <path d="M190 160v20" stroke="var(--amber)" stroke-dasharray="5 4"/><path d="M184 174l6 8 6-8" stroke="var(--amber)"/>
+      <g stroke="currentColor" style="color:var(--ink)"><rect x="306" y="190" width="48" height="30" rx="3"/></g>
+      <path d="M260 206h46" stroke="var(--ink)" stroke-opacity=".7"/>
+    </svg>
+  </div>
+
+  <div class="reading">
+    <nav class="toc glass" aria-label="Contents">
+      <h4>Contents</h4>
+      <ol id="toc">
+        <li><a href="#s1">Introduction</a></li>
+        <li><a href="#s2">Learning objectives</a></li>
+        <li><a href="#s3">Functional modeling &amp; use cases</a></li>
+        <li><a href="#s4">Elements of a use-case diagram</a></li>
+        <li><a href="#s5">Include, extend &amp; generalization</a></li>
+        <li><a href="#s6">Identifying actors &amp; use cases</a></li>
+        <li><a href="#s7">Drawing the diagram</a></li>
+        <li><a href="#s8">Worked examples</a></li>
+        <li><a href="#s9">Common mistakes</a></li>
+        <li><a href="#s10">Key takeaways</a></li>
+      </ol>
+      <button class="btn primary quiz-link" data-go="quiz">Take the quiz →</button>
+    </nav>
+
+    <article>
+      <section class="sec glass reveal" id="s1">
+        <h2><span class="n">01</span>Introduction</h2>
+        <p>Reading 4 showed how to write down what a system must do. A requirements definition is a list, and a list is hard to see as a whole. A client who reads forty numbered sentences cannot easily say: <i>“Yes, this is the system I want.”</i> We need a picture that shows the whole system on one page, in a form that the user can read without special training. This picture is the <b>use-case diagram</b>.</p>
+        <p>A use-case diagram shows two things: <b>who uses the system</b> (the <b>actors</b>) and <b>what the system does for them</b> (the <b>use cases</b>). It is simple on purpose. Users understand it, so it is a very good tool for a conversation between the analyst and the client. The diagram is drawn early, while the requirements are still being gathered, and it often makes the users remember functions that they forgot to mention.</p>
+        <div class="staff">
+          <div><small>LECTURER</small>Zerina Altoka</div>
+          <div><small>TEACHING ASSISTANT</small>Emina Osmić</div>
+          <div><small>LAB ASSISTANT</small>Samira Zeba</div>
+          <div><small>LAB ASSISTANT</small>Sadžida Rakovac</div>
+          <div><small>LAB ASSISTANT</small>Muhamed Mulić</div>
+        </div>
+      </section>
+
+      <section class="sec glass reveal" id="s2">
+        <h2><span class="n">02</span>Learning objectives</h2>
+        <p>After completing this reading, you should be able to:</p>
+        <ul>
+          <li>explain what a use case is and why use cases matter in object-oriented development;</li>
+          <li>tell a logical model from a physical model;</li>
+          <li>name the elements of a use-case diagram and draw each of them correctly;</li>
+          <li>decide whether something can be an actor, and find the actors of a system;</li>
+          <li>use <span class="st">&lt;&lt;include&gt;&gt;</span>, <span class="st">&lt;&lt;extend&gt;&gt;</span> and generalization correctly;</li>
+          <li>follow the <b>five steps</b> that identify the major use cases;</li>
+          <li>follow the <b>four steps</b> that create a use-case diagram;</li>
+          <li>read a diagram and recognize the most common mistakes in diagrams.</li>
+        </ul>
+      </section>
+
+      <section class="sec glass reveal" id="s3">
+        <h2><span class="n">03</span>Functional modeling and use cases</h2>
+        <h3><span class="n">3.1</span>Three functional models</h3>
+        <p>Chapter 3 of the textbook is about functional modeling. A <b>functional model</b> describes the business processes and the way the information system interacts with its environment. It shows the <b>external, or functional, view</b> of the system: how the users see the system, and not how the system works inside. Three models are used together:</p>
+        <div class="tblcap">Table 3.1 · The three functional models</div>
+        <div class="tbl"><table>
+          <tr><th>Model</th><th>What it shows</th><th>Question it answers</th></tr>
+          <tr><td><b>Use-case diagram</b></td><td>The main functions of the system and the users who interact with them.</td><td>Who uses the system, and what for?</td></tr>
+          <tr><td><b>Activity diagram</b></td><td>The activities inside one business process and the order in which they happen.</td><td>What happens, step by step?</td></tr>
+          <tr><td><b>Use-case description</b></td><td>A text that combines and extends the two diagrams.</td><td>What exactly happens, in words?</td></tr>
+        </table></div>
+        <p>This week we study only the first model, the use-case diagram. Activity diagrams and use-case descriptions come in the next lecture. All three models can describe the <b>as-is</b> system (how the business works today) or the <b>to-be</b> system (the new system that we want to build).</p>
+
+        <h3><span class="n">3.2</span>What is a use case?</h3>
+        <p>A <b>use case</b> is a formal way of representing how a business system interacts with its environment. In simple words, it is <b>one function that the system offers to its users</b>: “Manage Appointments”, “Borrow Resource”, “Place Order”. A use case is a high-level overview of a business process. It shows how the user sees the process, and not the internal mechanisms that make it work.</p>
+        <p>Why do use cases matter so much? The textbook gives four reasons:</p>
+        <ol class="steps">
+          <li><b>Object-oriented development is use-case driven.</b> The use cases are the basis for the whole system.</li>
+          <li><b>They are the primary drivers for all UML diagrams.</b> Every later diagram shows the functionality of a use case from another point of view.</li>
+          <li><b>They are the foundation for testing.</b> Every use case, and every path through it, must be tested (Chapter 7).</li>
+          <li><b>They are the foundation for user-interface design.</b> Screens are designed to support use cases (Chapter 9).</li>
+        </ol>
+        <p>A use case can be drawn for the current system or for the new one. Figure 3.1 shows where the use-case diagram stands in the functional modeling process. It comes right after the requirements have been gathered and before the processes are modeled in detail. The process is <b>iterative</b>: when you draw activity diagrams, you may discover a missing use case and return to the diagram.</p>
+        <figure class="fig"><button data-zoom><img src="images/fig-3-1.png" alt="Five boxes in a row: 1 Gather needs, 2 Find use cases (highlighted, use-case diagram), 3 Model the process (activity diagrams), 4 Describe use cases, 5 Verify and validate. A curved arrow says iterate." loading="lazy" width="1200" height="333"></button><figcaption><b>Figure 3.1.</b> The functional modeling process. This week: step 2.</figcaption></figure>
+
+        <h3><span class="n">3.3</span>Logical models and physical models</h3>
+        <p>Use-case diagrams are <b>logical models</b>. A logical model describes <b>what</b> the business does, and gives no hint about <b>how</b> it is done. It is also called a <b>problem domain model</b>. A <b>physical model</b>, in contrast, describes how the work is carried out: by hand or by computer, on paper or on the Web, in a filing cabinet or in a database. Physical models are made later, in design.</p>
+        <div class="tblcap">Table 3.2 · Logical and physical statements about the same functions</div>
+        <div class="tbl"><table>
+          <tr><th>Function</th><th>Logical (analysis)</th><th>Physical (design)</th></tr>
+          <tr><td>Appointments</td><td>Record an appointment.</td><td>Save the appointment in the MySQL database.</td></tr>
+          <tr><td>Grades</td><td>Show grades to the student.</td><td>Display the grades on the web page of the portal.</td></tr>
+          <tr><td>Orders</td><td>Place an order.</td><td>Tap the green Order button in the mobile app.</td></tr>
+          <tr><td>Payments</td><td>Pay for the ride.</td><td>Charge the credit card through the payment API.</td></tr>
+        </table></div>
+        <p>Why start with the logical model? Because it lets the analyst and the user think about how the business should run <b>without being distracted by technology</b>. If a use case is called “Click the Save button”, it is already a physical statement. The correct name is a goal of the user, such as “Manage Appointments”.</p>
+
+        <h3><span class="n">3.4</span>Use case and scenario</h3>
+        <p>A use case describes one and only one function in which users interact with the system. But there are usually several ways to go through this function. Each possible path through a use case is called a <b>scenario</b>. A scenario is an <b>instance</b> of a use case, like an object is an instance of a class.</p>
+        <div class="tblcap">Table 3.3 · One use case and some of its scenarios</div>
+        <div class="tbl"><table>
+          <tr><th>Use case</th><th>Scenarios (paths through the use case)</th></tr>
+          <tr><td><b>Manage Appointments</b></td><td>A new patient makes an appointment. · An existing patient makes an appointment. · An existing patient changes an appointment. · An existing patient cancels an appointment.</td></tr>
+          <tr><td><b>Borrow Resource</b></td><td>A patron borrows an available book. · A patron tries to borrow a book that is out, and reserves it. · A patron asks for a book from another library.</td></tr>
+          <tr><td><b>Place Order</b></td><td>A customer orders and pays by card. · A customer orders and uses a coupon. · A customer's payment is refused.</td></tr>
+        </table></div>
+        <p>The diagram shows the use case <b>only once</b>. The scenarios are used later, in activity diagrams and in testing. They also explain why the textbook says that a good use case is not too small: “change an appointment” and “cancel an appointment” are scenarios of Manage Appointments, and not separate use cases.</p>
+        <div class="callout key"><span class="lbl">Key point</span>A use case is one function of the system, seen from the user's side. It is a logical model: it says <b>what</b>, not <b>how</b>. A scenario is one path through a use case.</div>
+      </section>
+
+      <section class="sec glass reveal" id="s4">
+        <h2><span class="n">04</span>Elements of a use-case diagram</h2>
+        <p>A use-case diagram has only a few kinds of elements: <b>actors</b>, <b>use cases</b>, a <b>subject boundary</b>, and the <b>relationships</b> between them. Figure 4.1 shows the symbols. The textbook gives the full syntax in Figure 3-1; our figure is a simplified version of it.</p>
+        <figure class="fig"><button data-zoom><img src="images/fig-4-1.png" alt="Use-case diagram syntax: stick-figure actor, <<actor>> rectangle for a system, oval use case, subject boundary box, association line, include and extend dashed arrows, generalization arrow with hollow triangle." loading="lazy" width="1200" height="627"></button><figcaption><b>Figure 4.1.</b> The syntax of a use-case diagram (simplified).</figcaption></figure>
+        <p>Figure 4.2 shows the first example of the textbook: the appointment system of a doctor's office. Three kinds of users are in the picture. <b>Patients</b> manage appointments, <b>doctors</b> record the times when they are available, and the <b>management</b> produces the schedule. We use this diagram, and the same system, in the following sections.</p>
+        <figure class="fig"><button data-zoom><img src="images/fig-4-2.png" alt="Appointment System: Patient connected to Manage Appointments, Doctor to Record Availability, Management to Produce Schedule." loading="lazy" width="1200" height="533"></button><figcaption><b>Figure 4.2.</b> Use-case diagram for the appointment system: 3 actors, 3 use cases.</figcaption></figure>
+
+        <h3><span class="n">4.1</span>Actors</h3>
+        <p>An actor is drawn as a <b>stick figure</b>. The most important thing to remember is that <b>an actor is a role, and not a specific person</b>. “Patient” is an actor. “Mary Wilson” is not. Think of the actor as a class, and of the real people as objects that can play this role. One person can play several roles (a teacher may also be a student of another course), and many persons can play the same role.</p>
+        <p>An actor can be:</p>
+        <ul>
+          <li>a <b>person (role)</b> who uses the system (patient, librarian, customer);</li>
+          <li><b>another system</b> that talks to our system (a payment service, a registrar's system). Such an actor can be drawn as a rectangle with the word <span class="st">&lt;&lt;actor&gt;&gt;</span> and the name of the system;</li>
+          <li>something that <b>gives input</b> to the system, <b>receives output</b> from it, or both.</li>
+        </ul>
+        <p>Actors are <b>always outside the system</b>. They are the principal elements of the environment in which the system works. Test yourself with Table 4.1.</p>
+        <div class="tblcap">Table 4.1 · Can it be an actor?</div>
+        <div class="tbl"><table>
+          <tr><th>Candidate</th><th>Actor?</th><th>Reason</th></tr>
+          <tr><td>Ms. Mary Smith</td><td class="no">No</td><td>A specific person. Her role, for example Customer, is the actor.</td></tr>
+          <tr><td>Customer</td><td class="y">Yes</td><td>A role that people play when they buy.</td></tr>
+          <tr><td>Internet customer</td><td class="y">Yes</td><td>A specialized role: a customer who buys over the Web.</td></tr>
+          <tr><td>Mr. John Seals</td><td class="no">No</td><td>A specific person, not a role.</td></tr>
+          <tr><td>Supplier</td><td class="y">Yes</td><td>A role: a company that delivers goods, or the system it uses.</td></tr>
+          <tr><td>Data entry clerk</td><td class="y">Yes</td><td>A role that enters data into the system.</td></tr>
+          <tr><td>Database administrator</td><td class="y">Yes</td><td>A role with its own goals (backup, access rights).</td></tr>
+          <tr><td>The customer's database</td><td class="no">No</td><td>Part of the system, not outside it.</td></tr>
+        </table></div>
+
+        <h3><span class="n">4.2</span>Specialized actors</h3>
+        <p>Sometimes an actor plays a specialized role of a more general actor. A <b>New Patient</b> is a kind of <b>Patient</b>, but there are things that only a new patient does, for example filling in a registration form. The specialized actor is connected to the general actor with a line that ends with a <b>hollow triangle, pointing at the general actor</b>. The specialized actor inherits everything that the general actor can do, and adds something of its own.</p>
+        <figure class="fig"><button data-zoom><img src="images/fig-4-3.png" alt="New Patient connected to Patient with a generalization arrow. Patient uses Manage Appointments; New Patient additionally uses one more use case." loading="lazy" width="1200" height="573"></button><figcaption><b>Figure 4.3.</b> A specialized actor. New Patient inherits the use cases of Patient and adds one.</figcaption></figure>
+
+        <h3><span class="n">4.3</span>Use cases and their names</h3>
+        <p>A use case is drawn as an <b>oval inside the boundary</b>. It is a major process that the system performs, and it <b>must benefit an actor</b>. If no actor profits from a use case, then it should not be on the diagram.</p>
+        <p>A use case is named with a short <b>verb–noun phrase</b>: Manage Appointments, Produce Schedule, Borrow Resource. The name says what the user wants to reach, and not which buttons the user presses.</p>
+        <div class="tblcap">Table 4.2 · Good and weak use case names</div>
+        <div class="tbl"><table>
+          <tr><th>Name</th><th>Good?</th><th>Comment</th></tr>
+          <tr><td>Produce Schedule</td><td class="y">Yes</td><td>Verb + noun, one goal of the management.</td></tr>
+          <tr><td>Borrow Resource</td><td class="y">Yes</td><td>A goal of the patron, at the right size.</td></tr>
+          <tr><td>Appointment</td><td class="no">No</td><td>A noun only. What happens with the appointment? Use Manage Appointments.</td></tr>
+          <tr><td>Click Save Button</td><td class="no">No</td><td>A physical step, not a goal.</td></tr>
+          <tr><td>Database Update</td><td class="no">No</td><td>A technical action inside the system, not seen by the actor.</td></tr>
+          <tr><td>Make Appointment and Pay and Print Receipt</td><td class="no">No</td><td>Three functions in one oval. Split it, or find a general name.</td></tr>
+          <tr><td>Do Things</td><td class="no">No</td><td>Too vague to be useful.</td></tr>
+        </table></div>
+
+        <h3><span class="n">4.4</span>Associations</h3>
+        <p>An <b>association</b> is a line between an actor and a use case. It shows that the actor takes part in this use case. Three rules help:</p>
+        <ul>
+          <li>Every association connects <b>one actor and one use case</b>. A line never connects two actors, and it never connects two use cases (use cases are connected with include, extend or generalization).</li>
+          <li>The line usually means <b>two-way communication</b>: the actor gives something to the system and gets something back. If the communication goes only one way, add a <b>solid arrowhead</b> to show the direction of the information.</li>
+          <li>The diagram <b>does not show order</b>. The lines do not say what happens first.</li>
+        </ul>
+
+        <h3><span class="n">4.5</span>The subject boundary</h3>
+        <p>The use cases are enclosed in a box, the <b>subject boundary</b>. The name of the subject (the system) is written in the box or on its top. The boundary defines the <b>scope</b>: what is inside the system and what is outside. Actors stand outside, use cases inside.</p>
+        <p>Where to draw the boundary is one of the hardest decisions. It can separate a software system from its environment, a subsystem from other subsystems, or a single process from the rest. In the appointment system, the doctor and the management use the system and stay outside. The textbook also discusses the <b>receptionist</b>, who talks to the patients in the doctor's office. The receptionist could be shown as an internal actor in an inner boundary. The textbook leaves the receptionist out, because <b>internal actors start to bring in implementation decisions</b>, and the receptionist is treated as part of the system. Expect the boundary to change during the project.</p>
+        <div class="callout key"><span class="lbl">Key point</span>Actors are roles <b>outside</b> the boundary, use cases are verb + noun goals <b>inside</b> it, and associations connect <b>one actor with one use case</b>.</div>
+      </section>
+
+      <section class="sec glass reveal" id="s5">
+        <h2><span class="n">05</span>Include, extend and generalization</h2>
+        <p>Sometimes a use case includes, extends or generalizes the functionality of another use case. The three relationships have different meanings, and <b>mixing them is the most common mistake</b> in use-case diagrams. To make diagrams easy to read, higher-level use cases are normally drawn above the lower-level ones.</p>
+
+        <h3><span class="n">5.1</span>Include</h3>
+        <p><span class="st">&lt;&lt;include&gt;&gt;</span> means <b>mandatory behavior</b> that several use cases share. When a use case always needs the same piece of work, we put this piece into its own use case, and the others include it. In the textbook, <b>Record Availability</b> and <b>Produce Schedule</b> both need routine work to maintain the doctor's schedule. This work is a separate use case, <b>Manage Schedule</b>, that both of them include.</p>
+        <p>The arrow is <b>dashed</b>, is labeled <span class="st">&lt;&lt;include&gt;&gt;</span>, and goes <b>from the base use case to the included use case</b>. In this example, the included use case is drawn below; its position is a layout choice. Reading rule: <i>“Record Availability always uses Manage Schedule.”</i></p>
+        <figure class="fig"><button data-zoom><img src="images/fig-5-1.png" alt="Produce Schedule and Record Availability both have dashed include arrows pointing down to Manage Schedule." loading="lazy" width="1200" height="507"></button><figcaption><b>Figure 5.1.</b> Include: two use cases share Manage Schedule.</figcaption></figure>
+
+        <h3><span class="n">5.2</span>Extend</h3>
+        <p><span class="st">&lt;&lt;extend&gt;&gt;</span> means <b>optional behavior</b> that happens only under some condition. The textbook example: each time a patient makes an appointment, the patient is asked to verify payment arrangements. Sometimes, however, it is necessary to make <i>new</i> payment arrangements. This happens rarely, so it is an extension of Manage Appointments, called <b>Make Payment Arrangements</b>.</p>
+        <p>The arrow is <b>dashed</b>, is labeled <span class="st">&lt;&lt;extend&gt;&gt;</span>, and goes <b>from the extension to the base use case</b>, so it points to Manage Appointments (upward in this example). Unlike include, it points from the extension toward the base. Reading rule: <i>“Make Payment Arrangements sometimes extends Manage Appointments.”</i> The base use case is complete without the extension.</p>
+        <figure class="fig"><button data-zoom><img src="images/fig-5-2.png" alt="Make Payment Arrangements has a dashed extend arrow pointing up to Manage Appointments." loading="lazy" width="1200" height="507"></button><figcaption><b>Figure 5.2.</b> Extend: an optional extension of the base use case.</figcaption></figure>
+
+        <h3><span class="n">5.3</span>Generalization</h3>
+        <p><b>Generalization</b> means <b>“is a kind of”</b>. A special use case inherits all the behavior of a general use case, and adds its own. In the textbook, Manage Appointments is specialized into <b>Make Old Patient Appt</b> and <b>Make New Patient Appt</b>. Both do everything that Manage Appointments does, and each adds something special. The arrow is a <b>solid line with a hollow triangle</b> at the general use case, and it goes <b>from the special to the general</b> use case.</p>
+        <figure class="fig"><button data-zoom><img src="images/fig-5-3.png" alt="Make Old Patient Appt and Make New Patient Appt both point with hollow-triangle arrows up to Manage Appointments." loading="lazy" width="1200" height="533"></button><figcaption><b>Figure 5.3.</b> Generalization: two special cases of Manage Appointments.</figcaption></figure>
+
+        <h3><span class="n">5.4</span>Choosing the right relationship</h3>
+        <p>When you are not sure which relationship to use, ask the question in Table 5.1. The lecture gives a short test: <b>always happens → include; sometimes happens → extend; is a kind of → generalization.</b></p>
+        <div class="tblcap">Table 5.1 · Include, extend and generalization compared</div>
+        <div class="tbl"><table>
+          <tr><th></th><th>&lt;&lt;include&gt;&gt;</th><th>&lt;&lt;extend&gt;&gt;</th><th>Generalization</th></tr>
+          <tr><td><b>Meaning</b></td><td>Always happens; shared behavior</td><td>Sometimes happens; optional</td><td>Is a kind of</td></tr>
+          <tr><td><b>Line</b></td><td>Dashed, open arrowhead</td><td>Dashed, open arrowhead</td><td>Solid, hollow triangle</td></tr>
+          <tr><td><b>Arrow goes</b></td><td>From base to included</td><td>From extension to base</td><td>From special to general</td></tr>
+          <tr><td><b>Test</b></td><td>Does the base need it every time?</td><td>Does it happen only under a condition?</td><td>Can I say “A is a kind of B”?</td></tr>
+          <tr><td><b>Example</b></td><td>Record Availability includes Manage Schedule</td><td>Make Payment Arrangements extends Manage Appointments</td><td>Make New Patient Appt is a kind of Manage Appointments</td></tr>
+        </table></div>
+        <p>Figure 5.4 puts all three relationships, and the specialized actors, into one diagram. This is the textbook's Figure 3-4 for the appointment system, redrawn. Read it slowly: find each arrow, say its meaning in a sentence, and check its direction. In this figure, include arrows point down and extend and generalization arrows point up. <b>These positions are layout choices, not UML rules.</b> Always follow the elements: <b>include: base → included; extend: extension → base; generalization: special → general.</b> Rotating or rearranging the diagram does not change those rules.</p>
+        <figure class="fig"><button data-zoom><img src="images/fig-5-4.png" alt="Full appointment system: Patient with specialized Old Patient and New Patient; Manage Appointments generalized into Make Old Patient Appt and Make New Patient Appt; Make Payment Arrangements extends Manage Appointments; Update Patient Information extends Make Old Patient Appt; Make New Patient Appt includes Create New Patient; Produce Schedule (Management) and Record Availability (Doctor) both include Manage Schedule." loading="lazy" width="1200" height="960"></button><figcaption><b>Figure 5.4.</b> The appointment system with include, extend, generalization and specialized actors.</figcaption></figure>
+
+        <h3><span class="n">5.5</span>Do not overuse the relationships</h3>
+        <p>Beginners often decorate diagrams with <span class="st">&lt;&lt;include&gt;&gt;</span> and <span class="st">&lt;&lt;extend&gt;&gt;</span> everywhere. This makes the diagram hard to read and moves it away from the user's view. Use a relationship only when it helps the reader. <b>A diagram with only actors, use cases and associations is a correct diagram.</b> In particular:</p>
+        <ul>
+          <li>do not split a use case into small steps and join the steps with <span class="st">&lt;&lt;include&gt;&gt;</span> (that is <b>functional decomposition</b>, not use-case modeling);</li>
+          <li>do not add an included use case such as “Log In” to every use case. If login matters, show it once, or leave it for the description;</li>
+          <li>do not use <span class="st">&lt;&lt;extend&gt;&gt;</span> for something that always happens.</li>
+        </ul>
+      </section>
+
+      <section class="sec glass reveal" id="s6">
+        <h2><span class="n">06</span>Identifying actors and major use cases</h2>
+        <h3><span class="n">6.1</span>The five steps</h3>
+        <p>The textbook recommends five steps to find the major use cases.</p>
+        <figure class="fig"><button data-zoom><img src="images/fig-6-1.png" alt="Five steps: review requirements, identify subject boundary, identify primary actors and goals, identify business processes and major use cases, review the current set." loading="lazy" width="1200" height="440"></button><figcaption><b>Figure 6.1.</b> The five steps that identify the major use cases.</figcaption></figure>
+        <ol class="steps">
+          <li><b>Review the requirements definition.</b> Read the requirements definition (Reading 4) or the story that describes the requirements. This gives you the whole picture of the business process.</li>
+          <li><b>Identify the subject boundary.</b> Decide what is in scope. It will probably change while you work.</li>
+          <li><b>Identify the primary actors and their goals.</b> The actors come from the list of stakeholders and users. The goals are the functions that the system must give the actor.</li>
+          <li><b>Identify the business processes and major use cases.</b> Write only the major use cases. Do not describe one use case completely now. Define acronyms and jargon, so that people from outside the user group can understand the use cases.</li>
+          <li><b>Review the current set of use cases.</b> Split some use cases, merge others, add new ones. Identifying use cases is iterative, and users often change their minds.</li>
+        </ol>
+
+        <h3><span class="n">6.2</span>Stakeholders, actors and goals</h3>
+        <p>A <b>stakeholder</b> is a person, group or organization that can affect the system or is affected by it. An <b>actor</b> is a role that a stakeholder or user plays: “doctor”, not “Dr. Jones”. <b>Not every stakeholder is an actor.</b> The sponsor who pays for the system may never touch it, so the sponsor is not an actor. The patient who books an appointment is both a stakeholder and an actor.</p>
+        <p>The <b>goals</b> of an actor are the functions that the system must offer for the system to be a success. To find them, ask three questions about every actor:</p>
+        <ol class="steps">
+          <li>Does the actor need to <b>create, read, update, delete or execute (CRUDE)</b> any information in the system?</li>
+          <li>Are there <b>external changes</b> that the actor must tell the system about?</li>
+          <li>Is there <b>information that the system should give</b> to the actor?</li>
+        </ol>
+        <div class="tblcap">Table 6.1 · The three questions applied to the appointment system</div>
+        <div class="tbl"><table>
+          <tr><th>Actor</th><th>CRUDE (information)</th><th>External changes</th><th>Information for the actor</th></tr>
+          <tr><td><b>Patient</b></td><td>Create, change and cancel an appointment.</td><td>Moves to another address; new insurance.</td><td>Confirmation of the appointment.</td></tr>
+          <tr><td><b>Doctor</b></td><td>Create and update availability.</td><td>Holiday; sick leave.</td><td>The list of today's patients.</td></tr>
+          <tr><td><b>Management</b></td><td>Read the schedule; execute the report.</td><td>A new doctor joins the office.</td><td>The weekly schedule.</td></tr>
+        </table></div>
+        <p>Each row of the table points to a use case: the patient's goals lead to <b>Manage Appointments</b>, the doctor's goals to <b>Record Availability</b>, and the management's goals to <b>Produce Schedule</b>. Steps 2 and 3 are intertwined: when you discover a new actor, you often discover that the boundary was too small or too large.</p>
+
+        <h3><span class="n">6.3</span>Clues in a story</h3>
+        <p>Most requirements come as text, so you need a way to read the text. A simple method is to look at the words. <b>Nouns that name a kind of user</b> are candidates for actors. <b>Verbs that describe a goal</b> are candidates for use cases.</p>
+        <div class="callout story"><span class="lbl">Story · University gym</span>At the university gym, members swipe a card at the entrance. A member can book a place in a group class and can cancel the booking. The trainer enters the attendance after every class. The manager prints a monthly report about the attendance. Payments of membership fees are handled by the bank's system.</div>
+        <div class="tblcap">Table 6.2 · Reading the gym story</div>
+        <div class="tbl"><table>
+          <tr><th>Clue in the text</th><th>Becomes</th><th>Comment</th></tr>
+          <tr><td>member, trainer, manager</td><td>Actors (people)</td><td>Roles. Everybody who uses the system is a member, trainer or manager.</td></tr>
+          <tr><td>the bank's system</td><td>Actor (system)</td><td>External system. Drawn as &lt;&lt;actor&gt;&gt; Bank System.</td></tr>
+          <tr><td>swipe a card</td><td>Use case: Enter Gym</td><td>Optional. It is in scope only if the new system controls the entrance.</td></tr>
+          <tr><td>book a place, cancel the booking</td><td>One use case: Manage Bookings</td><td>Two verbs, one goal, as in Manage Appointments.</td></tr>
+          <tr><td>enters the attendance</td><td>Use case: Record Attendance</td><td>A goal of the trainer.</td></tr>
+          <tr><td>prints a monthly report</td><td>Use case: Produce Attendance Report</td><td>A goal of the manager.</td></tr>
+          <tr><td>membership fees</td><td>Use case: Pay Membership Fee</td><td>The bank's system is associated with this use case.</td></tr>
+        </table></div>
+        <div class="callout warn"><span class="lbl">Warning</span>The text is only a clue. Not every noun is an actor and not every verb is a use case. Check each candidate: is it a role outside the system? Does the use case benefit an actor? Is it a goal and not a step?</div>
+
+        <h3><span class="n">6.4</span>The right size and number of use cases</h3>
+        <p>The hardest question is the size of a use case. We could have made “make an appointment”, “change an appointment” and “cancel an appointment” three separate use cases, but this would give a huge set of small ones. One use case, Manage Appointments, covers all of them.</p>
+        <ul>
+          <li><b>Too many</b> use cases probably means that the use cases are too small or that the boundary is too large.</li>
+          <li><b>Too few</b> use cases means that each use case is too large and complex, and the activity diagrams that describe them will be hard to read.</li>
+          <li>All use cases on one diagram should be on the <b>same level of abstraction</b>. Do not mix “Manage Appointments” with “Click Save Button”.</li>
+          <li>When the diagram becomes crowded, group the use cases into <b>packages</b> and draw one diagram per package.</li>
+        </ul>
+        <figure class="fig"><button data-zoom><img src="images/fig-6-2.png" alt="Left: too small, the use cases are steps (Enter patient name, Choose a date, Click the Save button, Show a message, Print the receipt). Right: right size, the use cases are goals (Manage Appointments, Record Availability, Produce Schedule)." loading="lazy" width="1200" height="533"></button><figcaption><b>Figure 6.2.</b> The same function drawn at the wrong and at the right level.</figcaption></figure>
+        <p>The right number depends on the complexity of the problem domain. Complexity can be moved between the number of use cases on the diagram and the detail in the activity diagrams. A useful rule of thumb for a classroom system: <b>five to fifteen use cases</b> on one diagram.</p>
+      </section>
+
+      <section class="sec glass reveal" id="s7">
+        <h2><span class="n">07</span>Drawing the diagram</h2>
+        <h3><span class="n">7.1</span>The four steps</h3>
+        <p>When the major use cases are known, drawing the diagram is easy. Only four kinds of things are drawn: use cases, actors, the boundary and associations.</p>
+        <ol class="steps">
+          <li><b>Place and draw the use cases.</b> Take them from the list of major use cases. Add include, extend and generalization relationships. There is no formal order, so arrange them for readability.</li>
+          <li><b>Place and draw the actors.</b> Put each actor near the use cases that it uses, so that fewer lines cross.</li>
+          <li><b>Draw the subject boundary.</b> It separates the use cases (the functions of the system) from the actors (the roles outside).</li>
+          <li><b>Add the associations.</b> Connect each actor with the use cases it takes part in.</li>
+        </ol>
+        <h3><span class="n">7.2</span>Layout tips</h3>
+        <ul>
+          <li><b>Minimize crossing lines.</b> Move the symbols until the diagram is easy to follow. Expect to redraw it several times.</li>
+          <li><b>People on the left, other systems on the right.</b> A habit, not a rule, but it makes diagrams easy to compare.</li>
+          <li>Draw the <b>higher-level use cases above</b> the lower-level ones.</li>
+          <li>Keep the diagram on <b>one page</b>. If it does not fit, use packages.</li>
+          <li>Give the diagram a <b>title</b>, which is the name of the subject.</li>
+        </ul>
+        <p>Remember that there are <b>many correct diagrams</b> for the same problem. Two students can draw different diagrams, and both can be right. Also remember: whenever a use case changes, check whether the diagram must change too.</p>
+        <h3><span class="n">7.3</span>A checklist for a finished diagram</h3>
+        <div class="tblcap">Table 7.1 · Checklist for a use-case diagram</div>
+        <div class="tbl"><table>
+          <tr><th>#</th><th>Check</th></tr>
+          <tr><td>1</td><td>The system has a name, and the boundary is drawn around the use cases.</td></tr>
+          <tr><td>2</td><td>Every actor is outside the boundary and is a role, not a person's name.</td></tr>
+          <tr><td>3</td><td>Every use case is inside the boundary and has a verb–noun name.</td></tr>
+          <tr><td>4</td><td>Every use case is connected to at least one actor, or is included or extended by another use case.</td></tr>
+          <tr><td>5</td><td>Every association connects exactly one actor with one use case.</td></tr>
+          <tr><td>6</td><td>The arrows of include, extend and generalization have the correct direction and label.</td></tr>
+          <tr><td>7</td><td>All use cases are at the same level of abstraction.</td></tr>
+          <tr><td>8</td><td>Nothing from the requirements is missing, and nothing is on the diagram that is not in the requirements.</td></tr>
+        </table></div>
+        <h3><span class="n">7.4</span>Drawing with diagrams.net</h3>
+        <p>In the lab you will draw your diagrams with <b>diagrams.net</b> (formerly draw.io). It is free, runs in the browser at <a href="https://app.diagrams.net" target="_blank" rel="noopener">app.diagrams.net</a>, and needs no installation or account. The first time you open it, choose where to save: <b>Device</b> saves the file on your computer. The shape library for use cases is called <b>UML</b>. Switch it on with <b>More Shapes</b> at the bottom of the left panel, tick <b>UML</b>, and click <b>Apply</b>. The library contains the actor, the use case oval, and the boundary (a container).</p>
+        <p>Two useful habits: save often as a <code>.drawio</code> file (this is the editable file), and at the end export the diagram as a PNG image with <b>File → Export as → PNG</b>. Always check the arrow direction and the label of every include and extend relationship, because <b>the tool will not check them for you</b>.</p>
+      </section>
+
+      <section class="sec glass reveal" id="s8">
+        <h2><span class="n">08</span>Worked examples</h2>
+        <p>This section is the heart of the reading. Each example gives a short story, the actors and use cases that we find in it, and the diagram. Read the story first, try to draw your own diagram on paper, and only then look at ours. Your diagram can be different and still be correct.</p>
+
+        <h3><span class="n">8.1</span>Online university registration</h3>
+        <p>This example comes from the practice slide of the lecture. We follow the five steps of Section 6.1 and the four steps of Section 7.1.</p>
+        <div class="callout story"><span class="lbl">Story</span>An online university registration system. Department staff examine, add, remove and change courses. Students examine courses, add and drop them, and view their enrollment. Department staff print reports. No student may take too many courses. Students with unpaid fees cannot register; the fees data belongs to the financial office.</div>
+        <ol class="steps">
+          <li><b>Review the requirements.</b> The story above is our requirements. It names the users and the functions.</li>
+          <li><b>Boundary.</b> The registration system is the subject. The financial office has its own system with the fees data, so that system is outside.</li>
+          <li><b>Actors and goals.</b> Student: examine courses, register (add and drop), view enrollment. Department staff: manage courses (examine, add, remove, change), print reports. Financial office: provides the fees data. It is an external system, so it is an <span class="st">&lt;&lt;actor&gt;&gt;</span> on the right.</li>
+          <li><b>Major use cases.</b> Browse Courses, Register for Courses (adding and dropping are two scenarios of one goal), View Enrollment, Manage Courses (examine, add, remove and change are CRUDE operations on courses), Print Reports. The two rules in the story become Check Fees and Check Course Load. Both are needed every time a student registers, so they are <b>included</b>.</li>
+          <li><b>Review.</b> Is “Drop Course” a separate use case? No, it is a scenario of Register for Courses. Do we need Log In? It is not in the story, so we leave it out.</li>
+        </ol>
+        <figure class="fig"><button data-zoom><img src="images/fig-8-1.png" alt="Online Registration System: Student uses Browse Courses, Register for Courses and View Enrollment; Register for Courses includes Check Fees and Check Course Load; Financial Office actor connected to Check Fees; Department Staff uses Manage Courses and Print Reports." loading="lazy" width="1200" height="853"></button><figcaption><b>Figure 8.1.</b> Online university registration: 3 actors, 7 use cases, 2 include relationships.</figcaption></figure>
+        <p>Why is Check Fees associated with the Financial Office? Because the financial office supplies the information that the use case needs. Notice that the Student is <b>not</b> connected to Check Fees: the student never starts it, because the system starts it by itself when the student registers.</p>
+
+        <h3><span class="n">8.2</span>Library management system</h3>
+        <p>This is the running example of the textbook (Figure 3-5). The analyst, Susan, found <b>two human actors, three external system actors and six use cases</b>. She first thought of “borrow books” and “return books”, but because the library also lends DVDs and CDs, she generalized them into <b>Borrow Resource</b> and <b>Return Resource</b>. If a resource is not available, the patron can reserve it or ask another library for it. These are optional <b>extensions</b> of Borrow Resource. Retiring a resource that is returned is an extension of Return Resource.</p>
+        <figure class="fig"><button data-zoom><img src="images/fig-8-2.png" alt="Library Management System: Patron uses Borrow Resource and Return Resource; Reserve Resource and Borrow from Another Library extend Borrow Resource; Retire Resource extends Return Resource; Librarian uses Procure Resource and Retire Resource; Registrar's System, Personnel System and Other Library connected to Borrow Resource." loading="lazy" width="1200" height="867"></button><figcaption><b>Figure 8.2.</b> Library Management System, redrawn from Figure 3-5 of the textbook.</figcaption></figure>
+        <ul>
+          <li><b>Actors:</b> Patron and Librarian (people); Registrar's System, Personnel System and Other Library (external systems — we assume that the Registrar's and Personnel Systems identify students and staff, and that Other Library supplies resources).</li>
+          <li><b>Use cases:</b> Borrow Resource, Return Resource, Reserve Resource, Borrow Resource from Another Library, Procure Resource, Retire Resource.</li>
+        </ul>
+        <div class="callout key"><span class="lbl">Lesson</span>A name change (book → resource) can make three use cases out of nine. Choose names at the right level of generality.</div>
+
+        <h3><span class="n">8.3</span>Online food ordering</h3>
+        <div class="callout story"><span class="lbl">Story</span>A customer chooses meals and places an order. To place an order the customer must pay, either by card or in cash on delivery; card payments are handled by an external payment service. If the customer has a coupon, the coupon can be applied during payment. The restaurant staff see the new orders and prepare them. The customer can follow the status of the order.</div>
+        <figure class="fig"><button data-zoom><img src="images/fig-8-3.png" alt="Food Ordering System: Customer uses Place Order and Track Order; Place Order includes Pay for Order; Apply Coupon extends Pay for Order; Restaurant Staff connected to Place Order; Payment Service actor connected to Pay for Order." loading="lazy" width="1200" height="693"></button><figcaption><b>Figure 8.3.</b> Food ordering: include and extend in the same diagram.</figcaption></figure>
+        <div class="tblcap">Table 8.1 · Decisions in the food ordering diagram</div>
+        <div class="tbl"><table>
+          <tr><th>Decision</th><th>Reason</th></tr>
+          <tr><td>Place Order <b>includes</b> Pay for Order</td><td>Every order must be paid, so payment is mandatory: include.</td></tr>
+          <tr><td>Apply Coupon <b>extends</b> Pay for Order</td><td>Only some customers have a coupon. It is optional: extend, with the arrow pointing to the base.</td></tr>
+          <tr><td>Payment Service is an &lt;&lt;actor&gt;&gt;</td><td>It is an external system that takes part in payment.</td></tr>
+          <tr><td>“Prepare Meal” is not a use case</td><td>Cooking happens in the kitchen, outside the system. The staff are connected to Place Order only because they receive the order. A real project would probably add a use case for them, such as Manage Orders.</td></tr>
+          <tr><td>“Choose Meals” is not a use case</td><td>It is a step inside Place Order, not a separate goal.</td></tr>
+        </table></div>
+
+        <h3><span class="n">8.4</span>Hotel reservation</h3>
+        <div class="callout story"><span class="lbl">Story</span>Anybody can search for free rooms and book a room. Guests who have an account (registered guests) can also see the history of their bookings. At arrival the receptionist checks the guest in. At departure the receptionist checks the guest out, and the bill is paid through the bank's payment service.</div>
+        <figure class="fig"><button data-zoom><img src="images/fig-8-4.png" alt="Hotel Reservation System: Guest uses Search Rooms and Book Room; Registered Guest specializes Guest and uses View Booking History; Receptionist uses Check In Guest and Check Out Guest; Payment Service connected to Check Out Guest." loading="lazy" width="1200" height="747"></button><figcaption><b>Figure 8.4.</b> Hotel reservation: a specialized actor and an external payment service.</figcaption></figure>
+        <ul>
+          <li><b>Guest</b> is the general actor. <b>Registered Guest</b> is a specialized actor: it inherits Search Rooms and Book Room and adds View Booking History. This is simpler than drawing three lines from Registered Guest.</li>
+          <li><b>Receptionist</b> is a different role, even if the hotel's staff may also book rooms for guests by phone. If they do, add the line from Receptionist to Book Room.</li>
+          <li><b>Check In Guest</b> and <b>Check Out Guest</b> are two use cases, because they happen at different times and have different results. This is different from “change” and “cancel” in the appointment example: there they are two paths through the same goal.</li>
+        </ul>
+
+        <h3><span class="n">8.5</span>IBU Exam Portal</h3>
+        <p>This is the project of the Week 4 lab. Students see their exam grades online, teachers enter the grades of their courses, and the student affairs office checks and publishes them.</p>
+        <figure class="fig"><button data-zoom><img src="images/fig-8-5.png" alt="IBU Exam Portal: Student uses View Grades and Download Transcript; Teacher uses Enter Grades; Student Affairs Office uses Publish Grades." loading="lazy" width="1200" height="693"></button><figcaption><b>Figure 8.5.</b> IBU Exam Portal: three actors, four use cases.</figcaption></figure>
+        <p>This diagram is simple and correct. Think about the questions that an analyst would ask the client. <b>Can a student download a transcript?</b> That adds one use case, as in the figure. <b>Who sees the grades before they are published?</b> Only the teacher and the student affairs office: this is a <b>nonfunctional requirement</b> (security), and not a new use case. <b>Do teachers also correct grades?</b> Probably yes, but it is part of Enter Grades (the textbook would say: it is a scenario).</p>
+
+        <h3><span class="n">8.6</span>Bike sharing system</h3>
+        <div class="callout story"><span class="lbl">Story</span>A rider unlocks a bike at a station and returns it to any station. When a bike is returned, the ride is paid through an external payment service. If the rider notices that the bike is damaged, the rider can report the damage when returning it. The maintenance worker repairs the damaged bikes.</div>
+        <figure class="fig"><button data-zoom><img src="images/fig-8-6.png" alt="Bike Sharing System: Rider uses Unlock Bike and Return Bike; Return Bike includes Pay for Ride; Report Damaged Bike extends Return Bike; Payment Service connected to Pay for Ride; Maintenance Worker uses Repair Bike." loading="lazy" width="1200" height="747"></button><figcaption><b>Figure 8.6.</b> Bike sharing: include, extend and an external actor.</figcaption></figure>
+        <ul>
+          <li>Return Bike <b>includes</b> Pay for Ride: a ride is always paid.</li>
+          <li>Report Damaged Bike <b>extends</b> Return Bike: it happens only when the bike is damaged.</li>
+          <li>Repair Bike has <b>no relationship</b> to the other use cases. It is a separate goal of the maintenance worker. It is connected with the rest only through the data (the damage report), and the diagram does not show data.</li>
+        </ul>
+
+        <h3><span class="n">8.7</span>Comparing the examples</h3>
+        <div class="tblcap">Table 8.2 · Summary of the worked examples</div>
+        <div class="tbl"><table>
+          <tr><th>System</th><th>Actors</th><th>Use cases</th><th>Relationships used</th></tr>
+          <tr><td>Appointment system (Fig. 5.4)</td><td>Patient (Old, New), Doctor, Management</td><td>9</td><td>extend, include, generalization (use cases and actors)</td></tr>
+          <tr><td>Online registration</td><td>Student, Dept. Staff, Financial Office</td><td>7</td><td>include</td></tr>
+          <tr><td>Library (Fig. 3-5)</td><td>Patron, Librarian, 3 external systems</td><td>6</td><td>extend</td></tr>
+          <tr><td>Food ordering</td><td>Customer, Restaurant Staff, Payment Service</td><td>4</td><td>include, extend</td></tr>
+          <tr><td>Hotel reservation</td><td>Guest (Registered), Receptionist, Payment Service</td><td>5</td><td>generalization (actors)</td></tr>
+          <tr><td>IBU Exam Portal</td><td>Student, Teacher, Student Affairs</td><td>4</td><td>none</td></tr>
+          <tr><td>Bike sharing</td><td>Rider, Maintenance Worker, Payment Service</td><td>5</td><td>include, extend</td></tr>
+        </table></div>
+        <p>Notice what the examples have in common. Every use case is a goal of an actor. The examples have between four and nine use cases (see Table 8.2); keep user goals at a consistent level of abstraction. External systems are shown as actors. The relationships are used only where they make the diagram clearer.</p>
+
+        <h3><span class="n">8.8</span>Your turn: Campus Housing Service</h3>
+        <div class="callout"><span class="lbl">Exercise · Lab Task 7</span>The Campus Housing Service (CHS) helps students to find a place to live. Jane, a student, asks Emma, a CHS employee, to find an apartment for the next year. CHS keeps information about rental units, arranges visits to the units, helps the student to sign a lease with the owner, and makes sure that the information about the available units is up to date. The owners and managers of the units supply this information. Use the five steps of Section 6.1 to find the actors and major use cases, and draw the diagram.</div>
+      </section>
+
+      <section class="sec glass reveal" id="s9">
+        <h2><span class="n">09</span>Common mistakes</h2>
+        <p>Most diagrams that students draw for the first time contain some of these mistakes. Use the table as a review list before you submit a diagram.</p>
+        <div class="tblcap">Table 9.1 · Common mistakes in use-case diagrams and how to repair them</div>
+        <div class="tbl"><table>
+          <tr><th>Mistake</th><th>Why it is wrong</th><th>Repair</th></tr>
+          <tr><td>A person's name as actor (“Mary”).</td><td>An actor is a role.</td><td>Use the role: Patient.</td></tr>
+          <tr><td>An actor inside the boundary.</td><td>Actors are outside the system.</td><td>Move the actor out. Draw the boundary around the use cases only.</td></tr>
+          <tr><td>A line between two actors, or between two use cases.</td><td>An association connects one actor and one use case.</td><td>Use include, extend or generalization between use cases. Use generalization between actors.</td></tr>
+          <tr><td>Include and extend arrows in the wrong direction.</td><td>Include goes from base to included; extend goes from the extension to the base.</td><td>Reverse the arrow and check the label.</td></tr>
+          <tr><td>Extend used for a step that always happens.</td><td>Extend is optional behavior.</td><td>Use include, or make it part of the base use case.</td></tr>
+          <tr><td>Use cases like “Click OK” or “Save to database”.</td><td>They are physical steps, not goals.</td><td>Rename at the level of the user's goal.</td></tr>
+          <tr><td>Too many use cases (30 and more).</td><td>The level is too low or the boundary too large.</td><td>Merge small ones; use packages.</td></tr>
+          <tr><td>Use cases with no actor.</td><td>A use case must benefit an actor.</td><td>Find the actor, or remove the use case.</td></tr>
+          <tr><td>The diagram shows order or flow (arrows from step to step).</td><td>A use-case diagram has no sequence.</td><td>Put the flow into an activity diagram.</td></tr>
+          <tr><td>“System” or “User” as the only actor.</td><td>Too general; different users have different goals.</td><td>Find the specific roles.</td></tr>
+        </table></div>
+        <div class="callout key"><span class="lbl">Remember</span>A use-case diagram is a tool for conversation. If the client looks at your diagram and cannot say what the system does, redraw it, even if every symbol is formally correct.</div>
+      </section>
+
+      <section class="sec glass reveal" id="s10">
+        <h2><span class="n">10</span>Key takeaways</h2>
+        <ul class="takeaways">
+          <li>A use case is one function of the system, seen from the user's side. It is a logical model: <b>what, not how</b>.</li>
+          <li>An actor is a <b>role</b>, not a specific person. It can be a person or another system, and it stays <b>outside</b> the boundary.</li>
+          <li>A use case is an <b>oval</b> with a <b>verb–noun</b> name, and it must benefit an actor.</li>
+          <li>Every association connects <b>one actor and one use case</b>.</li>
+          <li><b>Include</b>: always happens. <b>Extend</b>: sometimes happens. <b>Generalization</b>: is a kind of. Learn the direction of each arrow.</li>
+          <li>The subject boundary shows the <b>scope</b>, and it will change during the project.</li>
+          <li>Find the major use cases at the same level in <b>five steps</b>; draw the diagram in <b>four steps</b>.</li>
+          <li>There are many correct diagrams for the same problem. Check them against the <b>requirements</b>, not against one model solution.</li>
+        </ul>
+      </section>
+
+      <div class="end-cta glass reveal">
+        <div><h3>Ready to test yourself?</h3><p class="muted" style="margin:4px 0 0">Every question has five options and only one correct answer.</p></div>
+        <button class="btn primary" data-go="quiz">Start the quiz →</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ======================= QUIZ ======================= -->
+<section id="view-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+  <div class="quiz">
+    <!-- setup -->
+    <div class="qcard glass" id="q-setup">
+      <div class="eyebrow"><span><i class="dot"></i>Reading 05 · Quiz</span></div>
+      <h2>Use Cases and Use Case Diagrams</h2>
+      <p class="muted" style="margin:0">Five options per question, one correct. Options are shuffled every time. You see the explanation right after you answer.</p>
+      <div>
+        <span class="label">How many questions?</span>
+        <div class="seg" id="count-seg"></div>
+      </div>
+      <div>
+        <div class="row between"><span class="label">Topics</span><button class="chip" id="all-topics" aria-pressed="true">All topics</button></div>
+        <div class="seg" id="topic-seg"></div>
+      </div>
+      <div class="row between">
+        <span class="best muted" id="best"></span>
+        <button class="btn primary" id="start">Start quiz →</button>
+      </div>
+      <p class="hint">Keyboard: <kbd>1</kbd>–<kbd>5</kbd> or <kbd>A</kbd>–<kbd>E</kbd> to answer, <kbd>Enter</kbd> for the next question.</p>
+    </div>
+
+    <!-- question -->
+    <div class="qcard glass" id="q-play" hidden>
+      <div class="qhead">
+        <span class="counter" id="q-counter"></span>
+        <span class="tag" id="q-topic"></span>
+        <span class="live" id="q-live"></span>
+      </div>
+      <div class="qbar"><i id="q-bar"></i></div>
+      <p class="question" id="q-text"></p>
+      <ul class="opts" id="q-opts"></ul>
+      <div id="q-explain" hidden></div>
+      <div class="row between">
+        <button class="btn" id="q-quit">✕ End quiz</button>
+        <button class="btn primary" id="q-next" disabled>Next →</button>
+      </div>
+    </div>
+
+    <!-- results -->
+    <div class="qcard glass" id="q-result" hidden>
+      <div class="result-top">
+        <div class="ring" id="r-ring"><div><span><b id="r-pct">0%</b><br><small id="r-raw"></small></span></div></div>
+        <div style="flex:1; min-width:220px">
+          <h2 id="r-title"></h2>
+          <p class="muted" id="r-msg" style="margin:6px 0 0"></p>
+        </div>
+      </div>
+      <div><span class="label">By topic</span><div class="topics" id="r-topics"></div></div>
+      <div class="row">
+        <button class="btn primary" id="r-retry">Retry mistakes</button>
+        <button class="btn" id="r-new">New quiz</button>
+        <button class="btn" data-go="read">Back to reading</button>
+      </div>
+      <div id="r-review-wrap"><span class="label">Your mistakes</span><div class="review" id="r-review"></div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<footer>IT 2002 · System Analysis and Design · International Burch University · 2026/2027 · <a href="../../index.html">All courses</a></footer>
+
+<dialog class="lb" id="lb"><button aria-label="Close" id="lb-close">✕</button><img id="lb-img" alt=""><p id="lb-cap"></p></dialog>
+
+<script>
+/* ---------------- theme ---------------- */
+const root = document.documentElement;
+const store = {
+  get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } },
+  set(k,v){ try{ localStorage.setItem(k,v) }catch(e){} },
+  remove(k){ try{ localStorage.removeItem(k) }catch(e){} }
+};
+const savedTheme = store.get("ibu-theme");
+if (savedTheme) root.dataset.theme = savedTheme;
+document.getElementById("theme").onclick = () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  store.set("ibu-theme", root.dataset.theme);
+  readShapeColor();
+};
+
+/* ---------------- background shapes ---------------- */
+const cv = document.getElementById("shapes"), cx = cv.getContext("2d");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let W=0, H=0, DPR=1, shapes=[], shapeRGB="150,175,255";
+function readShapeColor(){ shapeRGB = getComputedStyle(root).getPropertyValue("--shape").trim() || "150,175,255"; }
+function resize(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W*DPR; cv.height = H*DPR; cx.setTransform(DPR,0,0,DPR,0,0);
+  const n = Math.round(Math.min(26, Math.max(10, W*H/60000)));
+  while (shapes.length < n) shapes.push(makeShape());
+  shapes.length = n;
+}
+const KINDS = ["oval","oval","oval","actor","actor","box","dash"];
+function makeShape(){
+  const s = 0.6 + Math.random()*0.9;
+  return { k:KINDS[Math.random()*KINDS.length|0], x:Math.random()*W, y:Math.random()*H,
+    vx:(Math.random()-.5)*.22, vy:(Math.random()-.5)*.22, r:Math.random()*6.28, vr:(Math.random()-.5)*.0016,
+    s, a:.20 + Math.random()*.22, ph:Math.random()*6.28 };
+}
+function drawShape(o,t){
+  cx.save(); cx.translate(o.x,o.y); cx.rotate(o.r); cx.scale(o.s,o.s);
+  const a = o.a * (0.75 + 0.25*Math.sin(t*0.0006 + o.ph));
+  cx.strokeStyle = `rgba(${shapeRGB},${a})`; cx.lineWidth = 1.6/o.s; cx.setLineDash([]);
+  if (o.k==="oval"){ cx.beginPath(); cx.ellipse(0,0,46,18,0,0,6.283); cx.stroke();
+    cx.fillStyle=`rgba(${shapeRGB},${a*0.18})`; cx.fill(); }
+  else if (o.k==="actor"){ cx.beginPath(); cx.arc(0,-22,7,0,6.283); cx.moveTo(0,-15); cx.lineTo(0,6);
+    cx.moveTo(-12,-8); cx.lineTo(12,-8); cx.moveTo(0,6); cx.lineTo(-9,20); cx.moveTo(0,6); cx.lineTo(9,20); cx.stroke(); }
+  else if (o.k==="box"){ cx.strokeRect(-36,-24,72,48); cx.font="9px ui-monospace,monospace"; cx.fillStyle=`rgba(${shapeRGB},${a})`; cx.textAlign="center"; cx.fillText("<<actor>>",0,-8); }
+  else { cx.setLineDash([6,5]); cx.beginPath(); cx.moveTo(-40,0); cx.lineTo(34,0); cx.stroke(); cx.setLineDash([]);
+    cx.beginPath(); cx.moveTo(26,-6); cx.lineTo(36,0); cx.lineTo(26,6); cx.stroke(); }
+  cx.restore();
+}
+function frame(t){
+  cx.clearRect(0,0,W,H);
+  // association lines between nearby shapes
+  for (let i=0;i<shapes.length;i++) for (let j=i+1;j<shapes.length;j++){
+    const p=shapes[i], q=shapes[j], dx=p.x-q.x, dy=p.y-q.y, d=Math.hypot(dx,dy);
+    if (d<200){ cx.strokeStyle=`rgba(${shapeRGB},${(1-d/200)*0.16})`; cx.lineWidth=1; cx.beginPath(); cx.moveTo(p.x,p.y); cx.lineTo(q.x,q.y); cx.stroke(); }
+  }
+  for (const o of shapes){
+    if (!reduce){ o.x+=o.vx; o.y+=o.vy; o.r+=o.vr;
+      if (o.x<-80) o.x=W+80; if (o.x>W+80) o.x=-80; if (o.y<-80) o.y=H+80; if (o.y>H+80) o.y=-80; }
+    drawShape(o,t);
+  }
+  if (!reduce) requestAnimationFrame(frame);
+}
+readShapeColor(); resize(); addEventListener("resize", resize);
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", readShapeColor);
+requestAnimationFrame(frame);
+
+/* ---------------- views ---------------- */
+const views = { read:document.getElementById("view-read"), quiz:document.getElementById("view-quiz") };
+const tabs = { read:document.getElementById("tab-read"), quiz:document.getElementById("tab-quiz") };
+function show(v, push=true){
+  for (const k in views){ views[k].hidden = k!==v; tabs[k].setAttribute("aria-selected", k===v); }
+  if (push) history.replaceState(null, "", v==="quiz" ? "#quiz" : location.pathname + location.search);
+  scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+  updateProgress();
+}
+tabs.read.onclick = () => show("read"); tabs.quiz.onclick = () => show("quiz");
+document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g){ e.preventDefault(); show(g.dataset.go); } });
+
+/* reading progress + toc highlight */
+const bar = document.getElementById("progress");
+if (location.hash === "#quiz") show("quiz", false);
+function updateProgress(){
+  const h = document.documentElement.scrollHeight - innerHeight;
+  bar.style.width = (views.read.hidden ? 0 : Math.min(100, Math.max(0, scrollY / (h||1) * 100))) + "%";
+}
+addEventListener("scroll", updateProgress, {passive:true});
+const tocLinks = [...document.querySelectorAll("#toc a")];
+const secObs = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting){ tocLinks.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#"+e.target.id)); }
+}), {rootMargin:"-40% 0px -55% 0px"});
+document.querySelectorAll(".sec").forEach(s => secObs.observe(s));
+const revObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add("in"); revObs.unobserve(e.target); } }), {rootMargin:"0px 0px -8% 0px"});
+document.querySelectorAll(".reveal").forEach(s => revObs.observe(s));
+
+/* lightbox */
+const lb = document.getElementById("lb");
+document.querySelectorAll("[data-zoom]").forEach(b => b.onclick = () => {
+  const img = b.querySelector("img"), cap = b.closest("figure").querySelector("figcaption");
+  document.getElementById("lb-img").src = img.src; document.getElementById("lb-img").alt = img.alt;
+  document.getElementById("lb-cap").textContent = cap ? cap.textContent : "";
+  lb.showModal();
+});
+document.getElementById("lb-close").onclick = () => lb.close();
+lb.addEventListener("click", e => { if (e.target === lb) lb.close(); });
+
+/* ---------------- quiz data ---------------- */
+function Q(t,q,a,w,e){ return {t,q,a,w,e}; }
+const T = {
+ "fm": "Functional models",
+ "uc": "Use cases & scenarios",
+ "lp": "Logical vs physical",
+ "ac": "Actors",
+ "nm": "Names & associations",
+ "bd": "Subject boundary",
+ "rel": "Include / extend / generalization",
+ "find": "Finding use cases",
+ "size": "Size of use cases",
+ "draw": "Drawing the diagram",
+ "ex": "Worked examples",
+ "mis": "Common mistakes"
+};
+// Q(topic, question, correct answer, [4 wrong answers], explanation); options are shuffled at run time.
+const QUESTIONS = [
+Q("fm",
+ "Why does the reading say that a requirements definition alone is not enough?",
+ "A numbered list is hard to see as a whole; a one-page picture is easier for users to read.",
+ ["A requirements definition is a technical document that only the programmers are allowed to read.",
+  "A requirements definition may only contain nonfunctional requirements, never functional ones.",
+  "A list of requirements already shows the order of steps, and a picture is needed to hide that order.",
+  "A requirements definition is written after the system is built, so it always comes too late."],
+ "A client who reads forty numbered sentences cannot easily say \"Yes, this is the system I want.\" The use-case diagram is a picture of the whole system on one page, readable without special training."),
+Q("fm",
+ "Which two things does a use-case diagram show?",
+ "Who uses the system (actors) and what the system does for them (use cases).",
+ ["Which data the system stores and which screens display that data.",
+  "The classes of the system and the objects created from them.",
+  "The steps of each business process and the order in which they happen.",
+  "The hardware the system runs on and the software installed on it."],
+ "Actors = who uses the system; use cases = what the system does for them. The diagram is simple on purpose."),
+Q("fm",
+ "When is the use-case diagram usually drawn?",
+ "Early, while requirements are still being gathered.",
+ ["After the programming is finished, to document the code.",
+  "Only after all activity diagrams and descriptions are complete.",
+  "During testing, so the testers know which buttons to press.",
+  "At deployment, when the system is installed for the users."],
+ "It is drawn early, during requirements gathering, and is a very good tool for the conversation between the analyst and the client."),
+Q("fm",
+ "Which functional model shows the activities inside ONE business process and the order in which they happen?",
+ "Activity diagram",
+ ["Use-case diagram",
+  "Use-case description",
+  "Requirements definition",
+  "Subject boundary diagram"],
+ "The activity diagram answers \"What happens, step by step?\". The use-case diagram does not show order."),
+Q("fm",
+ "Which functional model is described as \"a text that combines and extends the two diagrams\"?",
+ "Use-case description",
+ ["Activity diagram",
+  "Use-case diagram",
+  "Requirements definition",
+  "Scenario diagram"],
+ "The use-case description answers \"What exactly happens, in words?\" It comes in the next lecture together with activity diagrams."),
+Q("fm",
+ "What does a functional model describe?",
+ "The external (functional) view: how users see the system, not how it works inside.",
+ ["The internal view: how the program code and the database work together.",
+  "The physical view: which computers and networks run the system.",
+  "The project view: how much the system costs and how long it takes.",
+  "The data view: which tables the database contains and how they are linked."],
+ "A functional model describes business processes and how the information system interacts with its environment, from the users' side."),
+Q("fm",
+ "A model that shows how the business works TODAY describes the…",
+ "as-is system",
+ ["to-be system",
+  "physical system",
+  "internal system",
+  "target system"],
+ "All three functional models can describe the as-is system (today) or the to-be system (the new system we want to build)."),
+Q("fm",
+ "Which of these is NOT one of the textbook's four reasons why use cases matter?",
+ "They define the database tables and the primary keys.",
+ ["Object-oriented development is use-case driven.",
+  "They are the primary drivers for all UML diagrams.",
+  "They are the foundation for testing every path.",
+  "They are the foundation for user-interface design."],
+ "The four reasons: OO development is use-case driven; use cases drive all UML diagrams; they are the basis for testing (Ch. 7); and for UI design (Ch. 9). Database tables are not mentioned."),
+Q("fm",
+ "In the functional modeling process (Figure 3.1), where does finding use cases stand?",
+ "After the needs are gathered, before activity diagrams.",
+ ["Before the needs are gathered, as the very first step of the project.",
+  "After the use-case descriptions are written, just before verification.",
+  "At the very end, after walkthroughs have validated all the models.",
+  "In parallel with programming, after the design has been finished."],
+ "1. Gather needs → 2. Find use cases (use-case diagram) → 3. Model the process (activity diagrams) → 4. Describe use cases → 5. Verify and validate."),
+Q("fm",
+ "The functional modeling process is iterative. What does that mean in practice?",
+ "Drawing activity diagrams may reveal a missing use case, so you go back to the use-case diagram.",
+ ["Every step is done exactly once and in strict order, and the earlier steps are frozen afterwards.",
+  "The use-case diagram is redrawn only once, after the whole system has been programmed and tested.",
+  "Iteration happens only in testing; the analysis models are never changed after they are approved.",
+  "Users may not change their minds once the first version of the diagram has been signed by them."],
+ "Any step can send you back to an earlier one. Identifying use cases is iterative too."),
+Q("uc",
+ "Which is the best definition of a use case?",
+ "One function the system offers its users, seen from the user's side.",
+ ["One screen of the user interface together with all of its buttons and fields.",
+  "One table of the database together with the operations that change its rows.",
+  "One method in the program code that runs when the user presses a button.",
+  "One single step of a process, such as typing a name or clicking a button."],
+ "A use case is a formal way to represent how a business system interacts with its environment, e.g. Manage Appointments, Borrow Resource, Place Order."),
+Q("uc",
+ "What is a scenario?",
+ "One possible path through a use case (an instance of it).",
+ ["A group of related use cases placed in the same package.",
+  "The role that a person plays when using the system.",
+  "A test of the database performed before the system goes live.",
+  "A separate use case drawn for every button in the interface."],
+ "A use case usually has several ways to go through it. Each path is a scenario — an instance of the use case."),
+Q("uc",
+ "A scenario relates to a use case in the same way that…",
+ "an object relates to a class.",
+ ["a class relates to an object.",
+  "an actor relates to the subject boundary.",
+  "a package relates to a diagram.",
+  "an attribute relates to a method."],
+ "A scenario is an instance of a use case, just as an object is an instance of a class."),
+Q("uc",
+ "\"An existing patient cancels an appointment.\" How should this be modeled?",
+ "As a scenario of the use case Manage Appointments.",
+ ["As a separate use case called Cancel Appointment on the diagram.",
+  "As a specialized actor called Cancelling Patient.",
+  "As an <<include>> use case of Manage Appointments that always happens.",
+  "As a physical model that is left for the design phase."],
+ "Making, changing and cancelling an appointment are scenarios (paths) of one goal: Manage Appointments. Separate ovals would give a huge set of tiny use cases."),
+Q("uc",
+ "A use case has six different scenarios. How many times does it appear on the use-case diagram?",
+ "Once",
+ ["Six times",
+  "Once per actor",
+  "Twice",
+  "Never"],
+ "The diagram shows the use case only once. Scenarios are used later, in activity diagrams and in testing."),
+Q("uc",
+ "Where are the scenarios of a use case used later in the project?",
+ "In activity diagrams and in testing.",
+ ["Only in the database design.",
+  "Nowhere; they are discarded once the diagram is drawn.",
+  "As separate ovals on the use-case diagram.",
+  "In the hardware specification of the system."],
+ "Every use case, and every path through it, must be tested (Chapter 7). Activity diagrams also show the different paths."),
+Q("lp",
+ "Use-case diagrams are…",
+ "logical models: they say what the business does, not how.",
+ ["physical models: they show how the work is done by computer.",
+  "implementation models: they show the program structure.",
+  "deployment models: they show where the software is installed.",
+  "data models: they show which tables the database contains."],
+ "A logical model describes what the business does and gives no hint about how it is done."),
+Q("lp",
+ "Another name for a logical model is…",
+ "problem domain model",
+ ["solution domain model",
+  "implementation model",
+  "deployment model",
+  "technical model"],
+ "A logical model is also called a problem domain model. Physical models come later, in design."),
+Q("lp",
+ "Which statement is PHYSICAL (design) rather than logical (analysis)?",
+ "Save the appointment in the MySQL database.",
+ ["Record an appointment for the patient.",
+  "Show the grades to the student.",
+  "Place an order for a meal.",
+  "Pay for the ride when it ends."],
+ "Naming a technology (MySQL, a web page, a mobile button, a payment API) makes a statement physical."),
+Q("lp",
+ "Which statement is LOGICAL (analysis)?",
+ "Pay for the ride at the end of the trip.",
+ ["Charge the card through the payment API.",
+  "Tap the green Order button in the app.",
+  "Display the grades on the portal page.",
+  "Save the appointment in MySQL."],
+ "\"Pay for the ride\" says what happens. The others say how it is done with specific technology."),
+Q("lp",
+ "Why do analysts start with the logical model?",
+ "So analyst and user can think about the business without being distracted by technology.",
+ ["Because logical models already contain the final screen layouts that the users will see.",
+  "Because UML forbids drawing physical models until the system has been fully programmed.",
+  "Because logical models describe the database tables, which must be designed before anything else.",
+  "Because physical models can only be drawn by the users themselves, never by the analysts."],
+ "Physical models (how: by hand or computer, paper or Web, filing cabinet or database) are made later, in design."),
+Q("lp",
+ "An analyst names a use case \"Click the Save Button\". What is the problem?",
+ "It is a physical step, not a user goal.",
+ ["The name is too long; a use case name must be one word.",
+  "The name must start with a noun, not with a verb.",
+  "Buttons must be shown as actors, not as use cases.",
+  "It should be an <<extend>> because saving is optional."],
+ "A use case name states the goal the user wants to reach, not which buttons the user presses."),
+Q("ac",
+ "Which four kinds of elements does a use-case diagram contain?",
+ "Actors, use cases, a subject boundary and relationships",
+ ["Classes, objects, attributes, methods and the relationships between them",
+  "Actors, screens, database tables and printed reports",
+  "Activities, decisions, forks, joins and swimlanes",
+  "Use cases, scenarios, test cases and packages"],
+ "A use-case diagram has only a few kinds of elements: actors, use cases, the subject boundary, and the relationships between them."),
+Q("ac",
+ "What is the MOST important thing to remember about an actor?",
+ "An actor is a role, not a specific person.",
+ ["An actor is always a human being, never a computer system.",
+  "An actor is always drawn inside the subject boundary.",
+  "Every actor must be connected to every use case.",
+  "An actor is a specific employee identified by name."],
+ "\"Patient\" is an actor; \"Mary Wilson\" is not. Think of the actor as a class and real people as objects that play the role."),
+Q("ac",
+ "Can \"Ms. Mary Smith\" be an actor?",
+ "No — she is a specific person; her role (e.g. Customer) is the actor.",
+ ["Yes — she uses the system, so she must be drawn as an actor on the diagram.",
+  "Yes — but only if she is the one and only customer of the whole system.",
+  "No — actors can only be external computer systems, never people at all.",
+  "Yes — as long as she is drawn as a rectangle with the word <<actor>>."],
+ "Names of people are never actors. Use the role they play."),
+Q("ac",
+ "Why is \"the customer's database\" NOT an actor?",
+ "It is part of the system, not outside it.",
+ ["It is a specific person, not a role.",
+  "Databases can never interact with any system.",
+  "It is too general; a specific table should be used instead.",
+  "It is an actor only if drawn as a stick figure."],
+ "Actors are always outside the system. The system's own database is inside."),
+Q("ac",
+ "Which of these candidates CAN be an actor?",
+ "Database administrator",
+ ["Ms. Mary Smith",
+  "Mr. John Seals",
+  "The customer's database",
+  "Click Save Button"],
+ "The database administrator is a role with its own goals (backup, access rights)."),
+Q("ac",
+ "\"Internet customer\" can be an actor because it is…",
+ "a specialized role: a customer who buys over the Web.",
+ ["a specific person who buys from the shop using the Internet.",
+  "a component of the system's own web server and its database.",
+  "a physical model of the online shop drawn during design.",
+  "a scenario of the use case Place Order, not a role."],
+ "Table 4.1: Internet customer — Yes, a specialized role."),
+Q("ac",
+ "How can ANOTHER SYSTEM that talks to our system be shown as an actor?",
+ "As a rectangle labeled <<actor>> plus the system's name.",
+ ["As an oval drawn inside the subject boundary of our system.",
+  "As a dashed arrow labeled <<system>> between two use cases.",
+  "As an inner boundary drawn inside the main subject boundary.",
+  "It cannot be shown at all, because only people can be actors."],
+ "E.g. <<actor>> Payment Service, <<actor>> Financial Office. Such actors are usually placed on the right."),
+Q("ac",
+ "A teacher at IBU is also enrolled as a student in another course. How is this handled?",
+ "Teacher and Student are two separate actors; one person plays both roles.",
+ ["A single combined actor called \"Teacher-Student\" must be created for this person.",
+  "The teacher is drawn inside the boundary as an internal actor of the system.",
+  "Only one role can be chosen, because one real person always equals one actor.",
+  "An <<extend>> arrow is drawn from the Student actor to the Teacher actor."],
+ "One person can play several roles, and many persons can play the same role."),
+Q("ac",
+ "Which of these is NOT a valid kind of actor?",
+ "A table in our own system's database",
+ ["A person's role that uses the system",
+  "Another system that talks to our system",
+  "Something that only receives output from the system",
+  "Something that only gives input to the system"],
+ "An actor gives input, receives output, or both — and it is always outside the system."),
+Q("ac",
+ "How is a specialized actor (e.g. New Patient) connected to the general actor (Patient)?",
+ "With a solid line ending in a hollow triangle that points at the general actor.",
+ ["With a dashed arrow labeled <<extend>> pointing at the special actor.",
+  "With a dashed arrow labeled <<include>> pointing at the general actor.",
+  "With a plain association line and no arrowhead.",
+  "By drawing the special actor inside the general actor's stick figure."],
+ "This is generalization between actors; the triangle points to the general one."),
+Q("ac",
+ "What does a specialized actor such as New Patient get from the general actor Patient?",
+ "Everything the general actor can do, plus something of its own.",
+ ["Nothing; it must be connected to every use case again with new lines.",
+  "Only the use cases that are marked with <<include>> on the diagram.",
+  "Only the scenarios of the general actor, not its use cases.",
+  "It replaces the general actor, which is then removed from the diagram."],
+ "E.g. only a new patient fills in a registration form, but a new patient can also manage appointments like any patient."),
+Q("ac",
+ "Where are actors drawn?",
+ "Always outside the subject boundary.",
+ ["Always inside the subject boundary.",
+  "Inside the boundary if they are people, outside if they are systems.",
+  "Inside the oval of the use case they use.",
+  "Anywhere; the position has no meaning."],
+ "Actors are the principal elements of the environment in which the system works."),
+Q("nm",
+ "How is a use case drawn?",
+ "As an oval inside the subject boundary.",
+ ["As a rectangle outside the boundary.",
+  "As a stick figure inside the boundary.",
+  "As a rounded rectangle with an arrow.",
+  "As a diamond on the boundary line."],
+ "Oval = use case, stick figure = actor, box = subject boundary."),
+Q("nm",
+ "A use case on the draft diagram benefits no actor at all. What should the analyst do?",
+ "Find the actor who benefits, or remove the use case.",
+ ["Keep it, because use cases do not need to benefit anybody.",
+  "Connect it to a generic actor called \"User\" so it is not alone.",
+  "Move it outside the subject boundary, next to the actors.",
+  "Turn it into an <<extend>> of another use case on the diagram."],
+ "A use case is a major process that must benefit an actor. If no actor profits, it should not be on the diagram."),
+Q("nm",
+ "Which use case name is GOOD?",
+ "Produce Schedule",
+ ["Appointment",
+  "Click Save Button",
+  "Database Update",
+  "Do Things"],
+ "Use cases are named with a short verb–noun phrase that states a goal."),
+Q("nm",
+ "What is wrong with the use case \"Appointment\"?",
+ "It is a noun only; it does not say what happens.",
+ ["It is too long and should be abbreviated to a code.",
+  "It is a physical step that names a specific technology.",
+  "It contains three different functions in a single oval.",
+  "Nothing — a single noun is the form the textbook recommends."],
+ "Table 4.2: a noun alone is a weak name."),
+Q("nm",
+ "Why is \"Database Update\" a weak use case name?",
+ "It is a technical action inside the system, unseen by the actor.",
+ ["It is a noun only and needs a verb in front of it to be valid.",
+  "It is far too vague; nobody can tell what it means at all.",
+  "It contains several different goals inside a single oval.",
+  "It is a role, so it should be the name of an actor instead."],
+ "Use cases are named from the user's side, not from the inside of the system."),
+Q("nm",
+ "What should you do with the use case \"Make Appointment and Pay and Print Receipt\"?",
+ "Split it, or find a general name.",
+ ["Keep it; longer names are clearer for users.",
+  "Turn each \"and\" into an <<include>> arrow.",
+  "Change it into an actor called Appointment Maker.",
+  "Rename it to \"Do Appointment Things\"."],
+ "One use case = one function. Three functions in one oval is a weak name."),
+Q("nm",
+ "What does an association connect?",
+ "Exactly one actor and one use case.",
+ ["Two actors that work together.",
+  "Two use cases that share behavior.",
+  "An actor and the subject boundary.",
+  "Any two elements of the diagram."],
+ "A line never connects two actors or two use cases. Use cases are linked with include, extend or generalization."),
+Q("nm",
+ "The communication between an actor and a use case goes only ONE way. How is this shown?",
+ "Add a solid arrowhead showing the direction of the information.",
+ ["Use a dashed line instead of a solid one between the two elements.",
+  "Write the stereotype <<one-way>> next to the association line.",
+  "Draw the actor inside the boundary, close to the use case it uses.",
+  "It cannot be shown, because associations are always two-way lines."],
+ "A plain line usually means two-way communication; an arrowhead shows one direction."),
+Q("nm",
+ "Does the use-case diagram show which use case happens first?",
+ "No — a use-case diagram shows no order or sequence.",
+ ["Yes — use cases are read from top to bottom in order.",
+  "Yes — the association lines are numbered.",
+  "Only if <<include>> arrows are used.",
+  "Yes — the left-most actor always starts first."],
+ "Order belongs in an activity diagram, not in a use-case diagram."),
+Q("bd",
+ "What does the subject boundary define?",
+ "The scope: what is inside the system and what is outside.",
+ ["The order in which the use cases are executed by the actors.",
+  "The security level and access rights of every single use case.",
+  "The list of people who are allowed to log in to the system.",
+  "The physical location of the servers that run the system."],
+ "Use cases stand inside the box, actors outside. The system's name is written in or on top of the box."),
+Q("bd",
+ "Why does the textbook leave the receptionist out of the appointment system diagram?",
+ "Internal actors bring in implementation decisions.",
+ ["Receptionists never talk to the patients in a doctor's office.",
+  "UML does not allow more than three actors on one diagram.",
+  "The receptionist is a specific person, not a role at all.",
+  "The receptionist is an external system and must be a box."],
+ "The receptionist could be an internal actor in an inner boundary, but that drifts into implementation."),
+Q("bd",
+ "What should you expect to happen to the subject boundary during a project?",
+ "It will probably change during the project.",
+ ["It is fixed after the first interview and never changes.",
+  "It can only grow, never shrink.",
+  "It is removed once activity diagrams exist.",
+  "It is decided by the programmers, not the analysts."],
+ "Where to draw the boundary is one of the hardest decisions. Expect it to change."),
+Q("bd",
+ "Which statement about where a boundary can be drawn is correct?",
+ "It can separate a system from its environment, a subsystem from others, or one process from the rest.",
+ ["It can only ever surround the entire organization, including all of its people and departments.",
+  "It must always surround exactly one use case, so a diagram has as many boundaries as use cases.",
+  "It must include all actors and all use cases, because everything on the diagram is in scope.",
+  "It can only separate the hardware of a system from its software, never one process from another."],
+ "The boundary is flexible in what it separates — that is why choosing it is hard."),
+Q("rel",
+ "What does <<include>> mean?",
+ "Mandatory behavior the base always needs, often shared.",
+ ["Optional behavior that happens only under some condition.",
+  "\"Is a kind of\" — the special use case inherits from the general.",
+  "The actor takes part in the use case and exchanges information.",
+  "The order in which two use cases happen, one after the other."],
+ "Short test from the lecture: always happens → include."),
+Q("rel",
+ "Which way does an <<include>> arrow go?",
+ "From the base use case to the included use case (dashed line).",
+ ["From the included use case to the base use case (dashed line).",
+  "From the special use case to the general one (solid line, hollow triangle).",
+  "From the actor to the use case (solid line).",
+  "It has no direction; include lines have no arrowhead."],
+ "Reading rule: \"Record Availability always uses Manage Schedule.\" In this example, the included use case is drawn below; its position is a layout choice."),
+Q("rel",
+ "In the appointment system, which use cases include Manage Schedule?",
+ "Record Availability and Produce Schedule",
+ ["Manage Appointments and Make Payment Arrangements",
+  "Make Old Patient Appt and Make New Patient Appt",
+  "Update Patient Information and Create New Patient",
+  "Produce Schedule and Make Payment Arrangements"],
+ "Both need routine work to maintain the doctor's schedule, so this work is its own use case that both include."),
+Q("rel",
+ "What does <<extend>> mean?",
+ "Optional behavior that happens only under some condition.",
+ ["Mandatory behavior that always happens.",
+  "\"Is a kind of\" between two use cases.",
+  "Shared behavior that every use case must call.",
+  "A one-way association between an actor and a use case."],
+ "Short test: sometimes happens → extend. The base use case is complete without the extension."),
+Q("rel",
+ "Which way does an <<extend>> arrow go?",
+ "From the extension to the base use case.",
+ ["From the base use case to the extension, exactly like include.",
+  "From the general use case down to the special use case.",
+  "From the use case to the actor that starts the use case.",
+  "In both directions at once, with an arrowhead on each end."],
+ "Reading rule: \"Make Payment Arrangements sometimes extends Manage Appointments.\" The arrow points to the base, regardless of its position on the page."),
+Q("rel",
+ "Why is Make Payment Arrangements an EXTENSION of Manage Appointments?",
+ "New payment arrangements are needed only rarely, so the behavior is optional.",
+ ["Every patient must make new payment arrangements every time.",
+  "It is a kind of Manage Appointments that inherits all its behavior.",
+  "It is a step that is always included in making an appointment.",
+  "It is done by a different actor, the Management."],
+ "Patients are always asked to VERIFY payment arrangements; MAKING new ones happens only sometimes."),
+Q("rel",
+ "How is generalization between use cases drawn?",
+ "Solid line, hollow triangle at the general use case.",
+ ["Dashed line with an open arrowhead, labeled <<include>>.",
+  "Dashed line with an open arrowhead, labeled <<extend>>.",
+  "Solid line with a filled diamond at the general use case.",
+  "A plain line with no arrowhead between the two ovals."],
+ "Generalization = \"is a kind of\". E.g. Make New Patient Appt is a kind of Manage Appointments."),
+Q("rel",
+ "Which question tests whether to use GENERALIZATION?",
+ "Can I say \"A is a kind of B\"?",
+ ["Does the base need it every time?",
+  "Does it happen only under a condition?",
+  "Does the actor start it?",
+  "Does it happen before the other use case?"],
+ "Include: does the base need it every time? Extend: only under a condition? Generalization: A is a kind of B?"),
+Q("rel",
+ "\"Every time a customer checks out, the system calculates the tax.\" Which relationship fits Calculate Tax?",
+ "Check Out <<include>> Calculate Tax",
+ ["Calculate Tax <<extend>> Check Out",
+  "Calculate Tax is a generalization of Check Out",
+  "An association between Check Out and Calculate Tax",
+  "Check Out <<extend>> Calculate Tax"],
+ "It happens every time → mandatory → include, from the base (Check Out) to the included use case."),
+Q("rel",
+ "\"If the customer is a member, a discount is applied.\" Which relationship fits Apply Member Discount?",
+ "Apply Member Discount <<extend>> the base use case",
+ ["The base use case <<include>> Apply Member Discount",
+  "Apply Member Discount is a generalization of the base",
+  "A plain association between the two use cases",
+  "The base use case <<extend>> Apply Member Discount"],
+ "It happens only under a condition → extend, with the arrow from the extension to the base."),
+Q("rel",
+ "\"Pay by Card and Pay in Cash both do everything Pay for Order does, and each adds its own steps.\" Which relationship?",
+ "Generalization: both are kinds of Pay for Order.",
+ ["Pay for Order <<include>> both Pay by Card and Pay in Cash.",
+  "Pay by Card and Pay in Cash <<extend>> each other in turn.",
+  "Plain associations from Pay for Order to the two other use cases.",
+  "Pay for Order <<extend>> both Pay by Card and Pay in Cash."],
+ "\"Inherits all behavior and adds its own\" = generalization, arrow from special to general."),
+Q("rel",
+ "In the full appointment diagram (Figure 5.4), how are Make New Patient Appt and Create New Patient related?",
+ "Make New Patient Appt <<include>> Create New Patient",
+ ["Create New Patient <<extend>> Make New Patient Appt",
+  "Create New Patient is a kind of Make New Patient Appt",
+  "They are connected by an association",
+  "Make New Patient Appt <<extend>> Create New Patient"],
+ "A new patient appointment always needs a new patient record → include. (Update Patient Information EXTENDS Make Old Patient Appt.)"),
+Q("rel",
+ "If a diagram is rearranged, which arrow-direction rule still holds?",
+ "Include: base → included; extend: extension → base; generalization: special → general.",
+ ["Include arrows must always point down the page.",
+  "Extend arrows must always point up the page.",
+  "Generalization triangles must point to the top of the page.",
+  "All relationship arrows follow the order of execution."],
+ "Direction depends on the related elements, not their positions. Up and down describe only the layout of the examples."),
+Q("rel",
+ "Which piece of advice about relationships does the reading give?",
+ "Do not add an included use case such as \"Log In\" to every use case.",
+ ["Every use case should have at least one <<include>>.",
+  "Use <<extend>> for everything that always happens.",
+  "A diagram without include or extend is incorrect.",
+  "Split each use case into small steps joined with <<include>>."],
+ "If login matters, show it once or leave it for the description. Use a relationship only when it helps the reader."),
+Q("rel",
+ "Splitting a use case into small steps and joining them with <<include>> is called…",
+ "functional decomposition — and it is not use-case modeling.",
+ ["generalization — and it is the recommended technique.",
+  "use-case extension — and it is required by UML.",
+  "scenario analysis — and it is done in step 5.",
+  "boundary refinement — and it reduces the scope."],
+ "Overusing include and extend makes the diagram hard to read and moves it away from the user's view."),
+Q("rel",
+ "A diagram contains only actors, use cases and associations — no include, extend or generalization. Is it correct?",
+ "Yes — such a diagram is perfectly correct.",
+ ["No — every diagram needs at least one include.",
+  "No — every diagram needs at least one extend.",
+  "Only if it has more than ten use cases.",
+  "Only if every actor is an external system."],
+ "Relationships are optional tools; the IBU Exam Portal example uses none and is correct."),
+Q("find",
+ "What is the FIRST of the five steps for identifying the major use cases?",
+ "Review the requirements definition.",
+ ["Identify the subject boundary.",
+  "Identify the primary actors and their goals.",
+  "Identify the business processes and major use cases.",
+  "Review the current set of use cases."],
+ "Reading the requirements (or the story) gives the whole picture of the business process."),
+Q("find",
+ "Which is the correct order of the five steps?",
+ "Requirements → boundary → actors and goals → major use cases → review",
+ ["Actors and goals → requirements → boundary → review → major use cases",
+  "Boundary → major use cases → requirements → actors and goals → review",
+  "Requirements → actors and goals → review → boundary → major use cases",
+  "Major use cases → actors and goals → boundary → requirements → review"],
+ "1 Review requirements, 2 Identify subject boundary, 3 Identify primary actors and goals, 4 Identify business processes and major use cases, 5 Review the current set."),
+Q("find",
+ "What does step 4 (identify business processes and major use cases) advise?",
+ "List only the major use cases and define acronyms and jargon.",
+ ["Write every use case in full detail, including all of its scenarios.",
+  "Draw the final diagram with all include and extend relationships.",
+  "Choose the database and programming language for each use case.",
+  "List every button and every screen that the users are going to see."],
+ "Defining jargon lets people outside the user group understand the use cases."),
+Q("find",
+ "What happens in step 5, \"review the current set of use cases\"?",
+ "Split some use cases, merge others, add new ones.",
+ ["The set is frozen and handed over to the programmers.",
+  "All use cases are deleted and the analysis starts again.",
+  "Each use case is converted into a table of the database.",
+  "Each use case is assigned to one programmer for coding."],
+ "Identifying use cases is iterative, and users often change their minds."),
+Q("find",
+ "The sponsor pays for a new system but will never use it. Is the sponsor an actor?",
+ "No — the sponsor is a stakeholder but not an actor.",
+ ["Yes — every stakeholder is an actor.",
+  "Yes — whoever pays is always the main actor.",
+  "No — sponsors are part of the system, inside the boundary.",
+  "Yes — but drawn as a rectangle with <<actor>>."],
+ "A stakeholder can affect or be affected by the system. An actor is a role that interacts with it. Not every stakeholder is an actor."),
+Q("find",
+ "What does CRUDE stand for?",
+ "Create, Read, Update, Delete, Execute",
+ ["Create, Run, Use, Delete, Edit",
+  "Copy, Read, Update, Define, Export",
+  "Create, Retrieve, Upload, Download, Erase",
+  "Change, Read, Undo, Delete, Execute"],
+ "Question 1 for every actor: does it need to create, read, update, delete or execute any information?"),
+Q("find",
+ "Which is NOT one of the three questions you ask about every actor to find its goals?",
+ "Which programming language should the actor's screens be written in?",
+ ["Does the actor need to create, read, update, delete or execute information?",
+  "Are there external changes that the actor must tell the system about?",
+  "Is there information that the system should give to the actor?",
+  "Does the actor need to read or update any information stored in the system?"],
+ "The three questions: CRUDE, external changes, information the system gives the actor. Technology choices are not part of analysis."),
+Q("find",
+ "A doctor goes on holiday and must tell the system. Which of the three questions finds this goal?",
+ "Are there external changes that the actor must tell the system about?",
+ ["Does the actor need to create, read, update, delete or execute information?",
+  "Is there information that the system should give to the actor?",
+  "Is the actor a role and not a specific person?",
+  "Does the use case benefit at least one actor?"],
+ "Table 6.1: Doctor — external changes: holiday, sick leave."),
+Q("find",
+ "In Table 6.1, which information does the system give to the Management?",
+ "The weekly schedule",
+ ["Confirmation of the appointment",
+  "The list of today's patients",
+  "A new doctor joins the office",
+  "Holiday and sick leave"],
+ "Patient gets confirmation; Doctor gets today's patients; Management gets the weekly schedule."),
+Q("find",
+ "Why are steps 2 (boundary) and 3 (actors) described as intertwined?",
+ "A new actor often shows the boundary was too small or too large.",
+ ["Both steps are carried out by the users, never by the analyst.",
+  "Both steps produce exactly the same document at the same time.",
+  "Step 3 must always be completed before step 2 can even start.",
+  "The boundary is drawn around the actors, so they must come first."],
+ "Finding actors and setting scope inform each other."),
+Q("find",
+ "When reading a requirements story, what are good candidates for ACTORS?",
+ "Nouns that name a kind of user",
+ ["Verbs that describe a goal",
+  "Adjectives that describe the data",
+  "Every noun in the text",
+  "Numbers and dates in the text"],
+ "Nouns naming a kind of user → actors; verbs describing a goal → use cases. But the text is only a clue."),
+Q("find",
+ "In the gym story, \"book a place in a group class\" and \"cancel the booking\" become…",
+ "one use case: Manage Bookings",
+ ["two use cases: Book Place and Cancel Booking",
+  "an actor called Booking Member",
+  "Book Place <<extend>> Cancel Booking",
+  "a scenario of Record Attendance"],
+ "Two verbs, one goal — just like Manage Appointments."),
+Q("find",
+ "In the gym story, how is \"the bank's system\" (which handles membership fees) modeled?",
+ "As an external system actor: <<actor>> Bank System",
+ ["As a use case inside the boundary called Bank System",
+  "As a specialized actor of Member",
+  "It is left out because it is not a person",
+  "As the subject boundary of the gym system"],
+ "External systems are actors. The bank's system is associated with Pay Membership Fee."),
+Q("find",
+ "In the gym story, when is \"Enter Gym\" (members swipe a card) a use case?",
+ "Only if the new system controls the entrance.",
+ ["Always, because every verb in a story is a use case.",
+  "Never, because swiping a card is done by a machine.",
+  "Only if the manager prints a report about entering.",
+  "Only if it is included by Manage Bookings every time."],
+ "Table 6.2: optional — in scope only if the new system controls the entrance."),
+Q("find",
+ "What warning does the reading give about using nouns and verbs from the text?",
+ "Not every noun is an actor and not every verb is a use case.",
+ ["Every noun must become an actor, so that nothing gets missed.",
+  "Every verb must become a use case, so that nothing gets missed.",
+  "Only the first noun in each sentence of the story is an actor.",
+  "Verbs should be ignored completely; only the nouns really matter."],
+ "Check each candidate: a role outside the system? Does the use case benefit an actor? Is it a goal and not a step?"),
+Q("size",
+ "A diagram has far too many use cases. What does this probably mean?",
+ "The use cases are too small, or the boundary is too large.",
+ ["The use cases are too large and complex.",
+  "There are too few actors on the diagram.",
+  "The diagram uses too few <<include>> relationships.",
+  "The requirements definition is too short."],
+ "Too many → too small or boundary too large. Too few → each too large; activity diagrams will be hard to read."),
+Q("size",
+ "What is the problem with having too FEW use cases?",
+ "Each use case is too large and complex.",
+ ["The boundary is certainly drawn too large.",
+  "The actors will have nothing left to do.",
+  "The system cannot be tested at all then.",
+  "There is no problem; fewer is always better."],
+ "Complexity moves between the number of use cases and the detail in the activity diagrams."),
+Q("size",
+ "What is the classroom rule of thumb for the number of use cases on one diagram?",
+ "Five to fifteen",
+ ["One to three",
+  "Twenty to thirty",
+  "Exactly seven",
+  "At least fifty"],
+ "The right number depends on the complexity of the problem domain; 5–15 is a useful rule of thumb."),
+Q("size",
+ "The diagram has become crowded. What does the reading recommend?",
+ "Group use cases into packages, one diagram each.",
+ ["Make the font smaller so that everything still fits.",
+  "Remove all the actors and keep only the use cases.",
+  "Merge all use cases into one called Manage System.",
+  "Replace the use cases with a set of activity diagrams."],
+ "Packages keep each diagram on one page."),
+Q("size",
+ "Why should \"Manage Appointments\" and \"Click Save Button\" NOT appear on the same diagram?",
+ "All use cases on one diagram should be at the same level of abstraction.",
+ ["Because two use cases may not start with different verbs.",
+  "Because one belongs to the patient and the other to the doctor.",
+  "Because Click Save Button must be an actor.",
+  "Because Manage Appointments must be an <<extend>>."],
+ "Figure 6.2: steps (too small) vs goals (right size)."),
+Q("size",
+ "Why does the textbook use ONE use case, Manage Appointments, instead of Make, Change and Cancel Appointment?",
+ "Make, change and cancel are scenarios of one goal; separate ovals would be too small.",
+ ["Because UML does not allow the word Cancel to appear in the name of a use case.",
+  "Because only one use case at a time may be connected to the Patient actor.",
+  "Because changing and cancelling appointments are always done by the doctor.",
+  "Because the three use cases would then need <<include>> arrows to each other."],
+ "Make, change and cancel are scenarios of the same goal."),
+Q("draw",
+ "Which is the correct order of the four steps for DRAWING the diagram?",
+ "Use cases → actors → boundary → associations",
+ ["Actors → associations → use cases → boundary",
+  "Boundary → actors → associations → use cases",
+  "Associations → use cases → actors → boundary",
+  "Actors → boundary → use cases → associations"],
+ "1 Place and draw use cases (with relationships), 2 actors, 3 boundary, 4 associations."),
+Q("draw",
+ "Where should each actor be placed?",
+ "Near the use cases it uses, so that fewer lines cross.",
+ ["In alphabetical order along the top of the page.",
+  "Inside the boundary, next to its use cases.",
+  "All actors stacked together on the left.",
+  "As far as possible from the use cases."],
+ "Minimizing crossing lines makes the diagram easy to follow."),
+Q("draw",
+ "Which layout habit does the reading suggest?",
+ "People on the left, other systems on the right.",
+ ["Systems on the left, people on the right.",
+  "All actors at the bottom of the page.",
+  "Lower-level use cases above higher-level ones.",
+  "Spread the diagram over several pages."],
+ "It is a habit, not a rule, but it makes diagrams easy to compare."),
+Q("draw",
+ "What should the title of a use-case diagram be?",
+ "The name of the subject",
+ ["The name of the analyst",
+  "The date of the interview",
+  "The name of the main actor",
+  "The name of the first use case"],
+ "Give the diagram a title, which is the name of the subject."),
+Q("draw",
+ "According to the checklist, every use case must be…",
+ "linked to an actor, or included/extended by another use case.",
+ ["connected to every single actor that appears in the diagram.",
+  "connected to exactly two actors, one on each side of the box.",
+  "drawn outside the subject boundary, next to its actor.",
+  "included by at least one other use case on the diagram."],
+ "Checklist item 4. (Check Fees is connected to the Financial Office; included use cases may have no actor of their own.)"),
+Q("draw",
+ "Which checklist item compares the diagram with the requirements?",
+ "Nothing from the requirements is missing, and nothing extra.",
+ ["All use cases are at the same level of abstraction.",
+  "Every association connects one actor with one use case.",
+  "The system has a name and a boundary around the use cases.",
+  "Every actor is a role and not the name of a real person."],
+ "Checklist item 8."),
+Q("draw",
+ "Two students draw different diagrams for the same story. What does the reading say?",
+ "Both can be correct; many correct diagrams exist.",
+ ["Only one can be correct; there is one model solution.",
+  "The one with more use cases is always the better one.",
+  "The one with more relationships is always the better one.",
+  "Both are wrong unless they are completely identical."],
+ "Check diagrams against the requirements, not against one model solution."),
+Q("draw",
+ "In diagrams.net, how do you switch on the shape library for use cases?",
+ "More Shapes → tick UML → Apply",
+ ["File → Import → UseCase.xml → Open",
+  "Extras → Plugins → Enable UML",
+  "Arrange → Layout → Use Case Mode",
+  "Help → Libraries → Activate all shapes"],
+ "The UML library contains the actor, the use case oval and the boundary (container)."),
+Q("draw",
+ "Which file should you save often in diagrams.net, and how do you export the final image?",
+ "The .drawio file; export via File → Export as → PNG.",
+ ["Only a .png file; the .drawio file is never needed.",
+  "A .docx file; export via File → Print → Save page.",
+  "A .pdf file; export via Share → Image → Download.",
+  "An .xml file; export via Edit → Copy as image."],
+ "The .drawio file is editable; PNG is the image for submission."),
+Q("draw",
+ "What will diagrams.net NOT check for you?",
+ "Arrow direction and labels of include and extend.",
+ ["Whether the file has been saved to the device.",
+  "Whether a shape exists in the UML library at all.",
+  "Whether the export of the image to PNG worked.",
+  "Whether the diagram has a title and a background."],
+ "Always check arrow direction and labels yourself."),
+Q("ex",
+ "Online registration: why are Check Fees and Check Course Load INCLUDED by Register for Courses?",
+ "Both checks are needed every time a student registers.",
+ ["Both checks happen only sometimes, under a condition.",
+  "Both are kinds of Register for Courses.",
+  "Both are started by the student directly.",
+  "Both belong to the department staff."],
+ "Always needed → include."),
+Q("ex",
+ "Online registration: why is the Student NOT connected to Check Fees?",
+ "The student never starts it; the system does, during registration.",
+ ["Students are not allowed to see any information about their fees.",
+  "Check Fees is drawn outside the subject boundary, with the actors.",
+  "Only one actor at a time can be connected to any one use case.",
+  "Check Fees is an optional extension that only rarely happens at all."],
+ "Check Fees is associated with the Financial Office, which supplies the fees data."),
+Q("ex",
+ "Online registration: is \"Drop Course\" a separate use case?",
+ "No — it is a scenario of Register for Courses.",
+ ["Yes — every verb in the story is a separate use case.",
+  "Yes — it extends Register for Courses.",
+  "No — it is an actor.",
+  "No — it belongs to the Financial Office."],
+ "Adding and dropping are two scenarios of one goal."),
+Q("ex",
+ "Online registration: why is there no Log In use case?",
+ "It is not in the story, so it is left out.",
+ ["Log In must always be an actor.",
+  "Log In is included by every use case automatically.",
+  "Log In is a physical model.",
+  "The Financial Office handles logging in."],
+ "Only model what the requirements ask for."),
+Q("ex",
+ "Online registration: how many actors, use cases and include relationships are in Figure 8.1?",
+ "3 actors, 7 use cases, 2 includes",
+ ["2 actors, 5 use cases, 1 include",
+  "3 actors, 5 use cases, 2 extends",
+  "4 actors, 7 use cases, 3 includes",
+  "3 actors, 9 use cases, no relationships"],
+ "Student, Department Staff, Financial Office; Browse Courses, Register for Courses, View Enrollment, Manage Courses, Print Reports, Check Fees, Check Course Load."),
+Q("ex",
+ "Library: why did Susan name the use cases Borrow RESOURCE and Return RESOURCE instead of Borrow Books?",
+ "The library also lends DVDs and CDs.",
+ ["\"Book\" is a physical term that UML forbids.",
+  "The Registrar's System uses the word resource.",
+  "Librarians simply prefer the word resource.",
+  "Books are borrowed by a different actor."],
+ "A name change (book → resource) can make three use cases out of nine."),
+Q("ex",
+ "Library: how is Reserve Resource related to Borrow Resource?",
+ "Reserve Resource <<extend>> Borrow Resource — only when the resource is not available.",
+ ["Borrow Resource <<include>> Reserve Resource — every loan is reserved first.",
+  "Reserve Resource is a kind of Borrow Resource (generalization).",
+  "They are connected by a plain association.",
+  "Borrow Resource <<extend>> Reserve Resource."],
+ "Reserve and Borrow from Another Library are optional extensions of Borrow Resource."),
+Q("ex",
+ "Library: Retire Resource is…",
+ "an extension of Return Resource.",
+ ["an included part of Borrow Resource.",
+  "a kind of Procure Resource.",
+  "a use case of the Patron only.",
+  "an external system actor."],
+ "Retiring a returned resource happens only sometimes → extend."),
+Q("ex",
+ "Library (Figure 3-5): how many human actors, external system actors and use cases?",
+ "2 human actors, 3 external system actors, 6 use cases",
+ ["3 human actors, 2 external system actors, 9 use cases",
+  "1 human actor, 3 external system actors, 4 use cases",
+  "2 human actors, 1 external system actor, 6 use cases",
+  "4 human actors, no external systems, 6 use cases"],
+ "Patron, Librarian; Registrar's System, Personnel System, Other Library; six use cases."),
+Q("ex",
+ "Food ordering: how are Place Order and Pay for Order related?",
+ "Place Order <<include>> Pay for Order — every order must be paid.",
+ ["Pay for Order <<extend>> Place Order — paying is optional.",
+  "Pay for Order is a kind of Place Order.",
+  "They are both connected only to the Payment Service.",
+  "Place Order <<extend>> Pay for Order."],
+ "Payment is mandatory → include."),
+Q("ex",
+ "Food ordering: how is Apply Coupon modeled?",
+ "Apply Coupon <<extend>> Pay for Order",
+ ["Pay for Order <<include>> Apply Coupon",
+  "Apply Coupon as a separate external actor",
+  "Apply Coupon as a kind of Place Order",
+  "Left out, because it is only optional"],
+ "Only some customers have a coupon → optional → extend."),
+Q("ex",
+ "Food ordering: why is \"Choose Meals\" NOT a use case?",
+ "It is a step inside Place Order, not a goal.",
+ ["It is done in the kitchen, outside the system.",
+  "It is performed by the external Payment Service.",
+  "It is a physical statement about the database.",
+  "It should be an actor called Meal Chooser instead."],
+ "Steps inside a goal are not separate use cases."),
+Q("ex",
+ "Food ordering: why is \"Prepare Meal\" NOT a use case?",
+ "Cooking happens in the kitchen, outside the system.",
+ ["It is just a small step inside the use case Place Order.",
+  "It is optional and therefore modeled as an extension.",
+  "It is exactly the same function as Track Order.",
+  "Restaurant staff can never be actors in any system."],
+ "The staff are connected to Place Order only because they receive the order. A real project might add Manage Orders."),
+Q("ex",
+ "Hotel: what does the specialized actor Registered Guest do?",
+ "Inherits Search Rooms and Book Room, adds View Booking History.",
+ ["It replaces Guest, which is then removed from the diagram.",
+  "It can only view its booking history and do nothing else.",
+  "It checks guests in and out instead of the receptionist.",
+  "It is connected only to the external Payment Service actor."],
+ "Generalization between actors saves drawing extra lines."),
+Q("ex",
+ "Hotel: why are Check In Guest and Check Out Guest TWO use cases, unlike change/cancel appointment?",
+ "They happen at different times and have different results.",
+ ["Because the receptionist is a specialized actor.",
+  "Because one is included and the other extended.",
+  "Because UML forbids the word Manage for hotels.",
+  "Because they are performed by different external systems."],
+ "In the appointment example, change and cancel are two paths through the same goal; check-in and check-out are different goals."),
+Q("ex",
+ "IBU Exam Portal: \"Who sees the grades before they are published?\" How is this answered?",
+ "It is a nonfunctional (security) requirement.",
+ ["It becomes a new use case: See Unpublished Grades.",
+  "It becomes an <<extend>> of Publish Grades.",
+  "It adds a new external actor called Security.",
+  "The student is drawn inside the boundary to show it."],
+ "Security rules are nonfunctional requirements."),
+Q("ex",
+ "IBU Exam Portal: teachers sometimes correct grades. How is this modeled?",
+ "As part (a scenario) of Enter Grades.",
+ ["As a new use case Correct Grades included by Enter Grades.",
+  "As a new actor called Corrector.",
+  "As an extension of Publish Grades.",
+  "It cannot be modeled in a use-case diagram."],
+ "The textbook would say: it is a scenario."),
+Q("ex",
+ "Bike sharing: how are Return Bike and Report Damaged Bike related?",
+ "Report Damaged Bike <<extend>> Return Bike — only when the bike is damaged.",
+ ["Return Bike <<include>> Report Damaged Bike — every return is reported.",
+  "Report Damaged Bike is a kind of Return Bike.",
+  "Repair Bike <<extend>> Report Damaged Bike.",
+  "They are not related at all."],
+ "Conditional → extend. Return Bike <<include>> Pay for Ride because a ride is always paid."),
+Q("ex",
+ "Bike sharing: why does Repair Bike have NO relationship to the other use cases?",
+ "It is a separate goal, linked to the rest only through data.",
+ ["The maintenance worker stands outside the subject boundary.",
+  "It should actually be included by Return Bike every time.",
+  "It is a physical model that belongs to the design phase.",
+  "It is performed by the external Payment Service, not a person."],
+ "Use-case diagrams do not show data flows."),
+Q("ex",
+ "Which worked example uses NO include, extend or generalization at all?",
+ "IBU Exam Portal",
+ ["Online registration",
+  "Library management",
+  "Food ordering",
+  "Bike sharing"],
+ "Table 8.2: IBU Exam Portal — relationships used: none. It is simple and correct."),
+Q("ex",
+ "What do all the worked examples have in common?",
+ "Every use case is a goal of an actor; systems are actors.",
+ ["Every example uses include, extend and generalization.",
+  "Every example has exactly three actors and no more.",
+  "Every example shows the order in which use cases run.",
+  "Every example places the actors inside the boundary."],
+ "Table 8.2 lists 4–9 use cases per example, including nine for the appointment system. Relationships are used only where they make the diagram clearer."),
+Q("mis",
+ "A diagram uses \"Mary\" as an actor. How is it repaired?",
+ "Use the role she plays, e.g. Patient.",
+ ["Add her surname to make it unique.",
+  "Move her inside the boundary.",
+  "Draw her as a rectangle with <<actor>>.",
+  "Connect her to every use case."],
+ "An actor is a role."),
+Q("mis",
+ "A diagram has a line between two actors. How should it be repaired?",
+ "Remove it; use generalization if one is a kind of the other.",
+ ["Label the line <<include>> so that it becomes a valid relationship.",
+  "Label the line <<extend>> so that it becomes a valid relationship.",
+  "Turn one of the two actors into a use case inside the boundary.",
+  "Keep it, because actors are allowed to talk to each other directly."],
+ "An association connects one actor and one use case. Between actors, only generalization is allowed."),
+Q("mis",
+ "A use-case diagram has arrows from step to step that show the flow of work. What is wrong?",
+ "Use-case diagrams have no sequence; use an activity diagram.",
+ ["The arrows should be dashed instead of solid lines.",
+  "Each arrow should be labeled with <<include>>.",
+  "The individual steps should be drawn as actors.",
+  "Nothing — showing the flow is the goal of the diagram."],
+ "Order and flow are modeled with activity diagrams."),
+Q("mis",
+ "The only actor on a diagram is called \"User\". What is the problem?",
+ "Too general; find the specific roles.",
+ ["It is a specific person, not a role.",
+  "It must be drawn inside the boundary.",
+  "It must be a rectangle with <<actor>>.",
+  "Nothing; \"User\" is the recommended name."],
+ "\"System\" or \"User\" as the only actor is a common mistake."),
+Q("mis",
+ "Extend is used for a step that ALWAYS happens. How is it repaired?",
+ "Use include, or fold it into the base.",
+ ["Simply reverse the direction of the extend arrow.",
+  "Replace the extend with a generalization arrow.",
+  "Add a second extend arrow in the other direction.",
+  "Move the use case outside the subject boundary."],
+ "Extend is only for optional behavior."),
+Q("mis",
+ "A student's diagram has 30+ use cases. What is the repair?",
+ "Merge the small ones and use packages.",
+ ["Add more actors to share the work.",
+  "Connect every use case with <<include>>.",
+  "Remove the subject boundary.",
+  "Draw all of them on one large page."],
+ "Too many use cases means the level is too low or the boundary too large."),
+Q("mis",
+ "Include and extend arrows are drawn in the wrong direction. What is the rule to fix them?",
+ "Include: base → included. Extend: extension → base.",
+ ["Include: included → base. Extend: base → extension.",
+  "Both: base → other use case.",
+  "Both: other use case → base.",
+  "Both: from the actor to the use case."],
+ "Reverse the arrow and check the label."),
+Q("mis",
+ "The client looks at a diagram that is formally correct but cannot say what the system does. What should you do?",
+ "Redraw it until the client can read it.",
+ ["Nothing; formal correctness is all that matters.",
+  "Add more include and extend arrows to explain it.",
+  "Replace it with the numbered requirements list.",
+  "Ask the client to take a course in UML first."],
+ "If the client cannot read it, it fails its purpose, even if every symbol is correct."),
+Q("ex",
+ "Campus Housing Service: how should Jane and Emma appear in the actor list?",
+ "As roles such as Student and CHS Employee, rather than personal names.",
+ ["As actors named Jane and Emma.",
+  "As two use cases inside the boundary.",
+  "As database tables linked by an association.",
+  "As one actor named System."],
+ "Section 8.8 describes Jane as a student and Emma as a CHS employee. Use their roles when identifying actors."),
+Q("ex",
+ "Campus Housing Service: which set of goals is explicitly supported by the story?",
+ "Maintain rental-unit information, arrange visits and help students sign leases.",
+ ["Collect rent, approve mortgages and sell apartments.",
+  "Repair apartments, supply electricity and manage parking.",
+  "Register courses, check fees and publish grades.",
+  "Book hotel rooms, check guests in and process checkout."],
+ "The story says CHS keeps rental-unit information up to date, arranges visits and helps students sign leases. Owners and managers supply unit information. Check your diagram against these requirements.")
+];
+
+QUESTIONS.forEach((q,i) => q.id = i);
+document.getElementById("qcount-hero").textContent = QUESTIONS.length;
+
+/* ---------------- quiz logic ---------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = s => esc(s).replace(/&lt;&lt;(include|extend|actor)&gt;&gt;/g, '<span class="st">&lt;&lt;$1&gt;&gt;</span>');
+const shuffle = a => { a=[...a]; for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const BEST_KEY = "ibu-it2002-r05-best";
+const RUN_KEY = "ibu-it2002-r05-run-v1";
+// Exact bank contents invalidate old progress if questions or answers change.
+const BANK_VERSION = JSON.stringify(QUESTIONS);
+const READING_SECTIONS = {fm:"s3", uc:"s3", lp:"s3", ac:"s4", nm:"s4", bd:"s4", rel:"s5", find:"s6", size:"s6", draw:"s7", ex:"s8", mis:"s9"};
+function readingLink(q){
+  return `<a href="#${READING_SECTIONS[q.t]}" data-reading="${READING_SECTIONS[q.t]}">Read this topic →</a>`;
+}
+document.addEventListener("click", e => {
+  const link = e.target.closest("[data-reading]");
+  if (!link) return;
+  e.preventDefault();
+  const section = $(link.dataset.reading);
+  show("read", false);
+  history.replaceState(null, "", link.getAttribute("href"));
+  section.scrollIntoView({behavior: reduce ? "auto" : "smooth", block:"start"});
+  section.setAttribute("tabindex", "-1");
+  section.focus({preventScroll:true});
+});
+
+let count = 25, chosenTopics = new Set(Object.keys(T));
+const COUNTS = [10, 25, 50, "All"];
+function renderSetup(){
+  const pool = QUESTIONS.filter(q => chosenTopics.has(q.t)).length;
+  $("count-seg").innerHTML = COUNTS.map(c => `<button class="chip" data-c="${c}" aria-pressed="${c===count}">${c==="All" ? `All <small>(${pool})</small>` : c}</button>`).join("");
+  $("topic-seg").innerHTML = Object.entries(T).map(([k,v]) => `<button class="chip" data-t="${k}" aria-pressed="${chosenTopics.has(k)}">${esc(v)} <small>${QUESTIONS.filter(q=>q.t===k).length}</small></button>`).join("");
+  $("all-topics").setAttribute("aria-pressed", chosenTopics.size === Object.keys(T).length);
+  $("start").disabled = pool === 0;
+  const best = store.get(BEST_KEY);
+  $("best").textContent = best ? `Your best: ${best}` : `${QUESTIONS.length} questions in the bank`;
+}
+$("count-seg").onclick = e => { const b=e.target.closest("[data-c]"); if(!b) return; count = b.dataset.c==="All" ? "All" : +b.dataset.c; renderSetup(); };
+$("topic-seg").onclick = e => { const b=e.target.closest("[data-t]"); if(!b) return; const k=b.dataset.t; chosenTopics.has(k) ? chosenTopics.delete(k) : chosenTopics.add(k); renderSetup(); };
+$("all-topics").onclick = () => { chosenTopics = chosenTopics.size === Object.keys(T).length ? new Set() : new Set(Object.keys(T)); renderSetup(); };
+renderSetup();
+
+let run = null;
+function saveRun(){
+  store.set(RUN_KEY, JSON.stringify({bank:BANK_VERSION, count, topics:[...chosenTopics], i:run.i,
+    list:run.list.map(it => ({id:it.q.id, opts:it.opts.map(o => [it.q.a, ...it.q.w].indexOf(o.txt)), picked:it.picked ?? null}))}));
+}
+function restoreRun(){
+  try {
+    const saved = JSON.parse(store.get(RUN_KEY));
+    if (!saved) return;
+    if (saved.bank !== BANK_VERSION || !Array.isArray(saved.list) || !saved.list.length || saved.list.length > QUESTIONS.length ||
+        !Number.isInteger(saved.i) || saved.i < 0 || saved.i >= saved.list.length ||
+        !COUNTS.includes(saved.count) || !Array.isArray(saved.topics) || saved.topics.some(t => !Object.hasOwn(T,t)) ||
+        new Set(saved.list.map(it => it.id)).size !== saved.list.length) throw Error("Invalid progress");
+    const list = saved.list.map((it,index) => {
+      const q = QUESTIONS[it.id];
+      if (!q || !Array.isArray(it.opts) || it.opts.length !== 5 || new Set(it.opts).size !== 5 ||
+          it.opts.some(k => !Number.isInteger(k) || k < 0 || k > 4) ||
+          !(it.picked === null || Number.isInteger(it.picked) && it.picked >= 0 && it.picked < 5) ||
+          (index < saved.i && it.picked === null) || (index > saved.i && it.picked !== null)) throw Error("Invalid question");
+      return {q, opts:it.opts.map(k => ({txt:[q.a,...q.w][k], ok:k===0})), picked:it.picked, done:it.picked !== null};
+    });
+    const answers = list.filter(it => it.done).map(it => ({q:it.q, ok:it.opts[it.picked].ok, picked:it.opts[it.picked].txt}));
+    run = {list, i:saved.i, answers, good:answers.filter(a => a.ok).length};
+    count = saved.count; chosenTopics = new Set(saved.topics);
+    $("q-setup").hidden = true; $("q-result").hidden = true; $("q-play").hidden = false;
+    renderQ();
+  } catch(e) { store.remove(RUN_KEY); }
+}
+function startWith(list){
+  run = { list: list.map(q => ({ q, opts: shuffle([{txt:q.a, ok:true}, ...q.w.map(w => ({txt:w, ok:false}))]) })), i:0, good:0, answers:[] };
+  $("q-setup").hidden = true; $("q-result").hidden = true; $("q-play").hidden = false;
+  renderQ();
+}
+$("start").onclick = () => {
+  const pool = shuffle(QUESTIONS.filter(q => chosenTopics.has(q.t)));
+  startWith(count === "All" ? pool : pool.slice(0, count));
+};
+function renderQ(){
+  const it = run.list[run.i], n = run.list.length;
+  $("q-counter").textContent = `Question ${run.i+1} / ${n}`;
+  $("q-topic").textContent = T[it.q.t];
+  $("q-live").innerHTML = `<span class="g">✓ ${run.good}</span> &nbsp; <span class="r">✕ ${run.i - run.good}</span>`;
+  $("q-bar").style.width = (run.i / n * 100) + "%";
+  $("q-text").innerHTML = fmt(it.q.q);
+  $("q-opts").innerHTML = it.opts.map((o,k) => `<li><button class="opt" data-k="${k}"><span class="k">${"ABCDE"[k]}</span><span>${fmt(o.txt)}</span></button></li>`).join("");
+  $("q-explain").hidden = true; $("q-next").disabled = true;
+  $("q-next").textContent = run.i === n-1 ? "See results →" : "Next →";
+  if (it.done) paintAnswer(it.picked);
+  saveRun();
+}
+function answer(k){
+  const it = run.list[run.i]; if (it.done) return; it.done = true;
+  const ok = it.opts[k].ok;
+  it.picked = k;
+  if (ok) run.good++;
+  run.answers.push({ q:it.q, ok, picked:it.opts[k].txt });
+  paintAnswer(k);
+  saveRun();
+  $("q-next").focus({preventScroll:true});
+}
+function paintAnswer(k){
+  const it = run.list[run.i], ok = it.opts[k].ok;
+  const btns = [...$("q-opts").querySelectorAll(".opt")];
+  btns.forEach((b,j) => { b.disabled = true;
+    if (it.opts[j].ok) b.classList.add("correct");
+    else if (j === k) b.classList.add("wrong", "shake");
+    else b.classList.add("dim"); });
+  const ex = $("q-explain");
+  ex.className = "explain " + (ok ? "ok" : "no");
+  ex.innerHTML = `<b>${ok ? "Correct." : "Not quite."}</b> ${fmt(it.q.e)} <p>${readingLink(it.q)}</p>`;
+  ex.hidden = false;
+  $("q-live").innerHTML = `<span class="g">✓ ${run.good}</span> &nbsp; <span class="r">✕ ${run.i + 1 - run.good}</span>`;
+  $("q-next").disabled = false;
+}
+$("q-opts").onclick = e => { const b = e.target.closest(".opt"); if (b) answer(+b.dataset.k); };
+$("q-next").onclick = () => { if (run.i < run.list.length-1){ run.i++; renderQ(); $("q-play").scrollIntoView({block:"nearest"}); } else results(); };
+$("q-quit").onclick = () => { if (run.answers.length) results(); else { store.remove(RUN_KEY); $("q-play").hidden = true; $("q-setup").hidden = false; } };
+document.addEventListener("keydown", e => {
+  if ($("q-play").hidden || views.quiz.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  const m = "12345".indexOf(e.key) >= 0 ? "12345".indexOf(e.key) : "abcde".indexOf(e.key.toLowerCase());
+  if (m >= 0 && e.key.length === 1){ answer(m); e.preventDefault(); }
+  else if (e.key === "Enter" && !$("q-next").disabled){ $("q-next").click(); e.preventDefault(); }
+});
+function results(){
+  store.remove(RUN_KEY);
+  const n = run.answers.length, g = run.answers.filter(a => a.ok).length, pct = n ? Math.round(g/n*100) : 0;
+  $("q-play").hidden = true; $("q-result").hidden = false;
+  $("r-pct").textContent = pct + "%"; $("r-raw").textContent = `${g} / ${n}`;
+  const ring = $("r-ring"); let p = 0;
+  const step = () => { p = Math.min(pct, p + 2); ring.style.setProperty("--p", p); if (p < pct) requestAnimationFrame(step); };
+  reduce ? ring.style.setProperty("--p", pct) : requestAnimationFrame(step);
+  $("r-title").textContent = pct >= 90 ? "Excellent!" : pct >= 75 ? "Very good" : pct >= 55 ? "Getting there" : "Keep studying";
+  $("r-msg").textContent = pct >= 90 ? "You know use-case diagrams really well." : pct >= 75 ? "Review the topics with the lowest bars below." : "Re-read the sections for the red topics, then retry your mistakes.";
+  const by = {};
+  run.answers.forEach(a => { by[a.q.t] ??= [0,0]; by[a.q.t][1]++; if (a.ok) by[a.q.t][0]++; });
+  $("r-topics").innerHTML = Object.entries(by).sort((a,b) => a[1][0]/a[1][1] - b[1][0]/b[1][1]).map(([k,[x,y]]) => {
+    const r = x/y; return `<div class="trow"><span>${esc(T[k])}</span><span class="tb"><i class="${r<.5?"low":r<.8?"mid":""}" style="width:${r*100}%"></i></span><span>${x}/${y}</span></div>`; }).join("");
+  const wrong = run.answers.filter(a => !a.ok);
+  $("r-retry").hidden = !wrong.length; $("r-review-wrap").hidden = !wrong.length;
+  $("r-review").innerHTML = wrong.map(a => `<div class="ritem"><p class="q">${fmt(a.q.q)}</p><p class="you">✕ ${fmt(a.picked)}</p><p class="ans">✓ ${fmt(a.q.a)}</p><p class="why">${fmt(a.q.e)}</p><p>${readingLink(a.q)}</p></div>`).join("");
+  if (n >= 10){ const prev = parseInt(store.get(BEST_KEY)) || 0; if (pct > prev) store.set(BEST_KEY, `${pct}% (${g}/${n})`); }
+  scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+}
+$("r-retry").onclick = () => startWith(shuffle(run.answers.filter(a => !a.ok).map(a => a.q)));
+$("r-new").onclick = () => { $("q-result").hidden = true; $("q-setup").hidden = false; renderSetup(); };
+restoreRun();
+</script>
+</body>
+</html>
