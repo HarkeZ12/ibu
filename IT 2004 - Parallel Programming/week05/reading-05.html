@@ -1,0 +1,1628 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parallel Algorithms and Patterns</title>
+<meta name="description" content="IT 2004 Parallel Programming, Reading 05: Parallel algorithms and patterns. Full study guide and a multiple-choice quiz.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Glass theme: a STATIC colourful backdrop (gradient orbs + a hash-bucket grid) behind frosted panels.
+   Nothing moves behind the blurred panels, so the blur is only recomputed while scrolling (battery-friendly). */
+:root{
+  --bg:#e8ebf8;
+  --orb1:rgba(124,92,255,.55); --orb2:rgba(56,182,255,.50); --orb3:rgba(255,150,110,.45); --orb4:rgba(40,210,170,.40);
+  --grid:rgba(60,70,140,.13); --cell1:rgba(124,92,255,.22); --cell2:rgba(56,182,255,.22); --cell3:rgba(255,150,110,.24);
+  --glass:rgba(255,255,255,.56); --glass2:rgba(255,255,255,.34); --glass-strong:rgba(255,255,255,.80);
+  --edge:rgba(255,255,255,.75); --edge-soft:rgba(40,50,110,.10); --shine:rgba(255,255,255,.85);
+  --ink:#10162e; --muted:#4c5675; --line:rgba(40,50,110,.14);
+  --accent:#5a46f0; --accent2:#0b93a8; --accent-ink:#ffffff; --accent-soft:rgba(90,70,240,.10);
+  --amber:#a86a00; --amber-soft:rgba(240,170,40,.16);
+  --good:#147a46; --good-soft:rgba(20,150,80,.13); --bad:#b8352b; --bad-soft:rgba(200,50,40,.11);
+  --shadow:0 24px 60px -30px rgba(30,30,90,.45);
+  --code-bg:rgba(14,18,40,.88); --code-ink:#e6e9f7;
+  --f-display:"Sora", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#060914;
+  --orb1:rgba(110,80,255,.42); --orb2:rgba(30,150,255,.32); --orb3:rgba(255,110,140,.24); --orb4:rgba(20,200,170,.26);
+  --grid:rgba(160,175,255,.09); --cell1:rgba(124,92,255,.20); --cell2:rgba(56,182,255,.16); --cell3:rgba(255,120,150,.16);
+  --glass:rgba(20,25,52,.52); --glass2:rgba(20,25,52,.30); --glass-strong:rgba(28,34,70,.80);
+  --edge:rgba(255,255,255,.13); --edge-soft:rgba(255,255,255,.06); --shine:rgba(255,255,255,.16);
+  --ink:#eef1fb; --muted:#a4adca; --line:rgba(170,185,255,.15);
+  --accent:#a191ff; --accent2:#5ad8e6; --accent-ink:#0b0d1d; --accent-soft:rgba(161,145,255,.14);
+  --amber:#ffc95e; --amber-soft:rgba(255,200,90,.12);
+  --good:#62d79c; --good-soft:rgba(98,215,156,.14); --bad:#ff8a8f; --bad-soft:rgba(255,120,130,.13);
+  --shadow:0 30px 70px -30px rgba(0,0,0,.8);
+  --code-bg:rgba(6,8,20,.78); --code-ink:#e6e9f7;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#060914;
+  --orb1:rgba(110,80,255,.42); --orb2:rgba(30,150,255,.32); --orb3:rgba(255,110,140,.24); --orb4:rgba(20,200,170,.26);
+  --grid:rgba(160,175,255,.09); --cell1:rgba(124,92,255,.20); --cell2:rgba(56,182,255,.16); --cell3:rgba(255,120,150,.16);
+  --glass:rgba(20,25,52,.52); --glass2:rgba(20,25,52,.30); --glass-strong:rgba(28,34,70,.80);
+  --edge:rgba(255,255,255,.13); --edge-soft:rgba(255,255,255,.06); --shine:rgba(255,255,255,.16);
+  --ink:#eef1fb; --muted:#a4adca; --line:rgba(170,185,255,.15);
+  --accent:#a191ff; --accent2:#5ad8e6; --accent-ink:#0b0d1d; --accent-soft:rgba(161,145,255,.14);
+  --amber:#ffc95e; --amber-soft:rgba(255,200,90,.12);
+  --good:#62d79c; --good-soft:rgba(98,215,156,.14); --bad:#ff8a8f; --bad-soft:rgba(255,120,130,.13);
+  --shadow:0 30px 70px -30px rgba(0,0,0,.8);
+  --code-bg:rgba(6,8,20,.78); --code-ink:#e6e9f7;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth; scroll-padding-top:96px}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--f-body); font-size:18px; line-height:1.7;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+a{color:var(--accent)}
+code,kbd,.mono{font-family:var(--f-mono); font-size:.85em; font-variant-ligatures:none}
+p code, li code, td code{background:var(--accent-soft); padding:1px 6px; border-radius:6px}
+
+/* ---------- static backdrop ---------- */
+.backdrop{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  background:
+    radial-gradient(42vmax 42vmax at 8% 6%, var(--orb1), transparent 70%),
+    radial-gradient(40vmax 40vmax at 96% 18%, var(--orb2), transparent 70%),
+    radial-gradient(46vmax 46vmax at 82% 96%, var(--orb3), transparent 70%),
+    radial-gradient(36vmax 36vmax at 18% 88%, var(--orb4), transparent 70%),
+    var(--bg)}
+.backdrop svg{position:absolute; inset:0; width:100%; height:100%}
+.grain{position:absolute; inset:0; opacity:.06; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+/* ---------- glass ---------- */
+.glass{
+  position:relative;
+  background:linear-gradient(145deg, var(--glass), var(--glass2));
+  -webkit-backdrop-filter:blur(18px) saturate(1.6); backdrop-filter:blur(18px) saturate(1.6);
+  border:1px solid var(--edge); border-radius:24px;
+  box-shadow:inset 0 1px 0 var(--shine), inset 0 0 0 1px var(--edge-soft), var(--shadow);
+}
+:root[data-battery-saver="true"] .glass{background:var(--glass-strong);backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-battery-saver="true"] .grain{display:none}
+:root[data-battery-saver="true"] .reveal{opacity:1;transform:none;transition:none}
+.icon-btn.saver-btn{width:auto;padding:0 10px;display:flex;white-space:nowrap;gap:6px;font:600 .8rem var(--f-body)}
+.saver-btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+@media(max-width:700px){html{scroll-padding-top:146px}.bar{flex-wrap:wrap}.brand{flex:1 1 0}.tabs{order:3;width:100%}.tab{flex:1}.saver-btn{font-size:.75rem}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .glass{background:var(--glass-strong)}
+}
+@media (prefers-reduced-transparency: reduce){ .glass{background:var(--glass-strong); backdrop-filter:none; -webkit-backdrop-filter:none} }
+
+/* ---------- top bar ---------- */
+.top{position:sticky; top:0; z-index:20; padding:12px max(16px, env(safe-area-inset-left)) 0}
+.bar{max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 10px 8px 14px; border-radius:18px; overflow:hidden}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); min-width:0; margin-right:auto}
+.brand .logo{flex:none; width:34px; height:34px; border-radius:11px; display:grid; place-items:center;
+  background:linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.brand b{font-family:var(--f-display); font-weight:700; font-size:.98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block}
+.brand small{display:block; font-family:var(--f-mono); font-size:.64rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); line-height:1.2}
+.brand span{min-width:0}
+.tabs{display:flex; background:var(--accent-soft); border-radius:13px; padding:4px; gap:2px; border:1px solid var(--edge-soft)}
+.tab{appearance:none; border:0; background:transparent; color:var(--ink); font:600 .95rem var(--f-body); padding:7px 16px; border-radius:10px; cursor:pointer; transition:background .2s, color .2s}
+.tab[aria-selected="true"]{background:linear-gradient(135deg, var(--accent), var(--accent2)); color:var(--accent-ink); box-shadow:0 6px 16px -8px var(--accent)}
+.icon-btn{appearance:none; border:1px solid var(--line); background:var(--glass2); color:var(--ink); width:40px; height:40px; border-radius:12px; display:grid; place-items:center; cursor:pointer; flex:none}
+.icon-btn:hover{background:var(--accent-soft)}
+.progress{position:absolute; left:0; bottom:0; height:3px; width:0; background:linear-gradient(90deg, var(--accent), var(--accent2)); transition:width .15s linear}
+@media (max-width:560px){ .brand small{display:none} .brand b{font-size:.9rem} .tab{padding:7px 11px} .brand .logo{display:none}}
+
+/* ---------- shell ---------- */
+main{position:relative; z-index:1; padding:22px max(16px, env(safe-area-inset-left)) 80px}
+.shell{max-width:1200px; margin:0 auto}
+
+/* hero */
+.hero{padding:clamp(28px,5vw,60px); display:grid; gap:22px; margin-bottom:22px; overflow:hidden}
+.eyebrow{font-family:var(--f-mono); font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 14px}
+.eyebrow span{display:inline-flex; align-items:center; gap:6px}
+.eyebrow .dot{width:7px; height:7px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2))}
+h1,h2,h3,h4{font-family:var(--f-display); letter-spacing:-.02em; text-wrap:balance; margin:0}
+h1{font-size:clamp(2.2rem, 6vw, 4.2rem); line-height:1.02; font-weight:800; max-width:15ch}
+h1 em{font-style:normal; background:linear-gradient(100deg, var(--accent), var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent}
+.lede{font-size:1.16rem; color:var(--muted); max-width:56ch; margin:0}
+.cta{display:flex; flex-wrap:wrap; gap:12px}
+.btn{appearance:none; border:1px solid var(--line); background:var(--glass-strong); color:var(--ink); font:600 1rem var(--f-body); padding:12px 20px; border-radius:14px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:transform .15s, background .2s, border-color .2s}
+.btn:hover{transform:translateY(-1px); border-color:var(--accent)}
+.btn.primary{background:linear-gradient(135deg, var(--accent), var(--accent2)); color:var(--accent-ink); border-color:transparent; box-shadow:0 10px 24px -12px var(--accent)}
+.btn:disabled{opacity:.45; cursor:not-allowed; transform:none; box-shadow:none}
+.stats{display:flex; flex-wrap:wrap; gap:10px}
+.stat{padding:8px 14px; border-radius:13px; background:var(--glass2); border:1px solid var(--edge-soft); font-size:.92rem; color:var(--muted)}
+.stat b{color:var(--ink); font-family:var(--f-display); font-size:1.04rem; margin-right:5px}
+.hero-art{position:absolute; right:40px; top:50%; transform:translateY(-50%); width:min(36%, 380px); pointer-events:none}
+.hero > :not(.hero-art){position:relative; z-index:1}
+@media (max-width:900px){.hero-art{display:none}}
+
+/* ---------- reading ---------- */
+.reading{display:grid; grid-template-columns:260px minmax(0,1fr); gap:22px; align-items:start}
+@media (max-width:1000px){.reading{grid-template-columns:minmax(0,1fr)}}
+.toc{position:sticky; top:90px; padding:18px 14px; max-height:calc(100vh - 112px); overflow:auto; font-size:.92rem}
+.toc h4{font-size:.72rem; font-family:var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:0 8px 8px}
+.toc ol{list-style:none; margin:0; padding:0; counter-reset:t}
+.toc a{display:flex; gap:8px; padding:6px 8px; border-radius:10px; color:var(--muted); text-decoration:none; line-height:1.3}
+.toc a::before{counter-increment:t; content:counter(t, decimal-leading-zero); font-family:var(--f-mono); font-size:.74em; color:var(--accent); min-width:1.7em; padding-top:.2em}
+.toc a:hover{background:var(--accent-soft); color:var(--ink)}
+.toc a.on{background:var(--accent-soft); color:var(--ink); font-weight:600}
+.toc .quiz-link{margin-top:12px; width:100%; justify-content:center}
+@media (max-width:1000px){.toc{position:static; max-height:none} .toc ol{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}}
+
+article{display:flex; flex-direction:column; gap:22px; min-width:0}
+.sec{padding:clamp(22px,4vw,46px)}
+.sec > * + *{margin-top:16px}
+.sec h2{font-size:clamp(1.5rem,3.2vw,2.1rem); line-height:1.12; display:flex; align-items:baseline; gap:14px}
+.sec h2 .n{font-family:var(--f-mono); font-size:.48em; color:var(--accent); background:var(--accent-soft); padding:4px 9px; border-radius:9px; letter-spacing:0; flex:none}
+.sec h3{font-size:1.22rem; margin-top:30px}
+.sec p, .sec li{max-width:74ch}
+.sec ul, .sec ol{padding-left:1.3em}
+.sec li + li{margin-top:6px}
+.sec li::marker{color:var(--accent)}
+.steps{list-style:none; padding:0!important; counter-reset:s; display:grid; gap:10px}
+.steps li{counter-increment:s; position:relative; padding:12px 14px 12px 54px; background:var(--glass2); border:1px solid var(--edge-soft); border-radius:14px; max-width:none}
+.steps li::before{content:counter(s); position:absolute; left:14px; top:12px; width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--accent-ink); display:grid; place-items:center; font:700 .85rem var(--f-display)}
+.callout{border-radius:16px; padding:14px 18px; border:1px solid var(--edge-soft); border-left:4px solid var(--accent); background:var(--accent-soft)}
+.callout.key{border-left-color:var(--amber); background:var(--amber-soft)}
+.callout.warn{border-left-color:var(--bad); background:var(--bad-soft)}
+.callout.story{border-left-color:var(--good); background:var(--good-soft)}
+.callout .lbl{font-style:normal; font-family:var(--f-mono); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; display:block; margin-bottom:4px; color:var(--muted)}
+.callout p{margin:6px 0 0}
+.callout ol, .callout ul{margin:6px 0 0}
+.defs{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px}
+.def{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:14px 16px; line-height:1.5}
+.def b{display:block; font-family:var(--f-display); font-size:1rem; margin-bottom:4px}
+.def b .sym{color:var(--accent); font-family:var(--f-mono); margin-right:6px}
+.def span{color:var(--muted); font-size:.95rem}
+.tbl{overflow-x:auto; border-radius:16px; border:1px solid var(--line)}
+table{border-collapse:collapse; width:100%; font-size:.95rem; line-height:1.45; background:var(--glass-strong)}
+th,td{padding:10px 14px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line)}
+th{font-family:var(--f-display); font-weight:600; background:var(--accent-soft); font-size:.88rem}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--f-mono); font-size:.86rem; white-space:nowrap}
+td.y{color:var(--good); font-weight:700} td.no{color:var(--bad); font-weight:700}
+.tblcap{font-family:var(--f-mono); font-size:.74rem; color:var(--muted); margin-bottom:-8px; letter-spacing:.04em}
+pre.code{margin:0; background:var(--code-bg); color:var(--code-ink); border-radius:16px; padding:16px 18px; overflow-x:auto; font:500 .84rem/1.6 var(--f-mono); border:1px solid rgba(255,255,255,.08); box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+pre.code .c{color:#8b95b8; font-style:italic}
+pre.code .k{color:#c4b5ff}
+pre.code .s{color:#7fe3c8}
+.codecap{font-family:var(--f-mono); font-size:.74rem; color:var(--muted); margin-bottom:-8px}
+figure{margin:0}
+.fig button{appearance:none; border:0; padding:clamp(8px,2vw,16px); background:#fff; border-radius:16px; width:100%; cursor:zoom-in; display:block; box-shadow:0 0 0 1px var(--line), 0 12px 30px -20px rgba(0,0,0,.4); transition:transform .2s}
+.fig button:hover{transform:scale(1.006)}
+.fig img{width:100%; height:auto; display:block; margin:0 auto}
+.fig.narrow button{max-width:520px; margin:0 auto}
+.fig.mid button{max-width:720px; margin:0 auto}
+.fig figcaption{font-size:.9rem; color:var(--muted); margin-top:8px; text-align:center; max-width:none}
+.fig figcaption b{color:var(--ink); font-family:var(--f-display); font-weight:600}
+.pair{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; align-items:start}
+.scan{display:grid; gap:8px; font-family:var(--f-mono); font-size:.9rem; overflow-x:auto}
+.scan .row{display:flex; gap:6px; align-items:center; flex-wrap:nowrap}
+.scan .lab{width:110px; flex:none; color:var(--muted); font-size:.76rem}
+.scan i{font-style:normal; flex:none; width:44px; height:38px; display:grid; place-items:center; border-radius:10px; background:var(--glass-strong); border:1px solid var(--line)}
+.scan .ex i{background:var(--accent-soft); border-color:transparent; color:var(--accent); font-weight:600}
+.scan .in i{background:rgba(11,147,168,.12); border-color:transparent; color:var(--accent2); font-weight:600}
+.takeaways{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; list-style:none; padding:0!important}
+.takeaways li{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:14px 16px; max-width:none; margin:0!important}
+details.ex{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:12px 16px}
+details.ex + details.ex{margin-top:10px}
+details.ex summary{cursor:pointer; font-weight:600}
+details.ex p{margin:8px 0 0}
+.end-cta{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(22px,4vw,46px)}
+.end-cta h3{font-size:1.35rem}
+
+.reveal{opacity:0; transform:translateY(16px); transition:opacity .55s ease, transform .55s ease}
+.reveal.in{opacity:1; transform:none}
+
+/* ---------- quiz ---------- */
+.quiz{max-width:840px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+.qcard{padding:clamp(20px,4vw,38px); display:flex; flex-direction:column; gap:18px}
+.qcard h2{font-size:clamp(1.45rem,3.2vw,1.95rem)}
+.muted{color:var(--muted)}
+.label{font-family:var(--f-mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block}
+.seg{display:flex; flex-wrap:wrap; gap:8px}
+.chip{appearance:none; border:1px solid var(--line); background:var(--glass-strong); color:var(--ink); font:600 .9rem var(--f-body); padding:8px 14px; border-radius:999px; cursor:pointer; transition:background .15s, border-color .15s}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--accent-ink); border-color:transparent}
+.chip small{opacity:.75; font-weight:400; margin-left:4px}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.row.between{justify-content:space-between}
+.qhead{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; font-size:.92rem}
+.counter{font-family:var(--f-mono); color:var(--muted)}
+.tag{font-family:var(--f-mono); font-size:.72rem; letter-spacing:.05em; padding:4px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent)}
+.live{font-family:var(--f-mono); font-size:.86rem}
+.live .g{color:var(--good)} .live .r{color:var(--bad)}
+.qbar{height:6px; border-radius:6px; background:var(--accent-soft); overflow:hidden}
+.qbar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease}
+.question{font-family:var(--f-display); font-size:clamp(1.12rem,2.4vw,1.38rem); line-height:1.38; font-weight:600; margin:0}
+.mode{margin:-6px 0 0; font-size:.9rem; color:var(--muted); font-style:italic}
+.opts{display:grid; gap:10px; list-style:none; padding:0; margin:0}
+.opt{appearance:none; width:100%; text-align:left; border:1.5px solid var(--line); background:var(--glass-strong); color:var(--ink); font:400 1.02rem/1.45 var(--f-body); padding:13px 16px; border-radius:16px; cursor:pointer; display:flex; gap:14px; align-items:flex-start; transition:border-color .15s, background .15s, transform .15s}
+.opt:hover:not(:disabled){border-color:var(--accent); transform:translateX(3px)}
+.opt .k{flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background:var(--accent-soft); font:700 .82rem var(--f-mono); color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.sel{border-color:var(--accent); background:var(--accent-soft)}
+.opt.sel .k{background:var(--accent); color:var(--accent-ink)}
+.opt.correct{border-color:var(--good); background:var(--good-soft)}
+.opt.correct .k{background:var(--good); color:#fff}
+.opt.answer{border-color:var(--good); border-style:dashed}
+.opt.answer .k{background:var(--good-soft); color:var(--good)}
+.opt.answer::after{content:"correct answer"; margin-left:auto; align-self:center; font:600 .68rem var(--f-mono); color:var(--good); text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; padding-left:8px}
+.opt.wrong{border-color:var(--bad); background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad); color:#fff}
+.opt.dim{opacity:.55}
+.opt.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.explain{border-radius:16px; padding:14px 18px; background:var(--accent-soft); border:1px solid var(--edge-soft); border-left:4px solid var(--accent); animation:pop .3s ease}
+.explain.ok{border-left-color:var(--good); background:var(--good-soft)}
+.explain.no{border-left-color:var(--bad); background:var(--bad-soft)}
+.explain b{font-family:var(--f-display)}
+.explain p{margin:6px 0 0}
+@keyframes pop{from{opacity:0; transform:translateY(6px)}}
+.hint{font-size:.82rem; color:var(--muted); margin:0}
+kbd{border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:1px 6px; background:var(--glass-strong)}
+.result-top{display:flex; gap:24px; align-items:center; flex-wrap:wrap}
+.ring{--p:0; width:140px; height:140px; border-radius:50%; flex:none; display:grid; place-items:center;
+  background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--accent-soft) 0)}
+.ring div{width:112px; height:112px; border-radius:50%; background:var(--glass-strong); display:grid; place-items:center; text-align:center; line-height:1.1}
+.ring b{font:800 1.9rem var(--f-display)} .ring small{color:var(--muted); font-size:.78rem}
+.topics{display:grid; gap:8px}
+.trow{display:grid; grid-template-columns:minmax(0,1fr) 120px 52px; gap:10px; align-items:center; font-size:.92rem}
+.trow .tb{height:8px; border-radius:8px; background:var(--accent-soft); overflow:hidden}
+.trow .tb i{display:block; height:100%; background:var(--good)}
+.trow .tb i.mid{background:var(--amber)} .trow .tb i.low{background:var(--bad)}
+.trow span:last-child{font-family:var(--f-mono); text-align:right; color:var(--muted)}
+.review{display:grid; gap:12px}
+.ritem{border:1px solid var(--line); border-radius:16px; padding:14px 16px; background:var(--glass-strong)}
+.ritem p{margin:4px 0}
+.ritem .q{font-weight:700}
+.ritem .you{color:var(--bad)} .ritem .ans{color:var(--good)}
+.ritem .why{color:var(--muted); font-size:.94rem}
+.best{font-size:.9rem}
+
+/* lightbox */
+dialog.lb{border:0; padding:0; background:transparent; max-width:min(1200px,96vw); width:100%}
+dialog.lb::backdrop{background:rgba(5,8,20,.86)}
+dialog.lb img{width:100%; height:auto; background:#fff; border-radius:14px; display:block; padding:12px}
+dialog.lb p{color:#e7ebf7; text-align:center; font-size:.95rem; margin:10px 0 0}
+dialog.lb button{position:absolute; top:8px; right:8px; background:rgba(0,0,0,.6); color:#fff; border:0; width:38px; height:38px; border-radius:10px; font-size:1.2rem; cursor:pointer}
+
+footer{position:relative; z-index:1; text-align:center; color:var(--muted); font-size:.85rem; padding:0 16px 40px}
+footer a{color:var(--muted)}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1; transform:none; transition:none} html{scroll-behavior:auto}
+  .opt, .btn, .fig button{transition:none} .opt.shake{animation:none}
+}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true">
+  <svg id="bg-grid" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1600 1000"></svg>
+  <div class="grain"></div>
+</div>
+
+<header class="top">
+  <div class="bar glass">
+    <a class="brand" href="../../index.html" title="All courses">
+      <span class="logo"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true" fill="#fff"><rect x="1" y="1" width="7" height="7" rx="2"/><rect x="10" y="1" width="7" height="7" rx="2" opacity=".55"/><rect x="1" y="10" width="7" height="7" rx="2" opacity=".55"/><rect x="10" y="10" width="7" height="7" rx="2"/></svg></span>
+      <span><small>IT 2004 · Week 05</small><b>Parallel Algorithms &amp; Patterns</b></span>
+    </a>
+    <div class="tabs" role="tablist" aria-label="View">
+      <button class="tab" role="tab" id="tab-read" aria-selected="true" aria-controls="view-read">Reading</button>
+      <button class="tab" role="tab" id="tab-quiz" aria-selected="false" aria-controls="view-quiz">Quiz</button>
+    </div>
+    <button class="icon-btn saver-btn" id="battery-saver" aria-pressed="false" title="Reduce visual effects while keeping the page readable">Battery saver: off</button>
+    <button class="icon-btn" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="progress" id="progress"></div>
+  </div>
+</header>
+
+<main>
+<div class="shell">
+
+<!-- ======================= READING ======================= -->
+<section id="view-read" role="tabpanel" aria-labelledby="tab-read">
+  <div class="hero glass">
+    <div class="eyebrow"><span><i class="dot"></i>IT 2004 · Parallel Programming</span><span>Reading 05 · Chapter 5</span><span>2026/2027</span></div>
+    <h1>Parallel algorithms <em>and patterns</em></h1>
+    <p class="lede">How to judge an algorithm on real hardware, why hashing beats comparisons on parallel machines, and two patterns you will meet everywhere: the prefix sum and the reproducible global sum.</p>
+    <div class="cta">
+      <a class="btn primary" href="#s1">Start reading ↓</a>
+      <button class="btn" data-go="quiz">Take the quiz →</button>
+    </div>
+    <div class="stats">
+      <span class="stat"><b>14</b>chapters</span>
+      <span class="stat"><b>21</b>figures</span>
+      <span class="stat"><b id="qcount-hero">—</b>quiz questions</span>
+      <span class="stat"><b>~45</b>min read</span>
+    </div>
+    <svg class="hero-art" viewBox="0 0 380 300" aria-hidden="true" fill="none">
+      <defs>
+        <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent2)"/></linearGradient>
+      </defs>
+      <g font-family="JetBrains Mono, monospace" font-size="15" font-weight="600" text-anchor="middle">
+        <g>
+          <rect x="20" y="30" width="340" height="52" rx="14" fill="var(--glass-strong)" stroke="var(--line)"/>
+          <text x="20" y="20" text-anchor="start" fill="var(--muted)" font-size="11" letter-spacing="2">X</text>
+          <g fill="var(--ink)"><text x="52" y="62">3</text><text x="94" y="62">4</text><text x="136" y="62">6</text><text x="178" y="62">3</text><text x="220" y="62">8</text><text x="262" y="62">7</text><text x="304" y="62">5</text><text x="338" y="62">4</text></g>
+        </g>
+        <g stroke="url(#hg)" stroke-width="2" stroke-linecap="round">
+          <path d="M52 86 94 140M94 86 136 140M136 86 178 140M178 86 220 140M220 86 262 140M262 86 304 140M304 86 338 140" opacity=".55"/>
+        </g>
+        <g>
+          <rect x="20" y="144" width="340" height="52" rx="14" fill="url(#hg)" opacity=".16"/>
+          <rect x="20" y="144" width="340" height="52" rx="14" stroke="url(#hg)"/>
+          <text x="20" y="214" text-anchor="start" fill="var(--muted)" font-size="11" letter-spacing="2">EXCLUSIVE SCAN</text>
+          <g fill="var(--accent)"><text x="52" y="176">0</text><text x="94" y="176">3</text><text x="136" y="176">7</text><text x="178" y="176">13</text><text x="220" y="176">16</text><text x="262" y="176">24</text><text x="304" y="176">31</text><text x="338" y="176">36</text></g>
+        </g>
+        <g>
+          <rect x="60" y="232" width="56" height="44" rx="12" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="88" y="260" fill="var(--accent)">h(k)</text>
+          <path d="M120 254h40" stroke="var(--accent2)" stroke-width="2"/><path d="M154 248l8 6-8 6" stroke="var(--accent2)" stroke-width="2"/>
+          <g stroke="var(--line)"><rect x="168" y="232" width="34" height="44" rx="8" fill="var(--glass-strong)"/><rect x="206" y="232" width="34" height="44" rx="8" fill="url(#hg)" opacity=".5"/><rect x="244" y="232" width="34" height="44" rx="8" fill="var(--glass-strong)"/><rect x="282" y="232" width="34" height="44" rx="8" fill="var(--glass-strong)"/><rect x="320" y="232" width="34" height="44" rx="8" fill="url(#hg)" opacity=".3"/></g>
+        </g>
+      </g>
+    </svg>
+  </div>
+
+  <div class="reading">
+    <nav class="toc glass" aria-label="Contents">
+      <h4>Contents</h4>
+      <ol id="toc">
+        <li><a href="#s1">Algorithms vs patterns</a></li>
+        <li><a href="#s2">Learning objectives</a></li>
+        <li><a href="#s3">Algorithmic complexity</a></li>
+        <li><a href="#s4">Performance models</a></li>
+        <li><a href="#s5">Comparison sort vs hash sort</a></li>
+        <li><a href="#s6">Hash functions</a></li>
+        <li><a href="#s7">Spatial hashing &amp; AMR</a></li>
+        <li><a href="#s8">Perfect hash: neighbor finding</a></li>
+        <li><a href="#s9">Perfect hash: remap, lookup, sort</a></li>
+        <li><a href="#s10">Compact hashing</a></li>
+        <li><a href="#s11">Prefix sum (scan)</a></li>
+        <li><a href="#s12">Global sum &amp; reproducibility</a></li>
+        <li><a href="#s13">Traits of parallel algorithms</a></li>
+        <li><a href="#s14">Key takeaways &amp; exercises</a></li>
+      </ol>
+      <button class="btn primary quiz-link" data-go="quiz">Take the quiz →</button>
+    </nav>
+
+    <article>
+      <!-- 01 -->
+      <section class="sec glass reveal" id="s1">
+        <h2><span class="n">01</span>Algorithms vs patterns</h2>
+        <p>Algorithms, together with the data structures from chapter 4, are the base of every computational application. Before we parallelize a code, it pays to think hard about the key algorithms inside it, because the choice of algorithm often decides how far the code can scale. This chapter separates two ideas that people often mix up.</p>
+        <div class="defs">
+          <div class="def"><b>Parallel algorithm</b><span>A well-defined, step-by-step procedure that emphasizes concurrency to <i>solve a problem</i>. Examples: sorting, searching, optimization, matrix operations.</span></div>
+          <div class="def"><b>Parallel pattern</b><span>A concurrent, separable <i>fragment</i> of code that shows up again and again in different programs. On its own it does not solve a complete problem. Examples: reductions, prefix scans, ghost cell updates.</span></div>
+        </div>
+        <p>The same procedure can be an algorithm in one program and a pattern in another. What matters is its role: if it achieves the main goal, it is an algorithm; if it is only one part of a bigger computation, it is a pattern. Learning to spot “parallel-friendly” patterns early makes later parallelization much easier.</p>
+        <p>The chapter returns to three patterns: the <b>prefix scan</b> (section 11 here), the <b>reduction</b> (section 12), and ghost cell updates (covered later in the book, in chapter 8).</p>
+      </section>
+
+      <!-- 02 -->
+      <section class="sec glass reveal" id="s2">
+        <h2><span class="n">02</span>Learning objectives</h2>
+        <p>After this reading you should be able to:</p>
+        <ul>
+          <li>explain algorithmic, computational (step) and time complexity, and the notations Big&nbsp;O, Big&nbsp;Ω and Big&nbsp;Θ;</li>
+          <li>build a simple performance model that counts cache line loads and use it to compare a linear search with a bisection search;</li>
+          <li>explain why non-comparison algorithms such as the hash sort break the <i>O</i>(<i>N</i> log <i>N</i>) limit and parallelize well, even on GPUs;</li>
+          <li>define hash, bucket, perfect hash, minimal perfect hash, compact hash, load factor, collision and open addressing;</li>
+          <li>describe how a spatial hash is used for neighbor finding, remapping, table lookup and sorting on AMR meshes;</li>
+          <li>compute inclusive and exclusive prefix sums, and compare the step-efficient, work-efficient and large-array scan algorithms;</li>
+          <li>explain why parallel global sums are not reproducible and name the enhanced-precision fixes (long double, pairwise, Kahan, Knuth, quad precision);</li>
+          <li>list the traits that make an algorithm suitable for highly parallel hardware.</li>
+        </ul>
+      </section>
+
+      <!-- 03 -->
+      <section class="sec glass reveal" id="s3">
+        <h2><span class="n">03</span>Algorithmic complexity</h2>
+        <p>The development of parallel algorithms is a young field, and even its vocabulary still comes from the serial world. The traditional way to evaluate an algorithm is its <b>algorithmic complexity</b>.</p>
+        <div class="callout key"><span class="lbl">Definition</span><b>Algorithmic complexity</b> is a measure of the number of operations it takes to complete an algorithm. It is a property of the algorithm itself: the amount of work in the procedure.</div>
+        <p>Complexity is written in <b>asymptotic notation</b>, which gives the limiting bounds of performance: does the run time grow linearly with the problem size, or faster? <i>N</i> is the size of a long array (the number of cells, particles or elements), and <i>O</i>() can be read as “scales on the order of”. Leading constants are dropped by convention. Rules of thumb:</p>
+        <ul>
+          <li>a simple loop over <i>N</i> items is <i>O</i>(<i>N</i>);</li>
+          <li>a doubly nested loop over <i>N</i> items is <i>O</i>(<i>N</i>²);</li>
+          <li>a tree-based algorithm is <i>O</i>(<i>N</i> log <i>N</i>).</li>
+        </ul>
+        <div class="defs">
+          <div class="def"><b><span class="sym">O</span>Big O</b><span>The <b>worst case</b> limit of an algorithm’s performance. A doubly nested loop over an array of size <i>N</i> is <i>O</i>(<i>N</i>²).</span></div>
+          <div class="def"><b><span class="sym">Ω</span>Big Omega</b><span>The <b>best case</b> performance of an algorithm.</span></div>
+          <div class="def"><b><span class="sym">Θ</span>Big Theta</b><span>The <b>average case</b> performance of an algorithm (the meaning used in this book).</span></div>
+        </div>
+        <div class="callout"><span class="lbl">Notation in this chapter</span>The book associates O with worst case, Ω with best case and Θ with average case. The quiz explicitly asks for that usage. Formally, these symbols mean upper, lower and tight asymptotic bounds; each can describe a specified best, average or worst case. A bound alone does not identify the case. The tree example above is a rule of thumb, not a statement about every tree operation.</div>
+        <h3>Two adjusted definitions for parallel hardware</h3>
+        <p>Traditional texts use algorithmic, computational and time complexity as synonyms. On modern parallel hardware time does not scale with the amount of work, so the book separates them:</p>
+        <div class="defs">
+          <div class="def"><b>Computational complexity (step complexity)</b><span>The number of <b>steps</b> needed to complete the algorithm. It depends on the implementation and the hardware and includes the available parallelism: on a vector or multi-core machine one step (cycle) can be four or more floating-point operations.</span></div>
+          <div class="def"><b>Time complexity</b><span>Takes into account the <b>actual cost</b> of an operation on a modern computer. The biggest adjustment is the cost of <b>memory loads and caching</b>.</span></div>
+        </div>
+        <div class="callout"><span class="lbl">Limitation</span>Asymptotic complexity is one-dimensional. It only tells you how the cost grows in the limit of very large <i>N</i>; it gives no equation for the absolute run time of a real problem of finite size. For that we need a performance model.</div>
+      </section>
+
+      <!-- 04 -->
+      <section class="sec glass reveal" id="s4">
+        <h2><span class="n">04</span>Performance models</h2>
+        <p>A <b>performance model</b> (introduced in chapter 4) describes an algorithm’s performance much more completely than complexity analysis. The biggest difference: <b>we do not hide the constant multiplier</b>. Logarithms are also written exactly: a binary tree really costs log<sub>2</sub>&nbsp;<i>N</i>, not just “log&nbsp;<i>N</i>”. In complexity analysis such differences are constants that disappear, but in real-world problems they do not cancel out, and they decide which of two similar approaches is faster.</p>
+        <div class="callout story"><span class="lbl">Example · conference registration</span>
+          You must hand registration packets to 100 participants.
+          <ol>
+            <li><b>Unsorted folders.</b> Participants line up and for each one you search the 100 folders. Worst case 100 looks, average 50, and 100 if the packet is missing. <i>N</i> participants × <i>N</i> folders is a doubly nested loop: <i>O</i>(<i>N</i>²). Even if the folders shrink as packets are handed out, <i>N</i> + (<i>N</i>−1) + (<i>N</i>−2) + … is still <i>O</i>(<i>N</i>²).</li>
+            <li><b>Presorted folders.</b> Sort the packets alphabetically before registration and use a bisection search for each person: <i>O</i>(<i>N</i> log <i>N</i>) in the worst case.</li>
+          </ol>
+          <p>Asymptotic analysis describes one million participants, but the conference has 100. For finite sizes we need a fuller picture.</p>
+        </div>
+        <h3>Bisection search vs linear search, counted in cache lines</h3>
+        <p>Find an entry in a sorted array of <b>256 four-byte integers</b>. A cache line is 64 bytes, so it holds 16 integers and the whole array is 16 cache lines.</p>
+        <div class="tbl"><table>
+          <tr><th>Model</th><th>Linear search</th><th>Bisection (binary) search</th><th>Ratio</th></tr>
+          <tr><td>Count operations (steps)</td><td class="num">worst 256, average 128</td><td class="num">log<sub>2</sub> 256 = 8</td><td class="num">~16× slower</td></tr>
+          <tr><td>Count cache line loads</td><td class="num">worst 16, average (256/16)/2 = 8</td><td class="num">log<sub>2</sub>(256/16) = 4</td><td class="num">only ~2× slower</td></tr>
+        </table></div>
+        <p>The time-based model assumes that work on data already in cache is almost free (a couple of cycles), while loading a cache line costs about <b>100 cycles</b>. So we count only cache line loads and ignore the comparisons. Bisection is still faster, but only about <b>2×</b>, not the 16× that operation counting promises.</p>
+        <p>Several more effects can even make the linear search win:</p>
+        <ul>
+          <li>a linear algorithm is much easier to parallelize than a logarithmic one;</li>
+          <li>hardware is built to walk linearly through an array and <b>prefetch</b> the next data;</li>
+          <li>if the item sits near the beginning of the array, bisection does much worse than a linear search.</li>
+        </ul>
+        <div class="callout warn"><span class="lbl">Parallel twist · 32 threads</span>Run the search on 32 threads of a multi-core CPU or GPU. The threads must wait for the <b>slowest</b> one in each operation. Bisection always costs 4 cache loads, but the linear search varies per thread, and the worst thread controls the time, so the cost is closer to <b>16</b> cache lines than to the average of 8.</div>
+        <p>The book tests this in a real table lookup (listings 5.1 and 5.2). The linear version is a short, cache-friendly loop; the bisection version calls a small helper:</p>
+        <p class="codecap">Bisection helper used for the table lookup (listing 5.2)</p>
+<pre class="code"><span class="k">int</span> bisection(<span class="k">double</span> *axis, <span class="k">int</span> axis_size, <span class="k">double</span> value)
+{
+   <span class="k">int</span> ibot = 0;
+   <span class="k">int</span> itop = axis_size+1;
+   <span class="k">while</span> (itop - ibot > 1){          <span class="c">// halve the range each pass</span>
+      <span class="k">int</span> imid = (itop + ibot) /2;
+      <span class="k">if</span> ( value >= axis[imid] ) ibot = imid;
+      <span class="k">else</span>                        itop = imid;
+   }
+   <span class="k">return</span>(ibot);
+}</pre>
+        <p><b>Spoiler</b> (figure 5.8 later): the bisection search turns out to be <i>no faster</i> than the linear search in that test. But the analysis also shows that the linear search is not as slow as you might expect.</p>
+      </section>
+
+      <!-- 05 -->
+      <section class="sec glass reveal" id="s5">
+        <h2><span class="n">05</span>Comparison sort vs hash sort</h2>
+        <p>This example shows that an approach that is <b>comparison-free and less synchronous</b> is easier to implement and faster on highly parallel hardware.</p>
+        <div class="pair">
+          <div class="callout warn"><span class="lbl">Comparison sort (bubble sort)</span>
+            <ol>
+              <li>Each person compares their last name with their neighbor in the row and moves left if their name comes earlier, right if later.</li>
+              <li>Repeat for up to <i>N</i> steps.</li>
+            </ol>
+            <p>Think of each auditorium row as a GPU <b>workgroup</b>. Workgroups cannot communicate with each other, so at the end of a row you must <b>exit the kernel</b> to compare with the next row. Many kernel invocations add code complexity and run time.</p>
+          </div>
+          <div class="callout story"><span class="lbl">Hash sort</span>
+            <ol>
+              <li>Put a sign for each letter at the front of the room.</li>
+              <li>Each person goes to the table with the first letter of their last name.</li>
+              <li>For crowded letters, repeat with the second letter; for small groups use any simple sort.</li>
+            </ol>
+            <p>No one compares with anyone. Every person acts <b>independently</b>.</p>
+          </div>
+        </div>
+        <p>A bubble sort steps through the list, compares adjacent elements and swaps them if they are out of order, repeating until sorted, and it generally performs poorly. Even the <b>best comparison sort has a complexity limit of <i>O</i>(<i>N</i> log <i>N</i>)</b>. The hash sort breaks this barrier because it uses <b>no comparisons</b>: on average it is <b>Θ(1) per participant and Θ(<i>N</i>) for all</b>. More important for us, the operation for each participant is completely independent, so it parallelizes easily, even on less synchronous GPU architectures.</p>
+        <div class="callout key"><span class="lbl">Putting it together</span>Hash-sort both the participants and the folders, then open several registration lines split by alphabet. Two hash sorts are Θ(<i>N</i>); with <i>P</i> processors the work becomes Θ(<i>N</i>/<i>P</i>). For 16 processors and 100 participants the speedup over the serial brute-force method is 100² / (100/16) = <b>1,600×</b>. This is exactly how well-organized conferences and school registrations run.</div>
+      </section>
+
+      <!-- 06 -->
+      <section class="sec glass reveal" id="s6">
+        <h2><span class="n">06</span>Hash functions</h2>
+        <p>Hashing techniques date from the 1950s and 60s. A <b>hash function</b> encodes a <b>key</b> into a hash used to locate a <b>bucket</b> (or <b>bin</b>). A <b>hash table</b> uses that location and, when necessary, key comparisons and collision handling to retrieve the associated <b>value</b>. The chapter uses a dictionary analogy: a last name is the key and a username is the value. Distinct keys can hash to the same bucket, so hashing alone does not guarantee uniqueness. The best hash design is usually problem-specific.</p>
+        <figure class="fig narrow">
+          <button data-zoom aria-label="Enlarge figure 5.1"><img src="images/fig-5-1.png" alt="Hash table: keys Romero and Landry hash to 59 and 13, which point to the values sal and dar" loading="lazy"></button>
+          <figcaption><b>Figure 5.1</b> A hash table that looks up a username (moniker) by last name. Romero: R = 82, O = 79 in ASCII, so (82 − 64 + 26) + (79 − 64) = 59.</figcaption>
+        </figure>
+        <div class="defs">
+          <div class="def"><b>Perfect hash</b><span>At most <b>one entry in each bucket</b>. Simple to handle (no collisions) but can take more memory.</span></div>
+          <div class="def"><b>Minimal perfect hash</b><span>Exactly one entry in each bucket and <b>no empty buckets</b>. Slower to compute; worth it for fixed key sets such as programming-language keywords.</span></div>
+          <div class="def"><b>Compact hash</b><span>Compresses the hash so it needs <b>less memory</b>. Both the key and the value are stored, so on retrieval the key can be checked.</span></div>
+          <div class="def"><b>Load factor</b><span>The fraction of the hash that is filled: <b><i>n</i>/<i>k</i></b>, entries divided by buckets. Compact hashes still work at 0.8–0.9; above that collisions hurt efficiency.</span></div>
+          <div class="def"><b>Collision</b><span>More than one key wants to store its value in the <b>same bucket</b>. A good hash function spreads keys uniformly, which avoids clustering and allows higher load factors.</span></div>
+        </div>
+        <p>Most hashes in this chapter are created on the fly, queried and thrown away, so a <b>fast creation time matters more than memory size</b>. As always, there are trade-offs between programming complexity, run time and memory.</p>
+        <div class="callout warn"><span class="lbl">Why the first letter is a weak hash</span>Last names are not evenly distributed across the alphabet, so buckets get unequal numbers of entries. Using the integer representation of the first four letters is not great either: letters give only 52 possible values of the 256 per byte, so only a fraction of the integer keys are used. A hash function designed for characters needs far fewer storage locations.</div>
+      </section>
+
+      <!-- 07 -->
+      <section class="sec glass reveal" id="s7">
+        <h2><span class="n">07</span>Spatial hashing &amp; adaptive mesh refinement</h2>
+        <p>Scientific simulations often use meshes that are finer only where detail matters. In the Krakatau wave example, the team wants high resolution at the wave front and the shoreline but not elsewhere, so they choose <b>adaptive mesh refinement (AMR)</b>. (Image analysis could profit from the same idea: when a cell has mixed characteristics, just split it.) The biggest obstacle is that such meshes make the code more complicated and need new techniques that scale on parallel hardware.</p>
+        <div class="pair">
+          <div>
+            <p><b>Cell-based AMR</b> belongs to the unstructured mesh techniques. The cell data arrays are one-dimensional and <b>can be in any order</b>; extra arrays carry each cell’s size and location. A fully unstructured mesh goes further, with triangles or polyhedra that “fit” the land/ocean boundary at the cost of more complex numerics. AMR methods come in three kinds: <b>patch</b>, <b>block</b> and <b>cell-based</b>; patch and block methods still exploit some regular structure, while cell-based data is truly unstructured.</p>
+            <p>The <b>CLAMR</b> mini-app (shallow water, cell-based AMR) was written by summer students at Los Alamos in 2011 to see if cell-based AMR could run on GPUs. They found breakthrough parallel algorithms that also made the CPU code faster. The most important one was the <b>spatial hash</b>.</p>
+          </div>
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 5.2"><img src="images/fig-5-2.png" alt="Cell-based AMR mesh of a wave radiating from the upper right corner, with small cells along the wave front" loading="lazy"></button>
+            <figcaption><b>Figure 5.2</b> A cell-based AMR mesh from CLAMR. Small cells follow the wave front.</figcaption>
+          </figure>
+        </div>
+        <h3>What a spatial hash is</h3>
+        <p><b>Spatial hashing</b> uses a key based on <b>spatial information</b>: objects are mapped onto a grid of buckets arranged in a regular pattern. Each lookup keeps the average complexity of <b>Θ(1)</b>, every spatial query can be done with a spatial hash, and many are much faster than the alternatives.</p>
+        <figure class="fig">
+          <button data-zoom aria-label="Enlarge figure 5.3"><img src="images/fig-5-3.png" alt="Unstructured and AMR meshes, a 2D spatial hash, and particles binned by interaction distance" loading="lazy"></button>
+          <figcaption><b>Figure 5.3</b> Meshes, particles and objects mapped onto a spatial hash, so only nearby items need to be considered.</figcaption>
+        </figure>
+        <ul>
+          <li><b>Bucket size</b> follows the characteristic size of the objects: for a cell-based AMR mesh, the <b>minimum cell size</b>; for particles, the <b>interaction distance</b>. Then only the immediately adjacent buckets need to be checked for interactions or collisions.</li>
+          <li>AMR and unstructured meshes are called <b>differential discretized data</b>: cells get smaller where gradients are steeper. There is a limit to how small they get, which keeps buckets from becoming too small.</li>
+          <li>Meshes store their cell indices in all the buckets under each cell; particles and objects store their indices or identifiers.</li>
+          <li>Collision detection is a big application area: smooth particle hydrodynamics, molecular dynamics, astrophysics, and also <b>game engines and computer graphics</b>.</li>
+        </ul>
+        <p>Because only neighbors are visited, the cost per particle no longer grows with the size of the domain: particle interactions stay <b>Θ(<i>N</i>)</b> instead of Θ(<i>N</i>²).</p>
+        <p class="codecap">Particle interaction pseudo-code (listing 5.3)</p>
+<pre class="code"><span class="k">forall</span> particles, ip, <span class="k">in</span> NParticles{
+   <span class="k">forall</span> particles, jp, <span class="k">in</span> Adjacent_Buckets{       <span class="c">// not all particles!</span>
+      <span class="k">if</span> (distance between particles &lt; interaction_distance){
+         perform collision or interaction calculation
+      }
+   }
+}</pre>
+      </section>
+
+      <!-- 08 -->
+      <section class="sec glass reveal" id="s8">
+        <h2><span class="n">08</span>Perfect hashing: neighbor finding</h2>
+        <p>With a <b>perfect</b> spatial hash we can guarantee only one entry per bucket, so we never handle collisions. The book studies the four most important spatial operations (code at <code>github.com/lanl/PerfectHash</code>, CPU and OpenCL versions):</p>
+        <div class="defs">
+          <div class="def"><b>Neighbor finding</b><span>Locate the one or two neighbors on each side of a cell.</span></div>
+          <div class="def"><b>Remapping</b><span>Map another AMR mesh onto the current AMR mesh.</span></div>
+          <div class="def"><b>Table lookup</b><span>Find the intervals in a 2D table for interpolation.</span></div>
+          <div class="def"><b>Sorting</b><span>A 1D or 2D sort of the cell data.</span></div>
+        </div>
+        <p>Neighbor finding is one of the most important operations: material leaving one cell has to enter the neighboring cell, and in image analysis the neighbors say a lot about the current cell.</p>
+        <div class="pair">
+          <div>
+            <p><b>CLAMR mesh rules.</b> Across a cell face there can be at most a <b>one-level jump</b> in refinement (this is called a <b>graded mesh</b>). Each cell stores just one neighbor per side: the <b>lower</b> one of a pair on the left/right, and the <b>left</b> one of a pair on the bottom/top. The other one of the pair is found through the first, e.g. <code>ntop[nlft[ic]]</code>.</p>
+          </div>
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 5.4"><img src="images/fig-5-4.png" alt="Cell ic with neighbors nlft, nrht, nbot, ntop and a one-level jump in refinement" loading="lazy"></button>
+            <figcaption><b>Figure 5.4</b> Neighbor conventions in a graded AMR mesh.</figcaption>
+          </figure>
+        </div>
+        <h3>Ways to find neighbors</h3>
+        <div class="tbl"><table>
+          <tr><th>Method</th><th>Idea</th><th>Complexity</th></tr>
+          <tr><td>Naive search</td><td>Compare <i>i</i>, <i>j</i>, level of every other cell. Fine for few cells, explodes quickly.</td><td class="num">O(N²)</td></tr>
+          <tr><td>k-D tree</td><td>Split the mesh into two equal halves in x, then in y, repeat until the object is found. Best for large irregular objects, search from the <b>root</b>.</td><td class="num">O(N log N)</td></tr>
+          <tr><td>Quadtree</td><td>Four children per parent, one per quadrant, which matches AMR subdivision exactly. For a near neighbor of similar size, start at the <b>leaves</b>; with a graded mesh you go up at most two levels.</td><td class="num">O(N log N)</td></tr>
+          <tr><td>Spatial perfect hash</td><td>Write cell numbers into a fine grid, then read the neighbor location.</td><td class="num">Θ(N)</td></tr>
+        </table></div>
+        <p>Trees are comparison-based and work on CPUs, but comparisons and tree construction are hard on GPUs, where comparisons beyond the workgroup are difficult. (A <b>truncated</b> quadtree starts from the coarsest mesh level with one quadtree per coarse cell instead of from a single root.)</p>
+        <h3>The spatial hash algorithm</h3>
+        <p>No collisions are possible if the buckets are the size of the <b>finest</b> cells:</p>
+        <ol class="steps">
+          <li>Allocate a spatial hash the size of the finest level of the AMR mesh.</li>
+          <li><b>Write phase:</b> each cell writes its cell number to all hash buckets underneath it.</li>
+          <li>Compute the index of a finest-level cell one cell outside the current cell on each side.</li>
+          <li><b>Read phase:</b> read the value in that bucket. That is the neighbor.</li>
+        </ol>
+        <figure class="fig">
+          <button data-zoom aria-label="Enlarge figure 5.5"><img src="images/fig-5-5.png" alt="AMR mesh and its hash table; right neighbor of cell 21 found at column 8, row 3, which holds cell 26" loading="lazy"></button>
+          <figcaption><b>Figure 5.5</b> Finding the right neighbor of cell 21: look at column 8, row 3 of the hash, which holds cell 26.</figcaption>
+        </figure>
+        <p class="codecap">Write phase on the CPU (listing 5.4, shortened)</p>
+<pre class="code"><span class="k">for</span>(<span class="k">int</span> ic=0; ic&lt;ncells; ic++){            <span class="c">// GPU: this loop disappears</span>
+   <span class="k">int</span> lev = level[ic];
+   <span class="k">for</span> (<span class="k">int</span> jj=j[ic]*levtable[levmx-lev]; jj&lt;(j[ic]+1)*levtable[levmx-lev]; jj++)
+      <span class="k">for</span> (<span class="k">int</span> ii=i[ic]*levtable[levmx-lev]; ii&lt;(i[ic]+1)*levtable[levmx-lev]; ii++)
+         hash[jj][ii] = ic;                      <span class="c">// cell number into every bucket it covers</span>
+}</pre>
+        <p>On the GPU (OpenCL, listings 5.5 and 5.7) the code is almost the same. The biggest difference is that <b>there is no cell loop</b>: the kernel launch handles the outer loop, and each thread gets its cell index with <code>get_global_id(0)</code>. A guard <code>if (ic &gt;= isize) return;</code> keeps threads from reading past the end of the arrays. The read phase simply reads <code>hash</code> one cell to the left, right, bottom and top, using <code>MAX</code>/<code>MIN</code> to stay inside the mesh.</p>
+        <div class="pair">
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 5.6"><img src="images/fig-5-6.png" alt="Bar chart: k-D tree 1, hash single core 66, parallel hash GPU 3157" loading="lazy"></button>
+            <figcaption><b>Figure 5.6</b> 2D neighbor calculation: 66× from the algorithm, 3,157× in total on the GPU.</figcaption>
+          </figure>
+          <div>
+            <p>Results (NVIDIA V100 GPU vs one core of a Skylake Gold 5118 CPU, “Best(2018)” comparison):</p>
+            <ul>
+              <li>the hash on <b>one CPU core</b> was about an order of magnitude faster than the k-D tree (66×);</li>
+              <li>the GPU added another order of magnitude, for a total of <b>3,157×</b>;</li>
+              <li>the GPU port took <b>less than a day</b>; the k-D tree would take weeks or months on the GPU;</li>
+              <li>the hash code is about a dozen lines, while the k-D tree code is <b>about a thousand lines</b>.</li>
+            </ul>
+            <p>This is not a CPU vs GPU contest: using all 24 virtual cores of the CPU would also give a big parallel speedup.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 09 -->
+      <section class="sec glass reveal" id="s9">
+        <h2><span class="n">09</span>Perfect hashing: remap, table lookup, sort</h2>
+        <h3>Remap</h3>
+        <p>A <b>remap</b> moves values from one mesh to another, so different physics can run on meshes optimized for their needs. The setup is identical to neighbor finding, but the hash is built for the <b>source</b> mesh. In the read phase each <b>target</b> cell queries the hash buckets underneath it and sums the source values, adjusting for the size difference of the cells (dividing by 4 for each level of difference in 2D).</p>
+        <div class="pair">
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 5.7"><img src="images/fig-5-7.png" alt="Bar chart: k-D tree 1, hash single core 21, parallel hash GPU 1217" loading="lazy"></button>
+            <figcaption><b>Figure 5.7</b> Remap: 21× on one CPU core, over 1,000× (1,217×) on the GPU.</figcaption>
+          </figure>
+          <div>
+            <h3 style="margin-top:0">Table lookup</h3>
+            <p>A 51×23 table of equation-of-state values with <b>density</b> and <b>temperature</b> axes, equally spaced. <i>n</i> = axis length, <i>N</i> = number of lookups. Three algorithms:</p>
+            <ul>
+              <li><b>Linear search</b> (brute force): <i>O</i>(<i>n</i>) per query, <i>O</i>(<i>N</i>·<i>n</i>) in total;</li>
+              <li><b>Bisection</b>: <i>O</i>(log <i>n</i>) per query;</li>
+              <li><b>Hash</b>: <i>O</i>(1). Because the axes are equally spaced, the interval is just <code>(value − axis[0]) / increment</code>, an arithmetic expression with <b>no conditionals</b>.</li>
+            </ul>
+          </div>
+        </div>
+        <figure class="fig mid">
+          <button data-zoom aria-label="Enlarge figure 5.8"><img src="images/fig-5-8.png" alt="Bar chart: brute 1.000, bisection 1.005, hash single core 4.056, parallel hash GPU 1326" loading="lazy"></button>
+          <figcaption><b>Figure 5.8</b> Table lookup: bisection is no faster than brute force; the hash gives about 4× on the CPU and 1,326× on the GPU.</figcaption>
+        </figure>
+        <div class="callout key"><span class="lbl">The surprise, explained</span>The simple model predicted 4–5× per axis for bisection (about 2× with interpolation). But the linear search needs at most <b>two cache loads on one axis and four on the other</b>, and bisection needs the same number. Counting cache loads, no difference is expected. The hash goes straight to the interval but still needs a cache load: about 3× fewer loads, plus extra gain from <b>fewer conditionals</b>.</div>
+        <p><b>GPU optimization.</b> A GPU workgroup has a small, fast <b>local memory</b> shared by its threads (about 4,000 doubles). The table has 1,173 values plus 51 + 23 axis values, so it fits. All threads of the workgroup first <b>cooperatively load</b> the table into local memory, then a <code>barrier(CLK_LOCAL_MEM_FENCE)</code> makes sure everything is loaded before any thread interpolates. That is why the GPU gain is larger here than for the other kernels.</p>
+
+        <h3>Sorting with a spatial perfect hash</h3>
+        <p>Spatial sorting helps with nearest neighbors, removing duplicates, range finding and graphics output. Test case: 1D cells with a <b>minimum size of 2.0</b>; every cell size is a power of two times that (2, 4, 8, 16, 32); sizes and order are random. Knowing the minimum value and the minimum distance between values, the bucket index</p>
+        <p style="text-align:center; font-family:var(--f-mono); font-size:1.05rem">b<sub>k</sub> = ⌊ (X<sub>i</sub> − X<sub>min</sub>) / Δ<sub>min</sub> ⌋</p>
+        <p>is guaranteed to be a <b>perfect</b> hash. In figure 5.9 the minimum difference is 2.0 and <i>X</i><sub>min</sub> = 0, so key 8 goes to bucket 4. You can store either the <b>value</b> (read back <code>hash[4]</code>) or the original <b>index</b> (read back <code>keys[hash[4]]</code>). Storing the index is a bit slower but more general: it can reorder all the arrays of a mesh.</p>
+        <div class="pair">
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 5.9"><img src="images/fig-5-9.png" alt="Keys 8, 21, 16, 18, 13, 0, 5, 10, 23, 2 mapped by a hash function into buckets of size 2 from 0 to 24" loading="lazy"></button>
+            <figcaption><b>Figure 5.9</b> Sorting with a spatial perfect hash (bucket size 2, range 0–24).</figcaption>
+          </figure>
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 5.10"><img src="images/fig-5-10.png" alt="Bar chart: quicksort 1.0, hash single core 5.9, parallel hash GPU 246.4" loading="lazy"></button>
+            <figcaption><b>Figure 5.10</b> Hash sort: 5.9× faster than quicksort on one core, 246× on the GPU.</figcaption>
+          </figure>
+        </div>
+        <p class="codecap">Spatial hash sort on the CPU (listing 5.11)</p>
+<pre class="code"><span class="k">uint</span> hash_size = (<span class="k">uint</span>)((max_val - min_val)/min_diff);
+hash = (<span class="k">int</span>*)malloc(hash_size*<span class="k">sizeof</span>(<span class="k">int</span>));
+memset(hash, -1, hash_size*<span class="k">sizeof</span>(<span class="k">int</span>));       <span class="c">// -1 = empty bucket</span>
+
+<span class="k">for</span>(<span class="k">uint</span> i = 0; i &lt; length; i++)                 <span class="c">// write: index into its bucket</span>
+   hash[(<span class="k">int</span>)((arr[i]-min_val)/min_diff)] = i;
+
+<span class="k">int</span> count=0;
+<span class="k">for</span>(<span class="k">uint</span> i = 0; i &lt; hash_size; i++)              <span class="c">// read: sweep buckets in order</span>
+   <span class="k">if</span>(hash[i] >= 0) sorted[count++] = arr[hash[i]];
+free(hash);</pre>
+        <ul>
+          <li>Spatial hash sort is <b>Θ(<i>N</i>)</b>; quicksort is Θ(<i>N</i> log <i>N</i>). The price: it is specialized to the problem and can temporarily take more memory.</li>
+          <li>The code is barely a dozen lines; quicksort is five times longer and far more complicated.</li>
+          <li>The <b>read phase</b> needs a well-implemented <b>prefix sum</b> to retrieve sorted values in parallel (section 11).</li>
+          <li>Earlier tests (2 million values): the GPU version was 3× faster than the fastest general GPU sort, and the serial CPU version 4× faster than quicksort. With 16 million values on current CPUs: nearly <b>6×</b>. A sort written in two or three months beat reference sorts built on decades of research.</li>
+        </ul>
+      </section>
+
+      <!-- 10 -->
+      <section class="sec glass reveal" id="s10">
+        <h2><span class="n">10</span>Compact hashing</h2>
+        <p>The perfect hash methods can be improved further. Two key observations: we <b>do not need to write to every spatial bucket</b>, and if we <b>handle collisions</b>, the hash can be compressed to use far less memory.</p>
+        <h3>Write optimizations for neighbor finding</h3>
+        <p>With six or more refinement levels a coarse cell writes to many hash buckets (the book’s example: 64) while a fine cell writes to just one. That causes <b>load imbalance</b> and <b>thread divergence</b>.</p>
+        <div class="callout warn"><span class="lbl">Definition</span><b>Thread divergence</b>: the amount of work differs between threads, and the threads end up waiting for the slowest one.</div>
+        <figure class="fig">
+          <button data-zoom aria-label="Enlarge figure 5.11"><img src="images/fig-5-11.png" alt="Four hash tables with fewer and fewer writes: full, outer buckets only, corners and midpoints, single write" loading="lazy"></button>
+          <figcaption><b>Figure 5.11</b> Fewer writes, left to right: every bucket → only the outer buckets → only corners/midpoints → one write per cell.</figcaption>
+        </figure>
+        <ol class="steps">
+          <li>Neighbor queries only sample a cell’s <b>outer</b> buckets, so do not write the interior.</li>
+          <li>Only the <b>corners or midpoints</b> are ever queried, so write only those.</li>
+          <li>Write <b>once per cell</b> and do <b>multiple reads</b> to find a finer, same-size or coarser neighbor. This needs the hash initialized to a <b>sentinel value such as −1</b> meaning “no entry”.</li>
+        </ol>
+        <h3>From sparse to compact</h3>
+        <p>Fewer writes leave a lot of empty space. <b>Sparsity</b> is the empty fraction of the hash and shows the opportunity for compression. The hash can be compressed to as little as <b>1.25×</b> the number of entries. The <b>load factor</b> is the inverse of the size multiplier (filled entries / table size), so 1.25× means a load factor of 0.8. In parallel code a much lower load factor of about <b>0.333</b> (size multiplier 3) is typical, so that no processor is slowed down by long collision chains.</p>
+        <figure class="fig">
+          <button data-zoom aria-label="Enlarge figure 5.12"><img src="images/fig-5-12.png" alt="Spatial data stored in a perfect hash of 16 buckets, compressed to 8 buckets, with a collision resolved by probing" loading="lazy"></button>
+          <figcaption><b>Figure 5.12</b> Perfect hash (load factor 6/16) → compact hash (6/8 = 0.75) → a collision in bucket 1 resolved by probing for the next free slot.</figcaption>
+        </figure>
+        <p>When a bucket is taken, the entry looks for the next open slot: <b>open addressing</b>. Other collision methods often need to allocate memory during the operation, which is hard on a GPU, so open addressing (alternate slots inside the already allocated table) is used. Ways to choose the next slot:</p>
+        <div class="defs">
+          <div class="def"><b>Linear probing</b><span>Try the next bucket in sequence until one is open.</span></div>
+          <div class="def"><b>Quadratic probing</b><span>Squared increments: +1, +4, +9, … from the original location. <b>Used by the book</b>, because the first couple of tries are still in the cache.</span></div>
+          <div class="def"><b>Double hashing</b><span>A second hash function gives a deterministic but pseudo-random jump distance.</span></div>
+        </div>
+        <p>Fancier probing avoids <b>clustering</b> of values, which would make store and query sequences long. Once a slot is found, <b>both key and value</b> are stored; a read compares the stored key with the wanted key and tries the next slot if they differ.</p>
+        <figure class="fig mid">
+          <button data-zoom aria-label="Enlarge figure 5.13"><img src="images/fig-5-13.png" alt="Bar chart of optimized neighbor calculations from k-D tree 1 to GPU versions near 30000" loading="lazy"></button>
+          <figcaption><b>Figure 5.13</b> Optimized neighbor finding (six levels, 8.6 million cells). Compact versions perform as well as the perfect hashes with far less memory.</figcaption>
+        </figure>
+        <ul>
+          <li>The CPU gain from the optimizations is <b>modest</b> (more conditionals, and you must count cache lines, not values) and appears mainly at higher refinement levels. The GPU gains more because <b>thread divergence is reduced</b>.</li>
+          <li>The compact hash is competitive because there is much less memory to initialize to −1. With more sparsity than the test’s 30× it can even be faster than the perfect hash. Cell-based AMR typically compresses at least 10×, often more than 100×.</li>
+          <li>CLAMR <b>switches</b> between a perfect hash (low sparsity) and a compact hash (lots of empty space).</li>
+        </ul>
+        <h3>Face neighbors in unstructured meshes</h3>
+        <p>For unstructured (polygonal) meshes a perfect hash is hard to guarantee, so collisions must be handled. Finding the neighbor across each face is so expensive that many codes store the neighbor map; the hash method is fast enough to compute it on the fly:</p>
+        <figure class="fig">
+          <button data-zoom aria-label="Enlarge face neighbor figure"><img src="images/fig-5-face.png" alt="Polygonal cells overlaid on a hash grid, with face centers marked in buckets" loading="lazy"></button>
+          <figcaption><b>Face neighbors with a spatial hash.</b> Each face writes to one of two slots in the bucket at its center (graphic by Rachel Robey).</figcaption>
+        </figure>
+        <ol class="steps">
+          <li>Find the bucket that contains the center of each face.</li>
+          <li>Each cell writes its number into that bucket: into the <b>first</b> slot if the face is to the left and up from the cell center, otherwise into the <b>second</b>.</li>
+          <li>Each cell checks the <b>other</b> slot. A number there is the neighbor; an empty slot means an external face.</li>
+        </ol>
+        <p>Neighbors found with a <b>single write and a single read</b>. The right table size is hard to know in advance: pick a reasonable size from the number of faces or minimum face length and handle collisions.</p>
+        <h3>Remap with a single write</h3>
+        <figure class="fig">
+          <button data-zoom aria-label="Enlarge figure 5.14"><img src="images/fig-5-14.png" alt="Input mesh, hash with -1 sentinels and single writes, and output mesh with two reads" loading="lazy"></button>
+          <figcaption><b>Figure 5.14</b> Single-write, multiple-read remap.</figcaption>
+        </figure>
+        <ul>
+          <li>Each input cell writes its index only to the <b>lower-left corner</b> of its area in the hash (initialized to −1).</li>
+          <li>An output cell reads where a same-size input cell would write. If it finds −1 (or the wrong level), it looks where the <b>next coarser</b> cell would write, and so on. Output cell 1 reads (0,2), finds −1, then reads (0,0) and finds input cell 1.</li>
+          <li>If the input cells there are <b>finer</b>, it <b>recursively descends</b>, averaging four sub-cells per level (<code>avg_sub_cells</code>, returns <code>sum/4.0</code>).</li>
+          <li>Recursion is “not supported” on GPUs, yet this ran fine on every GPU tested: a <b>limited amount of recursion</b> works for the few levels of a practical mesh.</li>
+        </ul>
+        <h3>Hierarchical hash with breadcrumbs</h3>
+        <div class="pair">
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 5.15"><img src="images/fig-5-15.png" alt="Hierarchical hash with a separate table per level and -1 sentinels in coarser levels" loading="lazy"></button>
+            <figcaption><b>Figure 5.15</b> One hash table per level; sentinels leave a “breadcrumb” trail upward.</figcaption>
+          </figure>
+          <div>
+            <ul>
+              <li>Allocate <b>one hash table per mesh level</b>.</li>
+              <li>Each cell writes its index into its own level’s table and leaves a <b>sentinel (−1) in each coarser table</b> above it: a breadcrumb trail meaning “there is data at finer levels”.</li>
+              <li>A read starts at the <b>coarsest</b> table; on a sentinel it descends recursively and sums the finer values.</li>
+              <li>Benefit: the tables do <b>not need to be initialized</b> to a sentinel at the start. Each level can be a perfect or a compact hash, and it also runs fine on GPUs.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11 -->
+      <section class="sec glass reveal" id="s11">
+        <h2><span class="n">11</span>Prefix sum (scan)</h2>
+        <p>The <b>prefix sum</b>, also called a <b>scan</b>, made the parallel hash sort work. It is common in computations with <b>irregular sizes</b>: to work in parallel, each process must know <b>where to start writing</b>. Example: every processor has a different number of particles and must map its local indices to global ones. The output <i>y</i> is a running sum of the input <i>x</i>:</p>
+        <p style="text-align:center; font-family:var(--f-mono); font-size:1.05rem">y<sub>j</sub> = Σ<sub>i=0</sub><sup>j−1</sup> x<sub>i</sub> &nbsp;&nbsp;(exclusive scan)</p>
+        <div class="scan" role="img" aria-label="x = 3 4 6 3 8 7 5 4; exclusive scan 0 3 7 13 16 24 31 36; inclusive scan 3 7 13 16 24 31 36 40">
+          <div class="row"><span class="lab">x (particles)</span><i>3</i><i>4</i><i>6</i><i>3</i><i>8</i><i>7</i><i>5</i><i>4</i></div>
+          <div class="row ex"><span class="lab">exclusive → start</span><i>0</i><i>3</i><i>7</i><i>13</i><i>16</i><i>24</i><i>31</i><i>36</i></div>
+          <div class="row in"><span class="lab">inclusive → end</span><i>3</i><i>7</i><i>13</i><i>16</i><i>24</i><i>31</i><i>36</i><i>40</i></div>
+        </div>
+        <p>An <b>exclusive</b> scan leaves out the current value and gives each process its <b>starting</b> index in the global array; an <b>inclusive</b> scan includes it and gives the <b>exclusive upper bound</b> of its range (the book calls this the ending index). (Figure 5.16 in the book shows the same arrays.)</p>
+        <p class="codecap">Serial inclusive scan (listing 5.15)</p>
+<pre class="code">y[0] = x[0];
+<span class="k">for</span> (<span class="k">int</span> i=1; i&lt;n; i++){
+   y[i] = y[i-1] + x[i];          <span class="c">// each step depends on the previous one</span>
+}</pre>
+        <p>After the scan, each process knows where its results go and can work fully in parallel. The scan itself looks intrinsically serial, but there are effective parallel versions.</p>
+        <h3>Step-efficient scan</h3>
+        <p>Uses the <b>fewest steps</b> (but not the fewest operations). It is a tree-based pattern: in step 1 each element adds the value 1 to its left, then the value 2 to its left, then 4, and so on. All processes stay busy, and the result is an <b>inclusive</b> scan in <b>log<sub>2</sub>&nbsp;<i>n</i></b> steps, but the total work is larger than in the serial algorithm.</p>
+        <figure class="fig mid">
+          <button data-zoom aria-label="Enlarge figure 5.17"><img src="images/fig-5-17.png" alt="Step-efficient scan of x0 to x7 in three steps" loading="lazy"></button>
+          <figcaption><b>Figure 5.17</b> Step-efficient inclusive scan: O(log<sub>2</sub> n) steps.</figcaption>
+        </figure>
+        <h3>Work-efficient scan</h3>
+        <p>Uses the <b>fewest operations</b> (but more steps). It has two sweeps:</p>
+        <div class="pair">
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 5.18"><img src="images/fig-5-18.png" alt="Upsweep phase: partial sums build up to the total in the last element" loading="lazy"></button>
+            <figcaption><b>Figure 5.18</b> <b>Upsweep</b> (a right sweep): every other value is left unmodified; the last element ends with the total.</figcaption>
+          </figure>
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 5.19"><img src="images/fig-5-19.png" alt="Downsweep phase: insert zero in the last element, then swap and add down the tree" loading="lazy"></button>
+            <figcaption><b>Figure 5.19</b> <b>Downsweep</b> (a left sweep): set the last value to zero, then sweep back to get an <b>exclusive</b> scan.</figcaption>
+          </figure>
+        </div>
+        <p>The upsweep starts with half the threads busy and shrinks to one; the downsweep starts with one thread and ends with all threads busy. The extra steps let earlier results be reused, so the total work is only <b>O(<i>N</i>)</b>. <b>Which one to choose depends on how many parallel processes you have.</b> Both are limited to the threads of one GPU workgroup or the processors of a CPU.</p>
+        <h3>Scan for large arrays</h3>
+        <figure class="fig mid">
+          <button data-zoom aria-label="Enlarge figure 5.20"><img src="images/fig-5-20.png" alt="Eight workgroups reduced to sums, scanned into offsets, then offsets applied to each thread" loading="lazy"></button>
+          <figcaption><b>Figure 5.20</b> Large-array scan in three stages (three GPU kernels).</figcaption>
+        </figure>
+        <ol class="steps">
+          <li><b>Kernel 1:</b> a reduction sum on each workgroup, stored in a temporary array that is smaller than the original by the workgroup size (typically up to <b>1,024</b> threads).</li>
+          <li><b>Kernel 2:</b> scan the temporary array in workgroup-sized blocks. It now holds the <b>offset</b> of each workgroup.</li>
+          <li><b>Kernel 3:</b> scan each workgroup-sized chunk of the original array and add the workgroup’s offset to every thread.</li>
+        </ol>
+        <div class="callout"><span class="lbl">In practice</span>The parallel scan is heavily optimized for GPUs, so use a library: <b>CUDPP</b> for CUDA, <b>CLPP</b> or the <code>sort_kern.cl</code> scan from PerfectHash for OpenCL. An OpenMP scan comes in chapter 7.</div>
+      </section>
+
+      <!-- 12 -->
+      <section class="sec glass reveal" id="s12">
+        <h2><span class="n">12</span>Global sum &amp; reproducibility</h2>
+        <p>Not every parallel algorithm is about speed. Since the early days, parallel computing has suffered from sums that are <b>not reproducible</b> across processor counts. The cause: <b>finite-precision arithmetic is not associative</b>, so changing the order of additions changes the answer, and parallelization can change the order. On two processors you add each half and then the two partial sums. The problem gets worse with size: the last value becomes a smaller and smaller part of the total and may not change it at all.</p>
+        <div class="callout warn"><span class="lbl">Catastrophic cancellation</span>Subtracting nearly equal approximations can expose earlier rounding errors and greatly reduce relative accuracy. The subtraction can be exact for the stored operands while the result differs from that for the intended decimal inputs.
+<pre class="code" style="margin-top:10px">x = 12.15692174374373 - 12.15692174374372
+print(x)        <span class="c"># 1.06581410364e-14  (only a couple of correct digits)</span></pre></div>
+        <div class="callout key"><span class="lbl">Definition</span>A <b>reduction</b> is an operation where an array of one or more dimensions is reduced to at least one dimension less, often to a scalar. Example: total mass or energy from the mass in every cell. The global sum is a reduction.</div>
+        <p>With fixed inputs, arithmetic settings and operation order, a serial sum repeats the same rounded result. A parallel sum can be more or less accurate, yet different from the serial one: the <b>global sum issue</b>. Programmers blamed every small serial/parallel difference on it, but often the real cause was a subtle bug such as <b>not updating ghost cells</b> (cells that hold the neighboring processor’s values).</p>
+        <p>For years the only known fix was to sort the data into a fixed order and sum serially: too expensive. Around <b>2010</b> several programmers realized it is <b>not only an order problem but also a precision problem</b>. In real-number arithmetic addition <i>is</i> associative, so <b>adding precision</b> can reduce the error far more cheaply than sorting. This does not make arbitrary finite-precision addition associative or guarantee identical results for every reduction order.</p>
+        <h3>Test case: the Leblanc problem</h3>
+        <p>The Leblanc problem (“the shock tube from hell”) separates a high- and a low-pressure region with a diaphragm removed at time zero. Energy is 1.0e−1 on one half and 1.0e−10 on the other: a <b>dynamic range</b> (max/min ratio) of <b>nine orders of magnitude</b>. Doubles have about 16 significant digits, so adding a small value to a big one keeps only about <b>7</b>. With 134,217,728 cells, summing the high values first leaves the small values almost nothing to contribute; summing the small values first (lowest to highest magnitude) is more accurate, which is the sorting solution again. The accurate answer is easy to compute by multiplying: <code>ncells/2 * 1.0e-1 + ncells/2 * 1.0e-10</code>.</p>
+        <h3>Enhanced-precision fixes</h3>
+        <div class="defs">
+          <div class="def"><b>Long double</b><span>Easiest. In the book’s x86 example it uses an 80-bit hardware format; compiler and platform details vary. <b>Not portable</b>: elsewhere it can be 64-bit, or 128-bit in software.</span></div>
+          <div class="def"><b>Pairwise summation</b><span>Add pairs, then pairs of pairs, in log<sub>2</sub> steps. The book’s single-processor implementation needs an <b>extra array half the original size</b>; across processors it may need communication at each step.</span></div>
+          <div class="def"><b>Kahan summation</b><span>The <b>most practical</b>. An extra double carries the lost remainder, improving effective accuracy without guaranteeing twice as many correct digits. About 4 flops instead of 1. William Kahan, 1965. Best when the accumulator is the larger value.</span></div>
+          <div class="def"><b>Knuth summation</b><span>Handles additions where <b>either term can be larger</b>, collecting the error of both. 7 flops. Donald Knuth, 1969.</span></div>
+          <div class="def"><b>Quad precision</b><span><code>__float128</code>. Simple to code but almost always done in <b>software</b>, so expensive, and not all compilers support it.</span></div>
+        </div>
+        <p class="codecap">Kahan summation (idea of listing 5.18)</p>
+<pre class="code"><span class="k">double</span> sum = 0.0, correction = 0.0;
+<span class="k">for</span> (<span class="k">long</span> i = 0; i &lt; ncells; i++) {
+   <span class="k">double</span> corrected_next_term = var[i] + correction;
+   <span class="k">double</span> new_sum = sum + corrected_next_term;
+   correction = corrected_next_term - (new_sum - sum);   <span class="c">// what got lost</span>
+   sum = new_sum;
+}
+<span class="k">return</span> sum + correction;</pre>
+        <p class="tblcap">Table 5.1 · Precision and run time of global sum methods (Leblanc test)</p>
+        <div class="tbl"><table>
+          <tr><th>Method</th><th>Error</th><th>Run time</th></tr>
+          <tr><td>Double</td><td class="num">−1.99e−09</td><td class="num">0.116</td></tr>
+          <tr><td>Long double</td><td class="num">−1.31e−13</td><td class="num">0.118</td></tr>
+          <tr><td>Pairwise summation</td><td class="num y">0.0</td><td class="num">0.402</td></tr>
+          <tr><td>Kahan summation</td><td class="num y">0.0</td><td class="num">0.406</td></tr>
+          <tr><td>Knuth summation</td><td class="num y">0.0</td><td class="num">0.704</td></tr>
+          <tr><td>Quad double</td><td class="num">5.55e−17</td><td class="num">3.010</td></tr>
+        </table></div>
+        <ul>
+          <li>Plain doubles give about <b>nine correct digits</b>. Long double helps but does not remove the error.</li>
+          <li>In this particular test, pairwise, Kahan and Knuth have a reported error of <b>0.0</b>; that is not a guarantee of exact sums for all inputs. Quad precision is the slowest method measured here.</li>
+          <li>The extra flops are cheap because the data stays in registers or L1 cache, and a <b>vectorized</b> Kahan/Knuth (section 6.3.4) costs the same as a plain sum. Compared with MPI communication costs the increase is insignificant.</li>
+          <li>This uses the processor’s <b>excess floating-point capability</b>: machines today can do about <b>50 flops per data load</b>, so extra arithmetic is almost free.</li>
+          <li>The multi-processor version needs MPI and comes in section 8.3.3.</li>
+        </ul>
+      </section>
+
+      <!-- 13 -->
+      <section class="sec glass reveal" id="s13">
+        <h2><span class="n">13</span>Traits of good parallel algorithms</h2>
+        <p>The chapter ends with the properties to look for in algorithms for highly parallel hardware:</p>
+        <div class="defs">
+          <div class="def"><b>Locality</b><span>Used often but rarely defined. <b>Locality for cache</b>: keep values used together close together. <b>Locality for operations</b>: do not operate on all the data when you do not need to, e.g. the spatial hash keeps particle interactions O(<i>N</i>) instead of O(<i>N</i>²).</span></div>
+          <div class="def"><b>Asynchronous</b><span>Avoid coordination between threads that causes synchronization.</span></div>
+          <div class="def"><b>Fewer conditionals</b><span>Besides the direct cost of branches, conditionals cause <b>thread divergence</b> on some architectures.</span></div>
+          <div class="def"><b>Reproducibility</b><span>Highly parallel techniques often run into the non-associativity of finite-precision arithmetic. Enhanced precision helps.</span></div>
+          <div class="def"><b>Higher arithmetic intensity</b><span>Hardware gained floating-point power faster than memory bandwidth, so algorithms that do more flops per byte use parallelism (e.g. vector units) well.</span></div>
+        </div>
+        <p>Parallel algorithm research is still young. Many good techniques exist but are not widely known, partly because they come from very different fields of computer and computational science.</p>
+      </section>
+
+      <!-- 14 -->
+      <section class="sec glass reveal" id="s14">
+        <h2><span class="n">14</span>Key takeaways &amp; exercises</h2>
+        <ul class="takeaways">
+          <li>Choose algorithms with <b>low complexity</b> that <b>lend themselves to parallelism</b> early in development.</li>
+          <li>Comparison-based algorithms have a lower limit of <b>O(<i>N</i> log <i>N</i>)</b>; non-comparison algorithms can break it.</li>
+          <li><b>Hashing</b> is a non-comparison, asynchronous, highly scalable technique; spatial hashing gives <b>Θ(<i>N</i>)</b> spatial operations.</li>
+          <li>For any spatial operation there is a spatial hashing algorithm that scales as <b>O(<i>N</i>)</b>.</li>
+          <li>Real performance depends on <b>cache line loads</b>, not just operation counts. Use performance models.</li>
+          <li>The <b>prefix scan</b> parallelizes work on irregular-sized arrays.</li>
+          <li><b>Reproducible global sums</b> need enhanced precision, which restores associativity and allows reordering, and thus more parallelism.</li>
+        </ul>
+        <h3>Exercises from the chapter (with short sample answers)</h3>
+        <details class="ex"><summary>1. A cloud collision model in an ash plume applies to particles within 1&nbsp;mm. Write pseudocode for a spatial hash version. What complexity order is it?</summary>
+          <p>Use buckets 1&nbsp;mm wide. Write each particle index into the bucket of its position, then for every particle loop only over particles in its own and the adjacent buckets and test the distance (like listing 5.3). The work per particle is bounded, so the operation is <b>O(<i>N</i>)</b> (Θ(<i>N</i>)) instead of O(<i>N</i>²).</p></details>
+        <details class="ex"><summary>2. How does the postal service use spatial hashes?</summary>
+          <p>Postal (ZIP) codes are spatial hash keys: an address is mapped to a code for a region, and mail is sorted into the bin for that region without comparing addresses with each other.</p></details>
+        <details class="ex"><summary>3. Big data uses map-reduce. How is it different from the hashing here?</summary>
+          <p>Map-reduce also hashes keys to group data (the map/shuffle step) but then <i>reduces</i> each group, usually across many distributed machines with disk and network in between. The hashing in this chapter is a fast, in-memory spatial mapping used to find neighbors, remap or sort, with buckets defined by geometry.</p></details>
+        <details class="ex"><summary>4. An AMR wave code must record wave height over time at buoy and shore locations, while cells keep being refined. How?</summary>
+          <p>Each time step, build (or reuse) the spatial hash of the current mesh and look up the bucket at each station’s coordinates to get the current cell, then record its height. The lookup is O(1) per station no matter how the cells were reordered or refined.</p></details>
+      </section>
+
+      <div class="glass end-cta reveal">
+        <h3>Ready to test yourself?</h3>
+        <button class="btn primary" data-go="quiz">Take the quiz →</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ======================= QUIZ ======================= -->
+<section id="view-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+  <div class="quiz">
+    <!-- setup -->
+    <div class="qcard glass" id="q-setup">
+      <div class="eyebrow"><span><i class="dot"></i>Reading 05 · Quiz</span></div>
+      <h2>Parallel Algorithms and Patterns</h2>
+      <p class="muted" style="margin:0">Five options per question and <b>exactly one correct answer</b> each time. Options are shuffled on every run, so learn the idea, not the letter.</p>
+      <div>
+        <span class="label">How many questions?</span>
+        <div class="seg" id="count-seg"></div>
+      </div>
+      <div>
+        <span class="label">Mode</span>
+        <div class="seg" id="mode-seg">
+          <button class="chip" data-m="practice">Practice <small>· feedback after every question</small></button>
+          <button class="chip" data-m="exam">Exam <small>· answers and explanations only at the end</small></button>
+        </div>
+      </div>
+      <div>
+        <div class="row between"><span class="label">Topics</span><button class="chip" id="all-topics" aria-pressed="true">All topics</button></div>
+        <div class="seg" id="topic-seg"></div>
+      </div>
+      <div class="row between">
+        <span class="best muted" id="best"></span>
+        <button class="btn primary" id="start">Start quiz →</button>
+      </div>
+      <div class="row between">
+        <span id="mistakes-status" class="muted" role="status" aria-live="polite"></span>
+        <button class="btn" id="review-mistakes" disabled>Review saved mistakes →</button>
+      </div>
+      <p class="hint">Saved on this browser. A later correct answer removes a question from the list. Review uses the topics selected above and Practice feedback. Private browsing or clearing browser data may remove saved progress.</p>
+      <p class="hint">Keyboard: <kbd>1</kbd>–<kbd>5</kbd> or <kbd>A</kbd>–<kbd>E</kbd> to choose, <kbd>Enter</kbd> to check (Practice) or go to the next question (Exam).</p>
+    </div>
+
+    <!-- question -->
+    <div class="qcard glass" id="q-play" hidden>
+      <div class="qhead">
+        <span class="counter" id="q-counter"></span>
+        <span class="tag" id="q-topic"></span>
+        <span class="live" id="q-live"></span>
+      </div>
+      <div class="qbar"><i id="q-bar"></i></div>
+      <p class="question" id="q-text"></p>
+      <p class="mode">Select one:</p>
+      <ul class="opts" id="q-opts" role="radiogroup" aria-labelledby="q-text"></ul>
+      <div id="q-explain" hidden></div>
+      <div class="row between">
+        <button class="btn" id="q-quit">✕ End quiz</button>
+        <button class="btn primary" id="q-next" disabled>Check</button>
+      </div>
+    </div>
+
+    <!-- results -->
+    <div class="qcard glass" id="q-result" hidden>
+      <div class="result-top">
+        <div class="ring" id="r-ring"><div><span><b id="r-pct">0%</b><br><small id="r-raw"></small></span></div></div>
+        <div style="flex:1; min-width:220px">
+          <h2 id="r-title"></h2>
+          <p class="muted" id="r-msg" style="margin:6px 0 0"></p>
+        </div>
+      </div>
+      <div><span class="label">By topic</span><div class="topics" id="r-topics"></div></div>
+      <div class="row">
+        <button class="btn primary" id="r-retry">Retry mistakes</button>
+        <button class="btn" id="r-new">New quiz</button>
+        <button class="btn" data-go="read">Back to reading</button>
+      </div>
+      <div id="r-review-wrap"><span class="label">Your mistakes</span><div class="review" id="r-review"></div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<footer>IT 2004 · Parallel Programming · International Burch University · 2026/2027 · <a href="../../index.html">All courses</a></footer>
+
+<dialog class="lb" id="lb"><button aria-label="Close" id="lb-close">✕</button><img id="lb-img" alt=""><p id="lb-cap"></p></dialog>
+
+<script>
+/* ---------------- theme ---------------- */
+const root = document.documentElement;
+const store = {
+  get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } },
+  set(k,v){ try{ localStorage.setItem(k,v); return true }catch(e){ return false } },
+  remove(k){ try{ localStorage.removeItem(k) }catch(e){} }
+};
+const SAVER_KEY = "ibu-it2004-r05-battery-saver";
+const savedSaver = store.get(SAVER_KEY);
+let batterySaver = savedSaver === null ? matchMedia("(prefers-reduced-transparency: reduce)").matches : savedSaver === "true";
+function renderSaver(){
+  root.dataset.batterySaver = String(batterySaver);
+  const button = document.getElementById("battery-saver");
+  button.setAttribute("aria-pressed", String(batterySaver));
+  button.textContent = `Battery saver: ${batterySaver ? "on" : "off"}`;
+}
+renderSaver();
+document.getElementById("battery-saver").onclick = () => {
+  batterySaver = !batterySaver; store.set(SAVER_KEY, String(batterySaver)); renderSaver();
+};
+const savedTheme = store.get("ibu-theme");
+if (savedTheme) root.dataset.theme = savedTheme;
+document.getElementById("theme").onclick = () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  store.set("ibu-theme", root.dataset.theme);
+};
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- static backdrop: a hash-bucket grid with a few filled buckets ----------------
+   Drawn once. Nothing animates behind the frosted panels. */
+(function drawGrid(){
+  const svg = document.getElementById("bg-grid"), NS = "http://www.w3.org/2000/svg", S = 56, W = 1600, H = 1000;
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let d = "";
+  for (let x = 0; x <= W; x += S) d += `M${x} 0V${H}`;
+  for (let y = 0; y <= H; y += S) d += `M0 ${y}H${W}`;
+  const g = document.createElementNS(NS, "g");
+  const p = document.createElementNS(NS, "path");
+  p.setAttribute("d", d); p.setAttribute("stroke", "var(--grid)"); p.setAttribute("stroke-width", "1"); p.setAttribute("fill", "none");
+  g.appendChild(p);
+  const fills = ["var(--cell1)", "var(--cell2)", "var(--cell3)"];
+  for (let k = 0; k < 46; k++){
+    const r = document.createElementNS(NS, "rect");
+    r.setAttribute("x", Math.floor(rnd() * W / S) * S + 4); r.setAttribute("y", Math.floor(rnd() * H / S) * S + 4);
+    r.setAttribute("width", S - 8); r.setAttribute("height", S - 8); r.setAttribute("rx", 10);
+    r.setAttribute("fill", fills[k % 3]);
+    g.appendChild(r);
+  }
+  svg.appendChild(g);
+})();
+
+/* ---------------- views ---------------- */
+const views = { read:document.getElementById("view-read"), quiz:document.getElementById("view-quiz") };
+const tabs = { read:document.getElementById("tab-read"), quiz:document.getElementById("tab-quiz") };
+function show(v, push=true){
+  for (const k in views){ views[k].hidden = k!==v; tabs[k].setAttribute("aria-selected", k===v); }
+  if (push) history.replaceState(null, "", v==="quiz" ? "#quiz" : location.pathname + location.search);
+  scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+  updateProgress();
+}
+tabs.read.onclick = () => show("read"); tabs.quiz.onclick = () => show("quiz");
+document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g){ e.preventDefault(); show(g.dataset.go); } });
+
+/* reading progress + toc highlight */
+const bar = document.getElementById("progress");
+function updateProgress(){
+  const h = document.documentElement.scrollHeight - innerHeight;
+  bar.style.width = (views.read.hidden ? 0 : Math.min(100, Math.max(0, scrollY / (h||1) * 100))) + "%";
+}
+if (location.hash === "#quiz") show("quiz", false);
+addEventListener("scroll", updateProgress, {passive:true});
+const tocLinks = [...document.querySelectorAll("#toc a")];
+const secObs = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting){ tocLinks.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#"+e.target.id)); }
+}), {rootMargin:"-40% 0px -55% 0px"});
+document.querySelectorAll(".sec").forEach(s => secObs.observe(s));
+const revObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add("in"); revObs.unobserve(e.target); } }), {rootMargin:"0px 0px -8% 0px"});
+document.querySelectorAll(".reveal").forEach(s => revObs.observe(s));
+
+/* lightbox */
+const lb = document.getElementById("lb");
+document.querySelectorAll("[data-zoom]").forEach(b => b.onclick = () => {
+  const img = b.querySelector("img"), cap = b.closest("figure").querySelector("figcaption");
+  document.getElementById("lb-img").src = img.src; document.getElementById("lb-img").alt = img.alt;
+  document.getElementById("lb-cap").textContent = cap ? cap.textContent : "";
+  lb.showModal();
+});
+document.getElementById("lb-close").onclick = () => lb.close();
+lb.addEventListener("click", e => { if (e.target === lb) lb.close(); });
+
+/* ---------------- quiz data ---------------- */
+// Q(topic, question, correct answer, [4 wrong answers], explanation). Exactly one correct answer; options are shuffled at run time.
+function Q(t,q,a,w,e){ return {t,q,a,w,e}; }
+const T = {
+ "ap":   "Algorithms vs patterns",
+ "cx":   "Complexity",
+ "pm":   "Performance models",
+ "hs":   "Comparison vs hash sort",
+ "hf":   "Hash functions",
+ "sh":   "Spatial hashing & AMR",
+ "nb":   "Neighbor finding",
+ "ops":  "Remap, lookup & sort",
+ "ch":   "Compact hashing",
+ "scan": "Prefix sum (scan)",
+ "gs":   "Global sum & precision",
+ "attr": "Parallel algorithm traits"
+};
+const READING_SECTIONS = {ap:"s1", cx:"s3", pm:"s4", hs:"s5", hf:"s6", sh:"s7", nb:"s8", ops:"s9", ch:"s10", scan:"s11", gs:"s12", attr:"s13"};
+const QUESTIONS = [
+Q("ap", "How does the chapter define a parallel algorithm?", "A well-defined, step-by-step procedure that emphasizes concurrency to solve a problem.", ["A concurrent code fragment that recurs in many programs but does not solve a whole problem.", "Any serial algorithm that has been compiled with OpenMP or MPI enabled.", "A procedure whose run time decreases linearly with the number of processors.", "A library routine for the GPU, such as a sort or scan from CUDPP."], "A parallel algorithm is a complete, step-by-step procedure that emphasizes concurrency to solve a problem (sorting, searching, optimization, matrix operations)."),
+Q("ap", "How does the chapter define a parallel pattern?", "A recurring, separable code fragment that usually does not solve a complete problem on its own.", ["A complete procedure that solves a whole problem using many threads at once.", "A design diagram that shows how the processes of a program communicate with each other.", "A fixed sequence of MPI calls that every parallel program has to include to run correctly.", "A hardware feature that executes the same instruction on many data items at once, like SIMD."], "Patterns are recurring fragments such as reductions, prefix scans and ghost cell updates. On their own they do not solve complete problems."),
+Q("ap", "Which of these does the chapter give as an example of a parallel PATTERN rather than an algorithm?", "A prefix scan.", ["A sorting procedure that orders the whole data set.", "A matrix multiplication of two dense matrices.", "A complete optimization routine that finds a minimum.", "A search procedure that solves a lookup problem."], "The pattern examples are reductions, prefix scans and ghost cell updates. Sorting, searching, optimization and matrix operations are the algorithm examples."),
+Q("ap", "What decides whether a parallel procedure counts as an algorithm or as a pattern?", "Whether it achieves the main goal or is only part of a larger context.", ["Whether it runs on a GPU or on a multi-core CPU.", "Whether its complexity is lower or higher than the O(N log N) comparison limit.", "Whether it is written with OpenMP or with MPI.", "Whether it uses comparisons or hashing to do most of its work internally."], "The same procedure can be an algorithm in one context and a pattern in another. The difference is its role: main goal vs part of a larger context."),
+Q("ap", "Why does the chapter say it is important to recognize “parallel friendly” patterns early?", "It prepares the code for later parallelization efforts.", ["It identifies the loops that must remain serial.", "It replaces algorithm selection with hardware selection.", "It postpones data-layout decisions until after parallelization.", "It makes synchronization the first step in every algorithm."], "Spotting parallel-friendly patterns early makes the later parallelization much easier. It guarantees nothing by itself."),
+Q("ap", "Which group lists only the pattern examples named in the chapter introduction?", "Reductions, prefix scans and ghost cell updates.", ["Sorting, searching and optimization.", "Matrix operations, reductions and sorting.", "Bisection search, quicksort and k-D trees.", "Kahan sums, quadtrees, linear probing and k-D tree searches."], "The introduction names reductions (section 5.7), prefix scans (5.6) and ghost cell updates (8.4.2) as pattern examples."),
+Q("cx", "What is algorithmic complexity, as defined in the chapter?", "A measure of the number of operations (the work) needed to complete it.", ["The number of lines of code needed to implement the algorithm.", "The measured run time of the algorithm on a standard reference computer.", "The number of processors needed to reach the best possible parallel speedup.", "The amount of memory the algorithm needs at its peak."], "Algorithmic complexity counts operations. It is a property of the algorithm itself, not of the hardware."),
+Q("cx", "In this book, which notation stands for the WORST-case performance of an algorithm?", "Big O", ["Big Ω (Omega)", "Big Θ (Theta)", "Little o", "Little ω"], "Big O is the worst-case limit, Big Ω the best case, and Big Θ the average case, as the chapter uses them. This is the chapter’s terminology. Formally, O is an upper bound, Ω a lower bound and Θ a tight bound; they do not by themselves specify worst, best or average case."),
+Q("cx", "In this book, which notation stands for the BEST-case performance of an algorithm?", "Big Ω (Omega)", ["Big O", "Big Θ (Theta)", "Little o", "Little ω"], "Big Ω is the best case. Big O is the worst case and Big Θ the average case. This is the chapter’s terminology. Formally, O is an upper bound, Ω a lower bound and Θ a tight bound; they do not by themselves specify worst, best or average case."),
+Q("cx", "In this book, which notation stands for the AVERAGE-case performance of an algorithm?", "Big Θ (Theta)", ["Big O", "Big Ω (Omega)", "Little o", "Little ω"], "The chapter uses Big Θ for average-case performance; that is why the hash sort is described as Θ(1) per item on average. This is the chapter’s terminology. Formally, O is an upper bound, Ω a lower bound and Θ a tight bound; they do not by themselves specify worst, best or average case."),
+Q("cx",
+ "As a rule of thumb, what is the complexity of a doubly nested loop over N items?",
+ "O(N²)",
+ ["O(N)",
+  "O(N log N)",
+  "O(log N)",
+  "O(2N)"],
+ "A simple loop is O(N), a doubly nested loop O(N²), and a tree-based algorithm O(N log N)."),
+Q("cx",
+ "As a rule of thumb, what is the complexity of a tree-based algorithm?",
+ "O(N log N)",
+ ["O(N)",
+  "O(N²)",
+  "O(1)",
+  "O(N² log N)"],
+ "The chapter’s rule of thumb: tree-based algorithms are O(N log N)."),
+Q("cx", "What happens to the leading constants in asymptotic notation?", "By convention they are dropped.", ["They are kept and written in front of N.", "They are moved into the exponent of N.", "They are replaced by the number of processors.", "They are converted into log₂ terms."], "Asymptotic notation drops leading constants, which is exactly what a performance model refuses to do."),
+Q("cx", "How does the chapter define computational complexity (step complexity)?", "The number of steps needed, which depends on the implementation and hardware, including parallelism.", ["The total number of floating-point operations, counted independently of the hardware used.", "The actual run time on a modern machine, including the cost of memory loads and caching.", "The number of comparisons the algorithm makes in the worst case, ignoring all other work.", "The amount of memory needed per processor for the computation, including caches and buffers."], "Step complexity counts steps. On a vector or multi-core machine one step can contain four or more floating-point operations."),
+Q("cx", "What does time complexity add, according to the chapter’s adjusted definition?", "The real cost of operations on a modern computer, mainly memory loads and caching.", ["The number of steps needed when every processor works fully in parallel.", "The best-case number of operations, ignoring the hardware it runs on.", "The number of code lines that must still be executed serially by one thread.", "The asymptotic limit of the algorithm for very large N, with all constants removed."], "Time complexity considers the real cost of an operation; the largest adjustment is for memory loads and caching."),
+Q("cx", "Why does the chapter call asymptotic complexity “one-dimensional” and of limited use?", "It only describes growth in the limit of large N, not the run time of a finite problem.", ["It only works for serial code and cannot describe threads or vector units.", "It counts only memory loads and ignores all the arithmetic operations.", "It requires measuring the code on the target machine before it can be used.", "It only applies to sorting algorithms, not to searches or numerical methods like interpolation."], "Asymptotic complexity describes scaling in the limit. For a real, finite problem size a fuller performance model is needed."),
+Q("pm", "What is the biggest difference between a performance model and algorithmic complexity analysis?", "A performance model does not hide the constant multiplier.", ["A performance model ignores memory and only counts the comparisons.", "A performance model only describes behaviour for very large N.", "A performance model always predicts the worst case only.", "A performance model uses Big Ω instead of Big O."], "Performance models keep the constants (and use exact terms like log₂ N) because for real problem sizes the constants matter."),
+Q("pm", "In the registration example, folders stay unsorted and you search them for each of N participants. What is the complexity?", "O(N²)", ["O(N)", "O(N log N)", "O(log N)", "O(1)"], "N participants times a search through N folders is a doubly nested loop, O(N²), even if the folders shrink as packets are handed out."),
+Q("pm", "In the registration example, what does presorting the packets alphabetically allow?", "A bisection search per participant, making the whole registration O(N log N).", ["A bisection search per participant, making the whole registration logarithmic.", "A linear search per participant, making the whole registration linear.", "A direct hash lookup per participant, without constructing a hash table.", "A comparison sort for each participant, repeated at every lookup."], "With sorted folders each participant’s packet is found by bisection, so the whole registration is O(N log N)."),
+Q("pm",
+ "For a sorted array of 256 four-byte integers, how many operations does a bisection search need?",
+ "8",
+ ["256",
+  "128",
+  "16",
+  "4"],
+ "Bisection halves the range each step: log₂ 256 = 8 steps. The linear search needs 256 in the worst case and 128 on average."),
+Q("pm",
+ "Counting cache line loads (16 integers per line), what is the AVERAGE cost of a linear search through the 256-integer array?",
+ "8 cache line loads",
+ ["128 cache line loads",
+  "16 cache line loads",
+  "4 cache line loads",
+  "2 cache line loads"],
+ "The array is 16 cache lines. On average a linear search reads half of them: (256/16)/2 = 8. The worst case is 16."),
+Q("pm",
+ "Counting cache line loads, about how many does the bisection search on the 256-integer array need?",
+ "About 4",
+ ["About 8",
+  "About 16",
+  "Exactly 1",
+  "About 128"],
+ "log₂(256/16) = 4 cache line loads, in the worst case and about the same on average."),
+Q("pm",
+ "Once cache line loads are counted, how much slower is the linear search than the bisection search on 256 integers?",
+ "Only about 2 times slower",
+ ["About 16 times slower",
+  "About 32 times slower",
+  "About 8 times slower, as the step count suggests",
+  "Exactly as fast"],
+ "Linear: 8 cache loads on average; bisection: 4. That is about 2×, not the 16× that counting operations suggests."),
+Q("pm", "What cost assumptions does the time-based model for the search use?", "Work on data in cache is almost free, while a cache line load costs about 100 cycles.", ["Every comparison costs about 100 cycles and memory loads are free.", "A cache line load and a comparison cost the same number of cycles.", "Only branch mispredictions are counted, everything else is free.", "Each floating-point operation costs about 50 cycles, and a cache line load costs about 1 cycle."], "Because a cache line load is about 100 cycles and cached operations cost a couple of cycles, the model counts only cache line loads."),
+Q("pm", "The search runs on 32 threads of a GPU that must wait for the slowest thread. What is the linear search cost then closer to?", "16 cache lines, the worst case", ["8 cache lines, the average case", "4 cache lines, the same as bisection", "1 cache line per thread", "256 cache lines, one per element"], "The threads wait for the slowest one, so the worst case controls the time: closer to 16 cache lines than to the average of 8."),
+Q("pm", "Which reason does the chapter give for why a linear search can sometimes beat a bisection search?", "Hardware is designed to walk linearly through arrays and prefetch data.", ["Bisection fetches every entry before making its first comparison.", "Linear access removes the need to check entries against the target.", "Sorted input makes bisection behave like an unsorted linear scan.", "Prefetching changes linear search into a logarithmic-work algorithm."], "Prefetching favours linear access. Linear algorithms are also easier to parallelize, and bisection does worse when the item is near the start."),
+Q("pm", "Which target position particularly favors a linear search starting at the first entry?", "When the item is at the beginning of the array.", ["Near the end of the array.", "At the midpoint chosen by bisection.", "Beyond the largest entry in the array.", "Absent from the sorted array."], "A linear search finds an early item almost immediately, while bisection still does all its halving steps."),
+Q("hs", "In the auditorium example, why is the comparison (bubble) sort awkward on a GPU?", "Cross-row coordination in this example requires separate kernel launches.", ["Each workgroup must first build a compact spatial hash.", "Each comparison requires a full prefix scan of the array.", "The row order prevents any comparisons within a workgroup.", "All rows must be copied into local memory of a single workgroup."], "In the chapter’s auditorium analogy, rows represent workgroups in separate synchronization domains. Coordinating across rows requires leaving and relaunching the kernel in the implementation described, rather than implying that GPU workgroups can never exchange data."),
+Q("hs",
+ "What is the lower complexity limit for the best comparison-based sort?",
+ "O(N log N)",
+ ["O(N)",
+  "O(N²)",
+  "O(log N)",
+  "O(1)"],
+ "No comparison sort can do better than O(N log N). Non-comparison algorithms such as the hash sort can break this limit."),
+Q("hs", "Why can the hash sort break the O(N log N) limit?", "It does not use comparisons.", ["It performs the same comparisons in a different order.", "It distributes comparison work over more processors.", "It changes the unit in which comparisons are counted.", "It drops the constant factor from a comparison sort."], "The limit applies to comparison sorts. The hash sort places each item directly by its key, with no comparisons."),
+Q("hs", "What is the average cost of the hash sort for N participants?", "Θ(1) per participant and Θ(N) for all participants", ["Θ(log N) per participant and Θ(N log N) in total", "Θ(N) per participant and Θ(N²) in total", "Θ(1) for all participants together", "Θ(N log N) per participant and Θ(N² log N) in total"], "Each person just walks to the table for their letter: constant work each, linear work in total."),
+Q("hs", "According to the chapter, what is MORE important than the hash sort’s speed for parallelism?", "The operations for each participant are completely independent.", ["The hash sort uses less memory than a bubble sort.", "The hash sort always produces a stable ordering.", "The hash sort works only with alphabetical keys.", "The hash sort needs fewer lines of code than quicksort or any other comparison sort."], "Complete independence makes the algorithm easy to parallelize, even on less synchronous GPU architectures."),
+Q("hs", "In the chapter’s idealized hash-sort model, how does dividing N entries over P processors affect the cost?", "Θ(N/P)", ["Θ(N·P)", "Θ(N log P)", "Θ(P/N)", "Θ(N²/P)"], "The idealized model divides linear work over P processors. It omits practical limits such as coordination, imbalance and memory costs."),
+Q("hs",
+ "With 16 processors and 100 participants, what speedup over the serial brute-force method does the chapter compute?",
+ "1,600×",
+ ["16×",
+  "100×",
+  "160×",
+  "10,000×"],
+ "Brute force costs 100² = 10,000; the parallel hash sort costs 100/16 = 6.25. 10,000 / 6.25 = 1,600×."),
+Q("hs", "In the hash sort for registration, what is the third step for letters with many participants?", "Repeat the process with the second letter of the last name.", ["Repeat the process using the first name instead.", "Use the final letter of the name as the next subdivision.", "Apply a global prefix scan instead of subdividing the group.", "Merge crowded letters before repeating the same first-letter hash."], "Crowded letters are split again by the second letter; small groups can use any simple sort."),
+Q("hf", "What does a hash function do?", "It maps a key to a hash used to locate a bucket.", ["It retrieves the associated value without accessing a table.", "It compares two keys to decide their sorted order.", "It computes the number of entries already stored in a bucket.", "It resolves every collision by changing the stored value."], "Section 5.4 describes encoding a key into a hash used as an index. Strictly, the hash function produces the hash; the table uses it to find the associated value."),
+Q("hf", "What is a bucket (or bin) in a hash table?", "A storage location selected by the hash, where entries can be stored.", ["The original key before it is converted into a hash.", "The function that converts each key into a short hash.", "A temporary array used during sorting.", "The number of empty slots left in the table after all the keys were inserted."], "A hash selects a bucket or bin. Different keys may select the same bucket; that is a collision, not a guarantee of one bucket per key."),
+Q("hf",
+ "Why must a computer encode a key into a shorter form called a hash?",
+ "Using keys directly would need 26 locations times the maximum key length.",
+ ["Keys must be encrypted before they can be stored in main memory.",
+  "Computers cannot store strings longer than four characters.",
+  "Short keys make the comparison sort faster than the hash sort.",
+  "Hashing is required by the IEEE floating-point standard for all string data stored in memory."],
+ "Unlike a printed dictionary, a computer would need a huge number of storage locations, so it “chops up” the key into a short index."),
+Q("hf", "Which condition defines collision freedom for a perfect hash on its key set?", "A hash with at most one entry in each bucket.", ["Every bucket is occupied, even if several keys share some buckets.", "The original key is stored next to every value.", "The table uses fewer buckets than distinct keys.", "Collisions are resolved by a deterministic probe sequence."], "A perfect hash has no collisions: at most one entry per bucket. It is simple to handle but can need more memory."),
+Q("hf", "What additional condition distinguishes a minimal perfect hash from a perfect hash?", "Exactly one entry in each bucket and no empty buckets.", ["Some buckets may remain empty after all keys are placed.", "Original keys must be stored alongside every value.", "Collisions are resolved by probing a larger table.", "The table must be rebuilt after every successful lookup."], "Minimal perfect hashes are slower to compute but worth it for fixed key sets, such as programming-language keywords."),
+Q("hf", "Why do the chapter’s hashes favour fast creation time over small memory size?", "They are created on the fly, queried and then thrown away.", ["They are queried repeatedly but never rebuilt.", "They use a fixed keyword set known at compile time.", "Their main cost is keeping a persistent sorted index.", "Their construction is performed once when the program is installed."], "Short-lived hashes are built, used and discarded, so building them quickly matters more than saving memory."),
+Q("hf", "What is a compact hash?", "A compressed hash that stores both key and value, so the key can be checked.", ["A hash with exactly one entry per bucket and no empty buckets.", "A hash that stores only the values, never the keys.", "A hash whose buckets are exactly the size of the finest mesh cells.", "A hash that is kept sorted by key after every insertion so that it can be searched by bisection."], "A compact hash saves memory. Because collisions can happen, both key and value are stored and the key is checked on reads."),
+Q("hf", "How is the load factor of a hash table computed?", "n/k, the number of entries divided by the number of buckets.", ["k/n, the number of buckets divided by the number of entries.", "The number of collisions divided by the number of entries.", "The number of empty buckets divided by the filled ones.", "The table size in bytes divided by the cache line size of the processor."], "Load factor = n/k: the fraction of the hash that is filled."),
+Q("hf", "Up to about what load factor do compact hashes still work well, according to the chapter?", "About 0.8 to 0.9", ["About 0.1 to 0.2", "About 0.4 to 0.5", "Exactly 1.0", "Anything up to 2.0 (twice full)"], "Compact hashes work at load factors of .8 to .9; beyond that efficiency drops because of collisions."),
+Q("hf", "What is a collision in a hash table?", "More than one key wants to store its value in the same bucket.", ["Two threads read the same bucket at the same time.", "A key hashes to a bucket outside the table.", "The table runs out of memory during creation.", "A bucket is read by one thread before another thread has finished writing to it."], "Collisions happen when several keys map to one bucket. A good hash function spreads keys uniformly to avoid them."),
+Q("hf",
+ "In figure 5.1 (R = 82, O = 79 in ASCII) the hash is (1st letter − 64 + 26) + (2nd letter − 64). What is the hash of “Romero”?",
+ "59",
+ ["13",
+  "44",
+  "161",
+  "26"],
+ "(82 − 64 + 26) + (79 − 64) = 44 + 15 = 59."),
+Q("hf", "Why is the first letter of the last name a flawed hash key?", "Names are not evenly spread over letters, so buckets get unequal numbers of entries.", ["The first letter also specifies the value stored for every name.", "The first-letter hash preserves the full ordering of last names.", "All collisions can be removed merely by renaming the buckets.", "Every first-letter bucket must have the same storage cost as a full name."], "Some letters are far more common than others, which leads to uneven buckets."),
+Q("sh", "In the Krakatau example, why does the team choose adaptive mesh refinement (AMR)?", "They need fine resolution only at the wave front and the shoreline.", ["They need equally fine cells throughout the entire domain.", "They need to preserve a fixed row-major order for every cell.", "They need to replace all spatial queries with global scans.", "They need to eliminate the need for cell-location information."], "AMR puts finer cells only where they are needed and keeps coarse cells elsewhere."),
+Q("sh", "What is special about the data layout of a cell-based AMR mesh?", "Cell data is in 1D arrays in any order; extra arrays hold each cell’s size and location.", ["Cells are stored in a 2D array in strict row-major order.", "Every cell has exactly four neighbors of the same size.", "The mesh is made only of triangles that fit the coastline exactly.", "Cells are grouped into fixed-size blocks that keep their regular structure and order during the run."], "There is some structure to the grid, but the data itself is completely unstructured and in any order."),
+Q("sh", "Which are the three kinds of AMR named in the chapter?", "Patch, block and cell-based", ["Linear, quadratic and double", "Perfect, minimal and compact", "Structured, unstructured and hybrid", "Inclusive, exclusive and segmented"], "Patch and block methods still exploit some regular structure; cell-based AMR is truly unstructured."),
+Q("sh", "What was CLAMR originally written to find out?", "Whether cell-based AMR applications could run on GPUs.", ["Whether hash tables could replace MPI communication.", "Whether Kahan summation could be vectorized.", "Whether quicksort could run on a single CPU core.", "Whether k-D trees could be built and searched on GPUs in under one day."], "CLAMR, a shallow-water cell-based AMR mini-app, was written by summer students at Los Alamos in 2011 to test AMR on GPUs."),
+Q("sh", "What is spatial hashing?", "Hashing with a key based on position, mapping objects onto a regular grid of buckets.", ["A hash table that is stored in GPU local memory to make it faster.", "A technique that sorts the mesh cells by their refinement level.", "A way to compress images by removing the empty pixels between objects.", "A tree that splits space into two equal halves repeatedly until each region holds one object."], "Objects are mapped by their position onto a regular grid of buckets; each lookup stays Θ(1) on average."),
+Q("sh", "How is the bucket size chosen for a spatial hash of a cell-based AMR mesh?", "It equals the minimum (finest) cell size.", ["It equals the maximum (coarsest) cell size.", "It equals the average cell size of the mesh.", "It equals the interaction distance of particles.", "It equals one cache line of 64 bytes."], "For AMR the minimum cell size is used, so no bucket ever holds two cells."),
+Q("sh", "How is the bucket size chosen for particles in a spatial hash?", "It is based on the interaction distance.", ["It equals the size of the largest particle.", "It equals the minimum distance between any two particles.", "It is chosen so that each bucket holds exactly one particle.", "It equals the number of particles divided by the processors."], "With interaction-distance buckets, only the immediately adjacent buckets need to be checked for interactions or collisions."),
+Q("sh", "In the chapter’s particle-locality model, with bounded nearby interactions per particle, how does total interaction work scale?", "Θ(N) instead of Θ(N²)", ["Θ(N²) instead of Θ(N)", "Θ(N log N) instead of Θ(N)", "Θ(1) for all particles together", "Θ(log N) instead of Θ(N log N)"], "Section 5.5 restricts the inner loop to nearby buckets. Linear total work assumes that the number of relevant nearby particles stays bounded as the domain grows; arbitrary clustering can increase the work."),
+Q("sh", "Why are AMR and unstructured meshes called “differential discretized data”?", "Their cells are smaller where the gradients are steeper.", ["Their values are stored as differences from the previous cell in the array.", "They are discretized with a different method on each processor.", "Their cell sizes are random and change every time step.", "They store derivatives of the physical variables instead of the values."], "Cell size varies with the gradient, but there is a limit to how small cells get, which keeps buckets from getting too small."),
+Q("sh", "Besides scientific computing, which application area does the chapter mention for spatial-hash collision calculations?", "Gaming engines and computer graphics", ["Relational database indexing", "Network packet routing", "Compiler optimization passes", "Cryptographic password storage and checking"], "Collision detection with spatial hashes is used in SPH, molecular dynamics, astrophysics, and also gaming engines and graphics."),
+Q("nb", "Which four spatial operations does the chapter study with perfect hashing?", "Neighbor finding, remapping, table lookup and sorting", ["Reduction, scan, broadcast and gather", "Insertion, deletion, search and update", "Linear probing, quadratic probing, double hashing and chaining", "Patch, block, cell-based and unstructured refinement"], "These four operations are implemented in 1D and 2D in the PerfectHash code."),
+Q("nb", "What rule do CLAMR meshes follow across a cell face?", "There can be at most a one-level jump in refinement.", ["All neighbors must have exactly the same size.", "There can be at most a two-level jump in refinement.", "Each face must touch exactly four other cells.", "Coarse cells may never touch fine cells across any face of the mesh."], "A mesh with at most one level jump across a face is called a graded mesh."),
+Q("nb", "What is a mesh with at most a one-level refinement jump across a face called?", "A graded mesh", ["A structured mesh", "A truncated mesh", "A minimal mesh", "A compact mesh"], "This limit is called a graded mesh; n-body quadtrees in astrophysics can have much larger jumps."),
+Q("nb", "When a cell has two neighbors on its left side, which one is stored as its left neighbor in CLAMR?", "The lower one of the two", ["The upper one of the two", "The larger one of the two", "Both, in two separate arrays", "The one with the smaller cell number"], "The left neighbor is the lower cell of the pair; the other one is found through it, e.g. ntop[nlft[ic]]."),
+Q("nb", "What is the complexity of the naive neighbor search that checks every other cell?", "O(N²)", ["O(N)", "O(N log N)", "O(log N)", "O(1)"], "Comparing every cell with every other cell is O(N²): fine for few cells, but it grows very quickly."),
+Q("nb",
+ "What is the complexity of the k-D tree and quadtree neighbor searches?",
+ "O(N log N)",
+ ["O(N²)",
+  "O(N)",
+  "O(1)",
+  "O(log N) in total"],
+ "Both are comparison-based tree algorithms that scale as O(N log N)."),
+Q("nb", "How many children does each parent have in a quadtree?", "Four, one for each quadrant", ["Two, one for each half", "Eight, one for each octant", "One, the next finer cell", "As many as there are refinement levels"], "A quadtree has four children per parent, which maps exactly onto the subdivision of a 2D cell-based AMR mesh (an octree is the 3D version)."),
+Q("nb", "For finding a near neighbor of similar size, where should a tree search start, according to the chapter?", "At the leaves, using a quadtree", ["At the root, using a k-D tree.", "At the root, using a quadtree.", "At a coarsest-level node, ignoring the current leaf.", "At the deepest leaf in a different coarse-cell subtree."], "With a graded mesh you go up at most two levels from the leaf. For large irregular objects use a k-D tree from the root."),
+Q("nb", "How does the spatial perfect hash guarantee that there are no collisions in neighbor finding?", "The buckets are the size of the finest cells in the AMR mesh.", ["Each cell writes only to the center bucket of its area.", "The hash table is three times larger than the number of cells.", "Quadratic probing is used whenever a bucket is full.", "Cells are sorted by level before they are written."], "If buckets match the finest cell size, no two cells can ever cover the same bucket."),
+Q("nb", "What happens in the write phase of the spatial hash neighbor algorithm?", "Each cell writes its cell number into every hash bucket underneath it.", ["Each cell writes the numbers of its four neighbors into the hash.", "Each cell writes its refinement level into one corner bucket.", "The hash is filled with −1 and nothing else is written.", "Each thread writes the bucket index of its left neighbor into a separate neighbor array."], "After the write phase, the read phase looks one finest cell outside each side of the cell to find the neighbor’s number."),
+Q("nb", "In figure 5.5, how is the right neighbor of cell 21 found?", "By reading the bucket one finest cell to the right, which holds cell 26.", ["By searching all cells for the one with the next larger i index.", "By walking up the quadtree from cell 21 to its parent and back down.", "By reading the bucket at the center of cell 21 in the hash.", "By comparing cell 21 with every cell in the same row of the mesh and picking the closest one."], "The neighbor is simply whatever cell number was written into that bucket during the write phase."),
+Q("nb", "What is the biggest difference between the CPU and GPU (OpenCL) versions of the hash code?", "The GPU version has no cell loop; each thread gets its cell from get_global_id.", ["The GPU version assigns the whole cell loop to one workgroup leader.", "The GPU version replaces each spatial lookup with a tree traversal.", "The GPU version writes neighbor IDs instead of cell IDs into the hash.", "The GPU version starts by sorting cells into a single global row."], "Outer loops are removed and handled by the kernel launch; the guard `if (ic >= isize) return;` avoids reading past the arrays."),
+Q("nb", "In the chapter’s reported neighbor-finding benchmark, what was the total speedup of the GPU hash over the baseline k-D tree?", "3,157×", ["66×", "1,217×", "246×", "1,600×"], "Figure 5.6 reports 3,157× for this test on the specified GPU versus the single-core CPU baseline. It is a benchmark result, not a general speedup guarantee."),
+Q("nb", "How did the effort to port the hash neighbor code to the GPU compare with the k-D tree?", "Under a day for the hash, versus weeks or months for the k-D tree.", ["Both required weeks or months of implementation work.", "The hash took weeks or months, while the tree took under a day.", "Both were ported by replacing only a single type declaration.", "The hash required a complete redesign as a comparison-based algorithm."], "The hash code is about a dozen lines; the k-D tree code for the CPU is about a thousand lines."),
+Q("ops", "In the perfect-hash remap, for which mesh is the spatial hash built?", "The source mesh", ["The target mesh", "Both meshes, merged into one", "Neither; the remap uses a k-D tree", "Only the coarsest level of the target mesh"], "Source cell numbers are written into the hash; each target cell then reads the buckets underneath it and sums the values."),
+Q("ops", "Why are source values divided by a power of four during the 2D remap read phase?", "To adjust for the size difference between source cells and buckets.", ["To convert the values from single to double precision for the sum.", "To average the values of the four neighboring processors that share the cell.", "To make the hash function produce smaller bucket indexes.", "To undo the effect of quadratic probing on the stored values."], "Each finer level in 2D has a quarter of the area, so the contribution is scaled by four_to_the(levmx − level)."),
+Q("ops", "What total GPU speedup does the chapter report for its spatial-hash remap benchmark?", "About 1,217×", ["About 21×", "About 3,157×", "About 246×", "About 66×"], "Figure 5.7 reports about 1,217× relative to the test’s baseline. This is a specific benchmark, not a promise for arbitrary remaps or hardware."),
+Q("ops", "Which two quantities form the axes of the 51×23 table in the table lookup test?", "Density and temperature", ["Pressure and volume", "Time and position", "Energy and mass", "Velocity and wave height"], "It is an equation-of-state table with density and temperature axes, equally spaced."),
+Q("ops", "Why does the hash table lookup need no conditionals to find the interval?", "The axes are equally spaced, so one arithmetic expression gives the interval.", ["The axes are sorted, so bisection removes the interval calculation.", "Every table entry is inspected and the interval is selected afterward.", "A prefix sum directly produces the two axis intervals.", "The interval is found by probing collisions in a compact hash."], "Interval = (value − axis[0]) / increment. A direct calculation, with no searching and no branches."),
+Q("ops", "In the table lookup test, how did the bisection search compare with the brute-force linear search?", "It was no faster (1.005 vs 1.000).", ["It was about 16 times faster.", "It was about 4 times faster.", "It was about 2 times slower.", "It was about 1,326 times faster, like the GPU hash."], "Surprising but explained by the cache: both searches need the same small number of cache loads."),
+Q("ops", "What explains why bisection did not beat the linear search in the table lookup?", "Both needed about the same few cache loads per axis.", ["Bisection had to sort the table again before every query.", "Bisection used global GPU memory while linear search used CPU cache.", "The comparison counted sorting time only for bisection.", "The linear algorithm skipped interpolation while bisection included it."], "Counting cache loads, no difference is expected. The hash still needs one load, so it is only about 3× better in loads."),
+Q("ops", "What extra optimization makes the GPU table-lookup kernel especially fast?", "The threads first load the whole table into the workgroup’s local memory.", ["The table is recomputed by every thread instead of being loaded from memory.", "Each thread uses bisection instead of a hash.", "The table is stored in quad precision for better accuracy.", "The kernel uses limited recursion to find the interval on each axis."], "1,173 values plus 74 axis values fit into local memory (about 4,000 doubles), which is fast and shared by the workgroup."),
+Q("ops", "Why does the GPU table-lookup kernel call barrier(CLK_LOCAL_MEM_FENCE)?", "To make sure all table data is in local memory before any thread uses it.", ["To stop threads from writing past the end of the output value array.", "To flush the interpolated results back to the CPU after each lookup.", "To reduce thread divergence in the bilinear interpolation step.", "To make the floating-point sums reproducible across workgroups when the results are added together."], "The load is shared among threads, so a synchronization is needed before the data is used."),
+Q("ops", "In the spatial hash sort, which formula gives the bucket index b_k for a value X_i?", "b_k = ⌊(X_i − X_min) / Δ_min⌋", ["b_k = X_i mod Δ_min", "b_k = (X_max − X_i) × Δ_min", "b_k = log₂(X_i − X_min)", "b_k = X_i / (number of buckets)"], "Δ_min is the minimum distance between adjacent values, which guarantees a perfect hash."),
+Q("ops",
+ "In figure 5.9 the minimum difference is 2.0 and X_min = 0. In which bucket does the key 8 go?",
+ "Bucket 4",
+ ["Bucket 8",
+  "Bucket 2",
+  "Bucket 16",
+  "Bucket 0"],
+ "8 / 2.0 = 4."),
+Q("ops", "Why does the performance test store the original index rather than the value in the hash sort?", "It is a bit slower but more general: it can reorder all arrays of a mesh.", ["Storing the value is impossible because equal values would collide.", "The index is faster to read back than the value in every case.", "Storing values would turn the hash sort back into a comparison sort.", "The index uses less memory than the value in every case, so the hash table can be smaller."], "With the index you read keys[hash[4]], and the same order can be applied to every other array."),
+Q("ops",
+ "What are the complexities of the spatial hash sort and of quicksort?",
+ "Θ(N) for the hash sort and Θ(N log N) for quicksort",
+ ["Θ(N log N) for both",
+  "Θ(N²) for the hash sort and Θ(N) for quicksort",
+  "Θ(1) for the hash sort and Θ(N) for quicksort",
+  "Θ(log N) for the hash sort and Θ(N log N) for quicksort"],
+ "The trade-off: the hash sort is specialized to the problem and can temporarily use more memory."),
+Q("ops", "Which pattern is needed for a good parallel read phase of the spatial hash sort?", "A prefix sum (scan)", ["A k-D tree traversal", "A Kahan summation", "A bisection search", "A ghost cell update"], "The scan tells each thread where to write its sorted values, so retrieval can run in parallel."),
+Q("ch", "In the chapter’s neighbor-finding example, what workload problem is described as thread divergence?", "Threads get unequal work and end up waiting for the slowest one.", ["Threads write to different hash tables at the same time and conflict.", "Threads run on different processors that have different clock speeds.", "Threads read stale ghost cell values from neighboring processors.", "Threads produce different floating-point sums for the same data."], "In the perfect hash, a coarse cell writes many buckets while a fine cell writes one: load imbalance and divergence."),
+Q("ch", "What is the first write optimization for neighbor finding with a spatial hash?", "Skip a cell’s interior buckets, since queries only sample its outer ones.", ["Write only the center bucket, leaving corners unwritten.", "Write the neighbor ID into each interior bucket.", "Write only cells on the external domain boundary.", "Write only the finest cells and omit every coarse cell."], "Further analysis then shows only corners or midpoints are queried, and finally one write per cell with multiple reads."),
+Q("ch", "What does the single-write, multiple-read neighbor optimization require?", "Filling the hash with a sentinel such as −1 that means “no entry”.", ["Keeping a second table sorted by cell index.", "Allocating exactly one bucket per coarse-grid cell.", "Using double hashing without checking stored keys.", "Writing the IDs of both neighbors into every occupied bucket."], "Reads must tell empty buckets apart from real entries, so the table starts filled with −1."),
+Q("ch",
+ "If a hash table is 1.25 times the number of entries, what is its load factor?",
+ "0.8",
+ ["1.25",
+  "0.25",
+  "0.333",
+  "0.625"],
+ "Load factor is the inverse of the size multiplier: 1 / 1.25 = 0.8."),
+Q("ch", "What load factor does the chapter say is typical in parallel processing, and why?", "About 0.333, so that no processor is much slower than the others.", ["About 0.95, to prioritize minimum storage over balanced probes.", "Exactly 1.0, to make every table a minimal perfect hash.", "About 0.8, as a fixed requirement of the GPU execution model.", "About 0.1, to make storing the original key unnecessary."], "A lower load factor means fewer and shorter collision chains, which keeps threads balanced."),
+Q("ch", "What does hash sparsity represent?", "The empty space in the hash, i.e. the room for compression.", ["The average number of collisions per bucket in the table.", "The fraction of buckets that were written more than once.", "The distance between the centers of two neighboring cells.", "The number of refinement levels in the mesh divided by the number of cells in it."], "High sparsity means lots of empty buckets, so the hash can be compressed into a compact hash."),
+Q("ch", "What is open addressing?", "On a collision, store the value in another open slot of the same table.", ["Allocating a new linked list for every bucket that has a collision.", "Leaving the table unlocked so that all threads can write freely.", "Storing the table in memory that the CPU and the GPU share.", "Resizing the table to twice its size on every collision and inserting all entries again."], "Other methods often allocate memory during the operation, which is hard on a GPU, so open addressing is used."),
+Q("ch", "Which probing method tries buckets at +1, +4, +9, … from the original location?", "Quadratic probing", ["Linear probing", "Double hashing", "Perfect hashing", "Binary probing"], "Quadratic probing squares the increment. Linear probing tries the next bucket; double hashing uses a second hash function."),
+Q("ch", "Why does the chapter choose quadratic probing?", "Its first couple of tries are still in the cache, so it is faster.", ["It removes the need to store the original key.", "It guarantees that no probing sequence ever clusters.", "It makes every insertion succeed in its first bucket.", "It avoids checking whether a candidate bucket is occupied."], "Nearby first attempts hit the cache, while larger jumps later avoid clustering."),
+Q("ch", "Why are more complex probing schemes used instead of always taking the next bucket?", "To avoid clustering, which makes store and query sequences longer.", ["To make the hash table smaller than the number of stored entries.", "To make the hash sort stable for entries with equal keys.", "To allow the hash to be read back without storing the key.", "To remove the need for a sentinel value when the table is initialized at the start."], "Linear probing tends to create clusters; quadratic probing and double hashing spread the entries."),
+Q("ch", "When reading a compact hash with open addressing, how do you know you found the right entry?", "Compare the stored key with the wanted key; if they differ, probe on.", ["The first non-empty slot you reach is always the right entry.", "Check whether the stored value is larger than the sentinel −1.", "Recompute the hash with a different function and compare.", "Look at the load factor of the table to see if the slot could be full, then return that value."], "That is why a compact hash stores both the key and the value."),
+Q("ch", "Why can the compact hash be competitive with, or even faster than, the perfect hash?", "Far less memory has to be initialized to the sentinel −1.", ["Compression guarantees that every entry has a unique initial bucket.", "Compression removes the key checks from all table reads.", "Compression eliminates all conditionals in the probing sequence.", "Compression replaces the write phase with a prefix scan."], "With enough sparsity (more than the test’s 30×), the saved initialization outweighs the cost of collisions."),
+Q("ch", "In the face-neighbor algorithm for unstructured meshes, where does each cell write its number?", "Into the bucket at each face center, in slot 1 or 2 depending on the face’s direction.", ["Into every bucket covered by the polygon of the cell.", "Into the single bucket at the center of the cell only.", "Into the lower-left corner bucket of the cell’s bounding box.", "Into a separate hash table for each refinement level, leaving breadcrumbs in the coarser ones."], "Left/up faces use the first slot, others the second. Each cell then reads the other slot: one write and one read."),
+Q("ch", "In the single-write remap, what does an output cell do when it reads −1 in the hash?", "It looks where a cell at the next coarser level would have written.", ["It reports the cell as an external boundary.", "It recursively descends to finer levels immediately.", "It uses quadratic probing to find the next slot.", "It copies the value of its left neighbor, which must be at the same level."], "Each input cell writes only to its lower-left corner, so a −1 means the input cell there is coarser."),
+Q("ch", "What did the authors observe when testing their recursive single-write remap on GPUs?", "It worked on the tested GPUs with the limited refinement depth used.", ["It failed unless the complete hash was sorted first.", "It required replacing the remap with a k-D tree search.", "It worked only after the input mesh was made uniform.", "It required every recursive call to return to the CPU."], "Section 5.5.2 reports success for the GPUs and shallow refinement levels tested. This is an observation about that implementation, not a guarantee of recursion support on every GPU platform."),
+Q("ch", "What is the main benefit of the hierarchical hash with “breadcrumb” sentinels?", "The tables need not be filled with a sentinel value at the start.", ["One hash table replaces all refinement-level tables.", "Reads no longer need to descend to finer levels.", "Every table is guaranteed to be completely filled.", "The read phase can ignore sentinels left by writes."], "Writes leave −1 breadcrumbs in each coarser table, telling reads to descend; no up-front initialization is needed."),
+Q("scan", "Why is the prefix sum (scan) important in parallel computations with irregular sizes?", "Each process must know where to start writing in the global array.", ["It sorts the data first so that the global sums become reproducible.", "It reduces the whole array to a single scalar value.", "It removes all collisions from a compact hash before reading it.", "It finds the neighbors of each cell in a cell-based AMR mesh."], "With different counts per process, the scan maps local indices to global ones so everyone can write in parallel."),
+Q("scan", "What is the difference between an exclusive and an inclusive scan?", "An exclusive scan leaves out the current value; an inclusive scan includes it.", ["An exclusive scan runs on one processor; an inclusive scan on many.", "An exclusive scan uses addition; an inclusive scan uses multiplication.", "An exclusive scan is step-efficient; an inclusive scan is work-efficient.", "An exclusive scan skips zero entries in the input; an inclusive scan keeps every entry."], "The formula y_j = Σ x_i for i < j is the exclusive scan."),
+Q("scan", "What does the exclusive scan give each process or thread?", "Its starting index in the global array", ["Its ending index in the global array", "The total number of items on all processes", "The number of items on the previous process only", "The index of its left neighbor cell"], "The exclusive scan gives the start offset. The inclusive scan gives the exclusive upper bound of the process’s range, called the ending address in the book."),
+Q("scan",
+ "For x = 3 4 6 3 8 7 5 4, what is the EXCLUSIVE scan?",
+ "0 3 7 13 16 24 31 36",
+ ["3 7 13 16 24 31 36 40",
+  "0 3 4 6 3 8 7 5",
+  "3 4 6 3 8 7 5 4",
+  "40 37 33 27 24 16 9 4"],
+ "Each entry is the sum of all previous values, starting from 0."),
+Q("scan",
+ "For x = 3 4 6 3 8 7 5 4, what is the INCLUSIVE scan?",
+ "3 7 13 16 24 31 36 40",
+ ["0 3 7 13 16 24 31 36",
+  "3 7 10 9 11 15 12 9",
+  "0 4 10 13 21 28 33 37 41",
+  "4 8 14 17 25 32 37 41"],
+ "Each entry includes its own value: the last one is the total, 40."),
+Q("scan", "Why does the scan operation look intrinsically serial?", "Each iteration depends on the previous one: y[i] = y[i−1] + x[i].", ["Each output depends only on its own input entry.", "Each output is independent once the input is sorted.", "Each iteration uses only the final total from a reduction.", "Each iteration writes its result before reading its input."], "The loop-carried dependency makes it look serial, but there are effective parallel algorithms."),
+Q("scan", "What does a step-efficient algorithm minimize?", "The number of steps, though not necessarily the number of operations", ["The number of operations, though not necessarily the number of steps", "The amount of memory, though not the run time", "The number of cache misses, though not the number of steps", "The number of threads, though not necessarily the number of steps or operations"], "Each step can contain a different number of operations, so the fewest steps is not the least work."),
+Q("scan", "For a power-of-two input size n, how many stages does the chapter’s step-efficient scan use?", "log₂ n", ["n", "n / 2", "n log₂ n", "2 log₂ n with half the work"], "Each element adds the value 1, then 2, then 4, … positions to its left: log₂ n steps."),
+Q("scan", "What is the drawback of the step-efficient scan compared with the serial scan?", "It does more total work (operations) than the serial algorithm.", ["It needs more sequential stages than the serial scan.", "It always produces an exclusive rather than an inclusive scan.", "It performs only a reduction and does not produce intermediate prefixes.", "It needs a global comparison sort before each stage."], "All processes are busy every step, so the total work grows; the work-efficient scan fixes that."),
+Q("scan", "What are the two phases of the work-efficient parallel scan?", "An upsweep and a downsweep", ["A write phase and a read phase", "A reduction phase and a broadcast phase", "A compression phase and a probing phase", "A sort phase and a merge phase"], "The upsweep is a right sweep that builds partial sums; the downsweep is a left sweep that produces the final result."),
+Q("scan", "After the upsweep, how does the chapter’s exclusive-scan downsweep begin?", "By setting the last value to zero", ["By setting the first value to zero", "By copying the input array into a temporary array", "By adding every value to its right neighbor", "By sorting the partial sums from the upsweep"], "After inserting zero, a tree-based left sweep produces an exclusive scan."),
+Q("scan", "What output does the chapter’s work-efficient scan produce after its upsweep and zero-initialized downsweep?", "An exclusive scan", ["An inclusive scan", "A reduction to one scalar", "A sorted copy of the input", "A segmented scan per workgroup"], "Figure 5.19 shows the downsweep producing an exclusive scan starting with 0."),
+Q("scan",
+ "What is the total work of the work-efficient scan?",
+ "O(N), because earlier calculations are reused",
+ ["O(N log N), because every step uses all threads",
+  "O(N²), because each value is added to all others",
+  "O(log N), because it is tree-based",
+  "O(1) per thread and O(1) in total"],
+ "The extra steps let earlier partial sums be reused, so the total operations stay O(N)."),
+Q("scan", "According to the chapter, what decides whether to use a work-efficient or a step-efficient scan?", "The number of parallel processes that can exist", ["Whether key comparisons use ascending or descending order.", "Whether the input was previously stored in a hash table.", "Whether all input entries have the same numeric value.", "Whether the array is stored in row-major or column-major order."], "With many processes, fewer steps can win; with fewer processes, less work can win."),
+Q("scan", "In the three-kernel scan for large arrays, what does the first kernel do?", "A reduction sum on each workgroup, stored in a smaller temporary array", ["A scan of the temporary array to get workgroup offsets", "Adding each workgroup’s offset to every thread", "Sorting the array into workgroup-sized blocks", "Filling the whole array with the sentinel value −1 before the scan starts"], "Kernel 1: reduce each workgroup; kernel 2: scan those sums to get offsets; kernel 3: scan chunks and apply offsets."),
+Q("scan", "What implementation approach does the chapter recommend for a production GPU prefix scan?", "Use an optimized scan library or an existing implementation.", ["Use the serial loop unchanged inside one GPU thread.", "Replace prefix outputs with a single reduction result.", "Sort the inputs and read back occupied hash buckets.", "Use higher precision in place of parallelizing the scan."], "Section 5.6 recommends existing optimized implementations, naming CUDPP for CUDA and CLPP or PerfectHash code for OpenCL as examples in the book."),
+Q("gs", "Why does a parallel global sum often differ from the serial sum?", "Finite-precision addition is not associative, and parallelization can change its order.", ["Parallel processors use a different floating-point format than serial ones.", "Some values are skipped when the work is divided among processors.", "Each processor rounds its partial sum to single precision first.", "MPI adds a small rounding error to every message that carries a floating-point value."], "Section 5.7 explains that regrouping additions can change rounding error. Whether a particular run changes its result depends on its data and reduction order."),
+Q("gs", "What is catastrophic cancellation?", "Loss of relative accuracy when nearly equal, already rounded values are subtracted.", ["Adding a very small value to a very large one so that nothing changes.", "Losing a message between two processors during a reduction.", "Dividing by a value that is close to zero.", "Overflowing the exponent of a floating-point number when two large values are multiplied."], "Subtracting nearly equal approximations can expose and amplify their earlier rounding errors relative to the small result. The subtraction itself can be exact for the stored operands; the issue is accuracy relative to the intended values."),
+Q("gs", "How does the chapter define a reduction?", "Reducing an array by at least one dimension, often down to a scalar.", ["An operation that removes all duplicate values from an array.", "An operation that lowers the precision of an array to save memory.", "An operation that computes the running sum at every array position.", "An operation that divides an array into equal parts among the processors of a cluster."], "Examples: the total mass or energy from the per-cell values. The global sum is a reduction."),
+Q("gs",
+ "What is the “global sum issue”?",
+ "The parallel sum is probably more accurate but differs from the serial one.",
+ ["A parallel sum is always less accurate than the serial one.",
+  "A global sum cannot be computed correctly with more than two processors.",
+  "A global sum overflows when there are too many cells in the mesh.",
+  "A serial sum gives a slightly different result every time it runs."],
+ "Serial sums are inexact but always the same; the parallel sum changes, which makes checking correctness hard."),
+Q("gs", "What did small serial/parallel differences often turn out to be, when examined closely?", "A subtle bug, such as ghost cells not being updated between processors.", ["A different number of significant digits in each processor’s double type.", "Automatic sorting of the input by the MPI communication layer.", "A required random perturbation in every reduction operation.", "Conversion of cell IDs into floating-point values during every sum."], "Ghost cells hold the neighbor processor’s values; if they are not updated, slightly old values cause small errors."),
+Q("gs",
+ "What did parallel programmers realize around 2010 about the global sum problem?",
+ "It is also a precision problem, so adding precision is a cheap fix.",
+ ["It can only be solved by sorting the data into a fixed order first.",
+  "It disappears if every processor uses the same compiler and flags.",
+  "It is caused only by programming bugs, never by the arithmetic.",
+  "It can safely be ignored because the error is always below 1e−16 for double precision."],
+ "In real-number arithmetic addition is associative, so more precision fixes the problem at far lower cost than sorting."),
+Q("gs",
+ "In the Leblanc test, energy is 1.0e−1 on one half and 1.0e−10 on the other. What is the dynamic range?",
+ "Nine orders of magnitude",
+ ["Ten orders of magnitude",
+  "Sixteen orders of magnitude",
+  "Seven orders of magnitude",
+  "One order of magnitude"],
+ "The dynamic range is max/min = 1e−1 / 1e−10 = 1e9."),
+Q("gs",
+ "Doubles have about 16 significant digits. With a dynamic range of nine orders of magnitude, about how many remain when a small value is added to a large one?",
+ "About 7",
+ ["About 16",
+  "About 9",
+  "About 2",
+  "About 25"],
+ "16 − 9 = 7 significant digits effectively contribute."),
+Q("gs", "For the chapter’s positive-energy example, which summation order helps preserve small contributions?", "From the lowest magnitude to the highest", ["From the highest magnitude to the lowest", "In random order, to average out the errors", "Alternating large and small values", "Sorted by their position in the mesh"], "Small values summed first build up to a size where they still contribute digits when the large values are added."),
+Q("gs", "What is the main problem with using long double for the global sum?", "Its precision and implementation depend on the compiler and platform.", ["It requires an extra temporary array half the input size.", "It requires sorting the full input before every sum.", "It cannot return a result converted back to double.", "It requires interprocessor messages for local additions."], "The chapter’s x86 example uses 80-bit long double, but other compilers and platforms can use different formats. It is not a portable guarantee of a particular precision."),
+Q("gs", "What extra storage does the chapter’s single-processor pairwise implementation allocate?", "A temporary array half the size of the original", ["Seven floating-point operations per value", "Software-emulated 128-bit arithmetic", "A sort of the whole array before summing", "An MPI message for every single addition in the sum"], "Listing 5.17 allocates a half-size temporary array. This describes that implementation, not a universal storage requirement for every possible pairwise summation algorithm."),
+Q("gs", "Which global sum method does the chapter call the most practical?", "Kahan summation", ["Quad-precision summation", "Sorting before summing", "Long double summation", "Plain double summation"], "Section 5.7 calls Kahan the most practical method discussed. Its extra correction variable carries low-order rounding information; the improvement depends on the data and implementation, rather than guaranteeing twice as many correct digits."),
+Q("gs", "How does Kahan summation improve accuracy?", "An extra double carries the remainder lost in each addition forward.", ["It sorts the values from small to large before adding them up.", "It adds the values in pairs, then pairs of pairs, and so on.", "It converts every value to 128-bit precision before adding it.", "It sums the values twice, in opposite orders, and averages the two results."], "The correction term catches what was lost when adding to a much larger running sum."),
+Q("gs", "What advantage does the chapter give for its Knuth correction scheme over the Kahan-style scheme?", "Additions where either term can be the larger one", ["Additions without storing any correction term.", "Additions requiring no extra floating-point operations.", "Additions where the original data is sorted automatically.", "Additions using only integer arithmetic for the accumulator."], "Section 5.7 contrasts a Kahan-style correction, most appropriate when the accumulator is larger, with Knuth’s scheme, which collects error for both terms. This does not mean Kahan cannot be applied to other input orders."),
+Q("gs", "What downside does the chapter identify for quad-precision summation?", "It is usually done in software, so it is slow and not always supported.", ["It requires every input to be sorted by magnitude.", "It requires an MPI message for every local addition.", "It cannot convert the result back to double.", "It uses only the exponent bits of each input value."], "The chapter describes software cost and compiler support as drawbacks in its setting. Actual implementation and performance depend on the platform."),
+Q("gs", "In the specific experiment reported in table 5.1, which methods had a reported error of 0.0?", "Pairwise, Kahan and Knuth summation", ["Long double and quad precision", "Plain double and long double", "Only quad precision", "Only Kahan summation, the most practical one"], "Table 5.1 reports 0.0 for pairwise, Kahan and Knuth on this particular test and reference answer. It does not establish that these methods are exact on all inputs."),
+Q("gs", "Why can the added arithmetic of Kahan summation be relatively inexpensive in the chapter’s discussion?", "Registers, cache and vectorization can reduce the added runtime cost.", ["The correction is applied to only every fourth array entry.", "The compiler should discard the correction as redundant arithmetic.", "Each input is reduced to single precision before it is accumulated.", "The extra instructions eliminate the need to load the input data."], "The chapter explains that data reuse and available arithmetic capability can reduce the runtime penalty. Its scalar table still shows overhead; vectorization is an implementation consideration, not an automatic guarantee."),
+Q("attr", "What does “locality for operations” mean in the chapter’s summary?", "Avoid operating on all the data when not all of it is needed.", ["Keep values that are used together close together in memory.", "Run every operation on the processor closest to the data.", "Avoid coordination between threads that causes synchronization.", "Use local variables instead of global ones in kernels."], "The spatial hash for particle interactions is the classic example: it keeps the algorithm O(N) instead of O(N²)."),
+Q("attr", "What does “locality for cache” mean in the chapter’s summary?", "Keep values that are used together close together in memory.", ["Keep nearby mesh cells far apart in memory to spread reads.", "Store each related value in a separate cache line.", "Lay out data only by processor number, regardless of access pattern.", "Reload each related value from main memory before using it."], "Cache locality is about memory layout; operation locality is about not touching unneeded data."),
+Q("attr", "Why are fewer conditionals a desirable trait in parallel algorithms?", "Besides their own cost, they cause thread divergence on some hardware.", ["They force every input value into a separate cache line.", "They prevent using the result of a prefix scan as an offset.", "They require all array elements to be sorted before execution.", "They replace data parallelism with recursion in every kernel."], "When threads take different branches, some wait for others: thread divergence."),
+Q("attr", "What does the trait “asynchronous” mean for a parallel algorithm?", "It avoids coordination between threads that causes synchronization.", ["It requires all threads to finish each operation together.", "It assigns all work to one thread to avoid coordination.", "It processes entries in globally sorted order on every pass.", "It inserts a barrier after each independent hash lookup."], "The hash sort is a good example: every item is handled independently with no waiting."),
+Q("attr", "Why is higher arithmetic intensity a desirable trait?", "Hardware has gained floating-point capability faster than memory bandwidth.", ["Memory bandwidth has grown faster than floating-point capability.", "It reduces the number of floating-point operations needed.", "It guarantees reproducible floating-point results.", "It reduces the number of threads that are needed, so each core can run at a higher clock."], "Doing more flops per byte loaded makes good use of vector units and other parallel resources."),
+Q("attr", "Which trait is about the non-associativity of finite-precision arithmetic?", "Reproducibility", ["Locality", "Asynchronous execution", "Fewer conditionals", "Higher arithmetic intensity"], "Highly parallel techniques often change the order of operations; enhanced-precision techniques help restore reproducible results.")
+];
+
+QUESTIONS.forEach((q,i) => { q.id = i; q.all = [q.a, ...q.w]; });
+document.getElementById("qcount-hero").textContent = QUESTIONS.length;
+
+/* ---------------- quiz logic ---------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = s => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
+const shuffle = a => { a=[...a]; for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const BEST_KEY = "ibu-it2004-r05-best-v1";
+const RUN_KEY = "ibu-it2004-r05-run-v1";
+const MODE_KEY = "ibu-it2004-r05-mode";
+const MISTAKES_KEY = "ibu-it2004-r05-mistakes-v1";
+const canSaveMistakes = store.set(`${MISTAKES_KEY}-check`, "1");
+store.remove(`${MISTAKES_KEY}-check`);
+const questionRevision = q => JSON.stringify([q.q, q.a, q.w]);
+function readMistakes(){
+  try {
+    const saved = JSON.parse(store.get(MISTAKES_KEY));
+    if (!Array.isArray(saved)) return new Set();
+    return new Set(saved.filter(x => x && Number.isInteger(x.id) && QUESTIONS[x.id] &&
+      x.revision === questionRevision(QUESTIONS[x.id])).map(x => x.id));
+  } catch(e){ return new Set(); }
+}
+function updateMistake(it){
+  const saved = readMistakes();
+  if (judge(it)) saved.delete(it.q.id); else saved.add(it.q.id);
+  store.set(MISTAKES_KEY, JSON.stringify([...saved].map(id => ({id, revision:questionRevision(QUESTIONS[id])}))));
+}
+function savedMistakeQuestions(){
+  const saved = readMistakes();
+  return QUESTIONS.filter(q => saved.has(q.id) && chosenTopics.has(q.t));
+}
+// Any change to the bank invalidates saved progress and best scores.
+const BANK_VERSION = JSON.stringify(QUESTIONS.map(q => [q.q, q.a, q.w]));
+function readingLink(q){ return `<a href="#${READING_SECTIONS[q.t]}" data-reading="${READING_SECTIONS[q.t]}">Read this topic →</a>`; }
+document.addEventListener("click", e => {
+  const link = e.target.closest("[data-reading]");
+  if (!link) return;
+  e.preventDefault();
+  const section = $(link.dataset.reading);
+  show("read", false);
+  history.replaceState(null, "", link.getAttribute("href"));
+  section.scrollIntoView({behavior: reduce ? "auto" : "smooth", block:"start"});
+  section.setAttribute("tabindex", "-1");
+  section.focus({preventScroll:true});
+});
+
+let count = 25, chosenTopics = new Set(Object.keys(T));
+let mode = store.get(MODE_KEY) === "exam" ? "exam" : "practice";
+const COUNTS = [10, 25, 50, "All"];
+const bestKey = (topics, size) => `${BEST_KEY}:${mode}:${[...topics].sort().join(",")}:${size}`;
+function readBest(topics, size){
+  try {
+    const best = JSON.parse(store.get(bestKey(topics, size)));
+    return best && best.bank === BANK_VERSION && best.total === size &&
+      Number.isInteger(best.good) && best.good >= 0 && best.good <= size ? best : null;
+  } catch(e) { return null; }
+}
+function renderSetup(){
+  const pool = QUESTIONS.filter(q => chosenTopics.has(q.t)).length;
+  $("count-seg").innerHTML = COUNTS.map(c => `<button class="chip" data-c="${c}" aria-pressed="${c===count}">${c==="All" ? `All <small>(${pool})</small>` : c}</button>`).join("");
+  $("topic-seg").innerHTML = Object.entries(T).map(([k,v]) => `<button class="chip" data-t="${k}" aria-pressed="${chosenTopics.has(k)}">${esc(v)} <small>${QUESTIONS.filter(q=>q.t===k).length}</small></button>`).join("");
+  $("all-topics").setAttribute("aria-pressed", chosenTopics.size === Object.keys(T).length);
+  $("start").disabled = pool === 0;
+  const mistakes = readMistakes(), available = savedMistakeQuestions();
+  $("mistakes-status").textContent = !canSaveMistakes ? "Browser storage is unavailable; mistakes cannot be saved here." : `${mistakes.size} saved mistake${mistakes.size === 1 ? "" : "s"} · ${available.length} in selected topics`;
+  $("review-mistakes").disabled = available.length === 0;
+  $("mode-seg").querySelectorAll("[data-m]").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === mode));
+  const size = count === "All" ? pool : Math.min(count, pool);
+  const best = readBest(chosenTopics, size);
+  $("best").textContent = best ? `Your best (${mode === "exam" ? "Exam" : "Practice"}) for these topics · ${size} questions: ${Math.round(best.good / best.total * 100)}% (${best.good}/${best.total})` :
+    `${QUESTIONS.length} questions in the bank`;
+}
+$("mode-seg").onclick = e => { const b=e.target.closest("[data-m]"); if(!b) return; mode = b.dataset.m; store.set(MODE_KEY, mode); renderSetup(); };
+$("count-seg").onclick = e => { const b=e.target.closest("[data-c]"); if(!b) return; count = b.dataset.c==="All" ? "All" : +b.dataset.c; renderSetup(); };
+$("topic-seg").onclick = e => { const b=e.target.closest("[data-t]"); if(!b) return; const k=b.dataset.t; chosenTopics.has(k) ? chosenTopics.delete(k) : chosenTopics.add(k); renderSetup(); };
+$("all-topics").onclick = () => { chosenTopics = chosenTopics.size === Object.keys(T).length ? new Set() : new Set(Object.keys(T)); renderSetup(); };
+renderSetup();
+
+/* run.list items: {q, order:[indexes into q.all], sel: displayed position or -1, done}. q.all[0] is the correct answer. */
+let run = null;
+const isOk = (it, pos) => it.order[pos] === 0;
+const judge = it => it.sel >= 0 && isOk(it, it.sel);
+function saveRun(){
+  store.set(RUN_KEY, JSON.stringify({bank:BANK_VERSION, count, topics:[...chosenTopics], recordEligible:run.recordEligible, mode:run.mode, i:run.i,
+    list:run.list.map(it => ({id:it.q.id, order:it.order, sel:it.sel, done:!!it.done}))}));
+}
+function restoreRun(){
+  try {
+    const saved = JSON.parse(store.get(RUN_KEY));
+    if (!saved) return;
+    if (saved.bank !== BANK_VERSION || !Array.isArray(saved.list) || !saved.list.length ||
+        !Number.isInteger(saved.i) || saved.i < 0 || saved.i >= saved.list.length ||
+        !COUNTS.includes(saved.count) || !Array.isArray(saved.topics) || saved.topics.some(t => !Object.hasOwn(T,t))) throw Error("Invalid progress");
+    const list = saved.list.map((it,index) => {
+      const q = QUESTIONS[it.id];
+      if (!q || !Array.isArray(it.order) || it.order.length !== 5 || new Set(it.order).size !== 5 ||
+          it.order.some(k => !Number.isInteger(k) || k < 0 || k > 4) || !Number.isInteger(it.sel) || it.sel < -1 || it.sel > 4 ||
+          (it.done && it.sel < 0) || (index < saved.i && !it.done) || (index > saved.i && it.done)) throw Error("Invalid question");
+      return {q, order:it.order, sel:it.sel, done:!!it.done};
+    });
+    run = {list, i:saved.i, recordEligible:saved.recordEligible === true, mode:saved.mode === "exam" ? "exam" : "practice"};
+    if (run.recordEligible) mode = run.mode;
+    count = saved.count; chosenTopics = new Set(saved.topics);
+    $("q-setup").hidden = true; $("q-result").hidden = true; $("q-play").hidden = false;
+    renderQ();
+  } catch(e) { store.remove(RUN_KEY); }
+}
+function startWith(list, recordEligible = true, m = mode){
+  run = { list: list.map(q => ({ q, order: shuffle([0,1,2,3,4]), sel:-1, done:false })), i:0, recordEligible, mode:m };
+  $("q-setup").hidden = true; $("q-result").hidden = true; $("q-play").hidden = false;
+  renderQ();
+}
+$("review-mistakes").onclick = () => {
+  const list = shuffle(savedMistakeQuestions());
+  if (list.length) startWith(list, false, "practice");
+};
+$("start").onclick = () => {
+  const pool = shuffle(QUESTIONS.filter(q => chosenTopics.has(q.t)));
+  startWith(count === "All" ? pool : pool.slice(0, count));
+};
+const answered = () => run.list.filter(it => it.done);
+function renderLive(){
+  const a = answered(), g = a.filter(judge).length;
+  if (run.mode === "exam"){ $("q-live").innerHTML = `<span>Exam · answered ${a.length} / ${run.list.length}</span>`; return; }
+  $("q-live").innerHTML = `<span class="g">✓ ${g}</span> &nbsp; <span class="r">✕ ${a.length - g}</span>`;
+}
+function renderQ(){
+  const it = run.list[run.i], n = run.list.length;
+  $("q-counter").textContent = `Question ${run.i+1} / ${n}`;
+  $("q-topic").textContent = T[it.q.t];
+  renderLive();
+  $("q-bar").style.width = (run.i / n * 100) + "%";
+  $("q-text").innerHTML = fmt(it.q.q);
+  $("q-opts").innerHTML = it.order.map((k,pos) => `<li><button class="opt${it.sel === pos ? " sel" : ""}" role="radio" aria-checked="${it.sel === pos}" data-k="${pos}"><span class="k">${"ABCDE"[pos]}</span><span>${fmt(it.q.all[k])}</span></button></li>`).join("");
+  $("q-explain").hidden = true;
+  if (it.done && run.mode !== "exam") paintAnswer(); else setAction();
+  saveRun();
+}
+function setAction(){
+  const it = run.list[run.i], last = run.i === run.list.length-1, btn = $("q-next");
+  if (!it.done && run.mode === "exam"){ btn.textContent = last ? "Finish →" : "Next →"; btn.disabled = it.sel < 0; }
+  else if (!it.done){ btn.textContent = "Check"; btn.disabled = it.sel < 0; }
+  else { btn.textContent = last ? "See results →" : "Next →"; btn.disabled = false; }
+}
+function choose(pos){
+  const it = run.list[run.i]; if (it.done) return;
+  it.sel = pos;
+  [...$("q-opts").querySelectorAll(".opt")].forEach((b,j) => { b.classList.toggle("sel", j === pos); b.setAttribute("aria-checked", j === pos); });
+  setAction(); saveRun();
+}
+function check(){
+  const it = run.list[run.i]; if (it.done || it.sel < 0) return;
+  it.done = true;
+  updateMistake(it);
+  if (run.mode === "exam"){
+    if (run.i < run.list.length-1){ run.i++; renderQ(); $("q-play").scrollIntoView({block:"nearest"}); } else results();
+    return;
+  }
+  paintAnswer(true); saveRun();
+  $("q-next").focus({preventScroll:true});
+}
+function paintAnswer(fresh){
+  const it = run.list[run.i], ok = judge(it);
+  [...$("q-opts").querySelectorAll(".opt")].forEach((b,j) => { b.disabled = true; b.classList.remove("sel");
+    const good = isOk(it, j), picked = it.sel === j;
+    if (good && picked) b.classList.add("correct");
+    else if (good) b.classList.add("answer");
+    else if (picked) b.classList.add("wrong", ...(fresh && !reduce ? ["shake"] : []));
+    else b.classList.add("dim"); });
+  const ex = $("q-explain");
+  ex.className = "explain " + (ok ? "ok" : "no");
+  ex.innerHTML = `<b>${ok ? "Correct." : "Not quite."}</b> ${fmt(it.q.e)} <p>${readingLink(it.q)}</p>`;
+  ex.hidden = false;
+  renderLive(); setAction();
+}
+$("q-opts").onclick = e => { const b = e.target.closest(".opt"); if (b) choose(+b.dataset.k); };
+$("q-next").onclick = () => {
+  const it = run.list[run.i];
+  if (!it.done) return check();
+  if (run.i < run.list.length-1){ run.i++; renderQ(); $("q-play").scrollIntoView({block:"nearest"}); } else results();
+};
+$("q-quit").onclick = () => { if (answered().length) results(); else { store.remove(RUN_KEY); $("q-play").hidden = true; $("q-setup").hidden = false; } };
+document.addEventListener("keydown", e => {
+  if ($("q-play").hidden || views.quiz.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.target.closest && e.target.closest("button") && e.key === " ") return;
+  const m = "12345".indexOf(e.key) >= 0 ? "12345".indexOf(e.key) : "abcde".indexOf(e.key.toLowerCase());
+  if (m >= 0 && e.key.length === 1){ choose(m); e.preventDefault(); }
+  else if (e.key === "Enter" && !$("q-next").disabled){ $("q-next").click(); e.preventDefault(); }
+});
+function results(){
+  store.remove(RUN_KEY);
+  const done = answered(), n = done.length, g = done.filter(judge).length, pct = n ? Math.round(g/n*100) : 0;
+  $("q-play").hidden = true; $("q-result").hidden = false;
+  $("r-pct").textContent = pct + "%";
+  $("r-raw").textContent = `${g} / ${n}${n < run.list.length ? ` · ${n} of ${run.list.length} done` : ""}`;
+  const ring = $("r-ring"); let p = 0;
+  const step = () => { p = Math.min(pct, p + 2); ring.style.setProperty("--p", p); if (p < pct && !batterySaver) requestAnimationFrame(step); else ring.style.setProperty("--p", pct); };
+  (reduce || batterySaver) ? ring.style.setProperty("--p", pct) : requestAnimationFrame(step);
+  $("r-title").textContent = pct >= 90 ? "Excellent!" : pct >= 75 ? "Very good" : pct >= 55 ? "Getting there" : "Keep studying";
+  $("r-msg").textContent = pct >= 90 ? "You know parallel algorithms and patterns really well." : pct >= 75 ? "Review the topics with the lowest bars below." : "Re-read the sections for the red topics, then retry your mistakes.";
+  const by = {};
+  done.forEach(it => { by[it.q.t] ??= [0,0]; by[it.q.t][1]++; if (judge(it)) by[it.q.t][0]++; });
+  $("r-topics").innerHTML = Object.entries(by).sort((a,b) => a[1][0]/a[1][1] - b[1][0]/b[1][1]).map(([k,[x,y]]) => {
+    const r = x/y; return `<div class="trow"><span>${esc(T[k])}</span><span class="tb"><i class="${r<.5?"low":r<.8?"mid":""}" style="width:${r*100}%"></i></span><span>${x}/${y}</span></div>`; }).join("");
+  const wrong = done.filter(it => !judge(it));
+  run.wrong = wrong.map(it => it.q);
+  $("r-retry").hidden = !wrong.length; $("r-review-wrap").hidden = !wrong.length;
+  $("r-review").innerHTML = wrong.map(it =>
+    `<div class="ritem"><p class="q">${fmt(it.q.q)}</p>` +
+    `<p class="you">You chose: ${fmt(it.q.all[it.order[it.sel]])}</p>` +
+    `<p class="ans">Correct answer: ${fmt(it.q.a)}</p>` +
+    `<p class="why">${fmt(it.q.e)}</p><p>${readingLink(it.q)}</p></div>`).join("");
+  if (run.recordEligible && n >= 10 && n === run.list.length){
+    const prev = readBest(chosenTopics, n);
+    if (!prev || g > prev.good) store.set(bestKey(chosenTopics, n), JSON.stringify({bank:BANK_VERSION, good:g, total:n}));
+  }
+  scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+}
+$("r-retry").onclick = () => startWith(shuffle(run.wrong), false, "practice");
+$("r-new").onclick = () => { $("q-result").hidden = true; $("q-setup").hidden = false; renderSetup(); };
+restoreRun();
+</script>
+</body>
+</html>
