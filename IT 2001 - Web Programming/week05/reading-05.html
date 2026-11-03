@@ -1,0 +1,1866 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Presentation Layer</title>
+<meta name="description" content="IT 2001 Web Programming, Reading 05: Presentation layer with FlightPHP. Full study guide and a multiple-answer quiz.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Glass theme: a STATIC colourful backdrop (gradient orbs + a soft grid) behind frosted panels.
+   Nothing moves behind the blurred panels, so the blur is only recomputed while scrolling (battery-friendly). */
+:root{
+  --bg:#e8ebf8;
+  --orb1:rgba(124,92,255,.55); --orb2:rgba(56,182,255,.50); --orb3:rgba(255,150,110,.45); --orb4:rgba(40,210,170,.40);
+  --grid:rgba(60,70,140,.13); --cell1:rgba(124,92,255,.22); --cell2:rgba(56,182,255,.22); --cell3:rgba(255,150,110,.24);
+  --glass:rgba(255,255,255,.56); --glass2:rgba(255,255,255,.34); --glass-strong:rgba(255,255,255,.80);
+  --edge:rgba(255,255,255,.75); --edge-soft:rgba(40,50,110,.10); --shine:rgba(255,255,255,.85);
+  --ink:#10162e; --muted:#4c5675; --line:rgba(40,50,110,.14);
+  --accent:#5a46f0; --accent2:#0b93a8; --accent-ink:#ffffff; --accent-soft:rgba(90,70,240,.10);
+  --amber:#a86a00; --amber-soft:rgba(240,170,40,.16);
+  --good:#147a46; --good-soft:rgba(20,150,80,.13); --bad:#b8352b; --bad-soft:rgba(200,50,40,.11);
+  --shadow:0 24px 60px -30px rgba(30,30,90,.45);
+  --code-bg:rgba(14,18,40,.88); --code-ink:#e6e9f7;
+  --f-display:"Sora", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#060914;
+  --orb1:rgba(110,80,255,.42); --orb2:rgba(30,150,255,.32); --orb3:rgba(255,110,140,.24); --orb4:rgba(20,200,170,.26);
+  --grid:rgba(160,175,255,.09); --cell1:rgba(124,92,255,.20); --cell2:rgba(56,182,255,.16); --cell3:rgba(255,120,150,.16);
+  --glass:rgba(20,25,52,.52); --glass2:rgba(20,25,52,.30); --glass-strong:rgba(28,34,70,.80);
+  --edge:rgba(255,255,255,.13); --edge-soft:rgba(255,255,255,.06); --shine:rgba(255,255,255,.16);
+  --ink:#eef1fb; --muted:#a4adca; --line:rgba(170,185,255,.15);
+  --accent:#a191ff; --accent2:#5ad8e6; --accent-ink:#0b0d1d; --accent-soft:rgba(161,145,255,.14);
+  --amber:#ffc95e; --amber-soft:rgba(255,200,90,.12);
+  --good:#62d79c; --good-soft:rgba(98,215,156,.14); --bad:#ff8a8f; --bad-soft:rgba(255,120,130,.13);
+  --shadow:0 30px 70px -30px rgba(0,0,0,.8);
+  --code-bg:rgba(6,8,20,.78); --code-ink:#e6e9f7;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#060914;
+  --orb1:rgba(110,80,255,.42); --orb2:rgba(30,150,255,.32); --orb3:rgba(255,110,140,.24); --orb4:rgba(20,200,170,.26);
+  --grid:rgba(160,175,255,.09); --cell1:rgba(124,92,255,.20); --cell2:rgba(56,182,255,.16); --cell3:rgba(255,120,150,.16);
+  --glass:rgba(20,25,52,.52); --glass2:rgba(20,25,52,.30); --glass-strong:rgba(28,34,70,.80);
+  --edge:rgba(255,255,255,.13); --edge-soft:rgba(255,255,255,.06); --shine:rgba(255,255,255,.16);
+  --ink:#eef1fb; --muted:#a4adca; --line:rgba(170,185,255,.15);
+  --accent:#a191ff; --accent2:#5ad8e6; --accent-ink:#0b0d1d; --accent-soft:rgba(161,145,255,.14);
+  --amber:#ffc95e; --amber-soft:rgba(255,200,90,.12);
+  --good:#62d79c; --good-soft:rgba(98,215,156,.14); --bad:#ff8a8f; --bad-soft:rgba(255,120,130,.13);
+  --shadow:0 30px 70px -30px rgba(0,0,0,.8);
+  --code-bg:rgba(6,8,20,.78); --code-ink:#e6e9f7;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth; scroll-padding-top:96px}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--f-body); font-size:18px; line-height:1.7;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+a{color:var(--accent)}
+code,kbd,.mono{font-family:var(--f-mono); font-size:.85em; font-variant-ligatures:none}
+p code, li code, td code{background:var(--accent-soft); padding:1px 6px; border-radius:6px}
+
+/* ---------- static backdrop ---------- */
+.backdrop{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  background:
+    radial-gradient(42vmax 42vmax at 8% 6%, var(--orb1), transparent 70%),
+    radial-gradient(40vmax 40vmax at 96% 18%, var(--orb2), transparent 70%),
+    radial-gradient(46vmax 46vmax at 82% 96%, var(--orb3), transparent 70%),
+    radial-gradient(36vmax 36vmax at 18% 88%, var(--orb4), transparent 70%),
+    var(--bg)}
+.backdrop svg{position:absolute; inset:0; width:100%; height:100%}
+.grain{position:absolute; inset:0; opacity:.06; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+/* ---------- glass ---------- */
+.glass{
+  position:relative;
+  background:linear-gradient(145deg, var(--glass), var(--glass2));
+  -webkit-backdrop-filter:blur(18px) saturate(1.6); backdrop-filter:blur(18px) saturate(1.6);
+  border:1px solid var(--edge); border-radius:24px;
+  box-shadow:inset 0 1px 0 var(--shine), inset 0 0 0 1px var(--edge-soft), var(--shadow);
+}
+:root[data-battery-saver="true"] .glass{background:var(--glass-strong);backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-battery-saver="true"] .grain{display:none}
+:root[data-battery-saver="true"] .reveal{opacity:1;transform:none;transition:none}
+.icon-btn.saver-btn{width:auto;padding:0 10px;display:flex;white-space:nowrap;gap:6px;font:600 .8rem var(--f-body)}
+.saver-btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+@media(max-width:700px){html{scroll-padding-top:146px}.bar{flex-wrap:wrap}.brand{flex:1 1 0}.tabs{order:3;width:100%}.tab{flex:1}.saver-btn{font-size:.75rem}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .glass{background:var(--glass-strong)}
+}
+@media (prefers-reduced-transparency: reduce){ .glass{background:var(--glass-strong); backdrop-filter:none; -webkit-backdrop-filter:none} }
+
+/* ---------- top bar ---------- */
+.top{position:sticky; top:0; z-index:20; padding:12px max(16px, env(safe-area-inset-left)) 0}
+.bar{max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 10px 8px 14px; border-radius:18px; overflow:hidden}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); min-width:0; margin-right:auto}
+.brand .logo{flex:none; width:34px; height:34px; border-radius:11px; display:grid; place-items:center;
+  background:linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.brand b{font-family:var(--f-display); font-weight:700; font-size:.98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block}
+.brand small{display:block; font-family:var(--f-mono); font-size:.64rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); line-height:1.2}
+.brand span{min-width:0}
+.tabs{display:flex; background:var(--accent-soft); border-radius:13px; padding:4px; gap:2px; border:1px solid var(--edge-soft)}
+.tab{appearance:none; border:0; background:transparent; color:var(--ink); font:600 .95rem var(--f-body); padding:7px 16px; border-radius:10px; cursor:pointer; transition:background .2s, color .2s}
+.tab[aria-selected="true"]{background:linear-gradient(135deg, var(--accent), var(--accent2)); color:var(--accent-ink); box-shadow:0 6px 16px -8px var(--accent)}
+.icon-btn{appearance:none; border:1px solid var(--line); background:var(--glass2); color:var(--ink); width:40px; height:40px; border-radius:12px; display:grid; place-items:center; cursor:pointer; flex:none}
+.icon-btn:hover{background:var(--accent-soft)}
+.progress{position:absolute; left:0; bottom:0; height:3px; width:0; background:linear-gradient(90deg, var(--accent), var(--accent2)); transition:width .15s linear}
+@media (max-width:560px){ .brand small{display:none} .brand b{font-size:.9rem} .tab{padding:7px 11px} .brand .logo{display:none}}
+
+/* ---------- shell ---------- */
+main{position:relative; z-index:1; padding:22px max(16px, env(safe-area-inset-left)) 80px}
+.shell{max-width:1200px; margin:0 auto}
+
+/* hero */
+.hero{padding:clamp(28px,5vw,60px); display:grid; gap:22px; margin-bottom:22px; overflow:hidden}
+.eyebrow{font-family:var(--f-mono); font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 14px}
+.eyebrow span{display:inline-flex; align-items:center; gap:6px}
+.eyebrow .dot{width:7px; height:7px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2))}
+h1,h2,h3,h4{font-family:var(--f-display); letter-spacing:-.02em; text-wrap:balance; margin:0}
+h1{font-size:clamp(2.2rem, 6vw, 4.2rem); line-height:1.02; font-weight:800; max-width:15ch}
+h1 em{font-style:normal; background:linear-gradient(100deg, var(--accent), var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent}
+.lede{font-size:1.16rem; color:var(--muted); max-width:56ch; margin:0}
+.cta{display:flex; flex-wrap:wrap; gap:12px}
+.btn{appearance:none; border:1px solid var(--line); background:var(--glass-strong); color:var(--ink); font:600 1rem var(--f-body); padding:12px 20px; border-radius:14px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:transform .15s, background .2s, border-color .2s}
+.btn:hover{transform:translateY(-1px); border-color:var(--accent)}
+.btn.primary{background:linear-gradient(135deg, var(--accent), var(--accent2)); color:var(--accent-ink); border-color:transparent; box-shadow:0 10px 24px -12px var(--accent)}
+.btn:disabled{opacity:.45; cursor:not-allowed; transform:none; box-shadow:none}
+.stats{display:flex; flex-wrap:wrap; gap:10px}
+.stat{padding:8px 14px; border-radius:13px; background:var(--glass2); border:1px solid var(--edge-soft); font-size:.92rem; color:var(--muted)}
+.stat b{color:var(--ink); font-family:var(--f-display); font-size:1.04rem; margin-right:5px}
+.hero-art{position:absolute; right:40px; top:50%; transform:translateY(-50%); width:min(36%, 380px); pointer-events:none}
+.hero > :not(.hero-art){position:relative; z-index:1}
+@media (max-width:900px){.hero-art{display:none}}
+
+/* ---------- reading ---------- */
+.reading{display:grid; grid-template-columns:260px minmax(0,1fr); gap:22px; align-items:start}
+@media (max-width:1000px){.reading{grid-template-columns:minmax(0,1fr)}}
+.toc{position:sticky; top:90px; padding:18px 14px; max-height:calc(100vh - 112px); overflow:auto; font-size:.92rem}
+.toc h4{font-size:.72rem; font-family:var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:0 8px 8px}
+.toc ol{list-style:none; margin:0; padding:0; counter-reset:t}
+.toc a{display:flex; gap:8px; padding:6px 8px; border-radius:10px; color:var(--muted); text-decoration:none; line-height:1.3}
+.toc a::before{counter-increment:t; content:counter(t, decimal-leading-zero); font-family:var(--f-mono); font-size:.74em; color:var(--accent); min-width:1.7em; padding-top:.2em}
+.toc a:hover{background:var(--accent-soft); color:var(--ink)}
+.toc a.on{background:var(--accent-soft); color:var(--ink); font-weight:600}
+.toc .quiz-link{margin-top:12px; width:100%; justify-content:center}
+@media (max-width:1000px){.toc{position:static; max-height:none} .toc ol{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}}
+
+article{display:flex; flex-direction:column; gap:22px; min-width:0}
+.sec{padding:clamp(22px,4vw,46px)}
+.sec > * + *{margin-top:16px}
+.sec h2{font-size:clamp(1.5rem,3.2vw,2.1rem); line-height:1.12; display:flex; align-items:baseline; gap:14px}
+.sec h2 .n{font-family:var(--f-mono); font-size:.48em; color:var(--accent); background:var(--accent-soft); padding:4px 9px; border-radius:9px; letter-spacing:0; flex:none}
+.sec h3{font-size:1.22rem; margin-top:30px}
+.sec p, .sec li{max-width:74ch}
+.sec ul, .sec ol{padding-left:1.3em}
+.sec li + li{margin-top:6px}
+.sec li::marker{color:var(--accent)}
+.steps{list-style:none; padding:0!important; counter-reset:s; display:grid; gap:10px}
+.steps li{counter-increment:s; position:relative; padding:12px 14px 12px 54px; background:var(--glass2); border:1px solid var(--edge-soft); border-radius:14px; max-width:none}
+.steps li::before{content:counter(s); position:absolute; left:14px; top:12px; width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--accent-ink); display:grid; place-items:center; font:700 .85rem var(--f-display)}
+.callout{border-radius:16px; padding:14px 18px; border:1px solid var(--edge-soft); border-left:4px solid var(--accent); background:var(--accent-soft)}
+.callout.key{border-left-color:var(--amber); background:var(--amber-soft)}
+.callout.warn{border-left-color:var(--bad); background:var(--bad-soft)}
+.callout.story{border-left-color:var(--good); background:var(--good-soft)}
+.callout .lbl{font-style:normal; font-family:var(--f-mono); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; display:block; margin-bottom:4px; color:var(--muted)}
+.callout p{margin:6px 0 0}
+.callout ol, .callout ul{margin:6px 0 0}
+.defs{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px}
+.def{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:14px 16px; line-height:1.5}
+.def b{display:block; font-family:var(--f-display); font-size:1rem; margin-bottom:4px}
+.def b .sym{color:var(--accent); font-family:var(--f-mono); margin-right:6px}
+.def span{color:var(--muted); font-size:.95rem}
+.tbl{overflow-x:auto; border-radius:16px; border:1px solid var(--line)}
+table{border-collapse:collapse; width:100%; font-size:.95rem; line-height:1.45; background:var(--glass-strong)}
+th,td{padding:10px 14px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line)}
+th{font-family:var(--f-display); font-weight:600; background:var(--accent-soft); font-size:.88rem}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--f-mono); font-size:.86rem; white-space:nowrap}
+td.y{color:var(--good); font-weight:700} td.no{color:var(--bad); font-weight:700}
+.tblcap{font-family:var(--f-mono); font-size:.74rem; color:var(--muted); margin-bottom:-8px; letter-spacing:.04em}
+pre.code{margin:0; background:var(--code-bg); color:var(--code-ink); border-radius:16px; padding:16px 18px; overflow-x:auto; font:500 .84rem/1.6 var(--f-mono); border:1px solid rgba(255,255,255,.08); box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+pre.code .c{color:#8b95b8; font-style:italic}
+pre.code .k{color:#c4b5ff}
+pre.code .s{color:#7fe3c8}
+.codecap{font-family:var(--f-mono); font-size:.74rem; color:var(--muted); margin-bottom:-8px}
+figure{margin:0}
+.fig button{appearance:none; border:0; padding:clamp(8px,2vw,16px); background:#fff; border-radius:16px; width:100%; cursor:zoom-in; display:block; box-shadow:0 0 0 1px var(--line), 0 12px 30px -20px rgba(0,0,0,.4); transition:transform .2s}
+.fig button:hover{transform:scale(1.006)}
+.fig img{width:100%; height:auto; display:block; margin:0 auto}
+.fig.narrow button{max-width:520px; margin:0 auto}
+.fig.mid button{max-width:720px; margin:0 auto}
+.fig figcaption{font-size:.9rem; color:var(--muted); margin-top:8px; text-align:center; max-width:none}
+.fig figcaption b{color:var(--ink); font-family:var(--f-display); font-weight:600}
+.pair{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; align-items:start}
+.scan{display:grid; gap:8px; font-family:var(--f-mono); font-size:.9rem; overflow-x:auto}
+.scan .row{display:flex; gap:6px; align-items:center; flex-wrap:nowrap}
+.scan .lab{width:110px; flex:none; color:var(--muted); font-size:.76rem}
+.scan i{font-style:normal; flex:none; width:44px; height:38px; display:grid; place-items:center; border-radius:10px; background:var(--glass-strong); border:1px solid var(--line)}
+.scan .ex i{background:var(--accent-soft); border-color:transparent; color:var(--accent); font-weight:600}
+.scan .in i{background:rgba(11,147,168,.12); border-color:transparent; color:var(--accent2); font-weight:600}
+.takeaways{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; list-style:none; padding:0!important}
+.takeaways li{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:14px 16px; max-width:none; margin:0!important}
+details.ex{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:12px 16px}
+details.ex + details.ex{margin-top:10px}
+details.ex summary{cursor:pointer; font-weight:600}
+details.ex p{margin:8px 0 0}
+.end-cta{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(22px,4vw,46px)}
+.end-cta h3{font-size:1.35rem}
+
+.reveal{opacity:0; transform:translateY(16px); transition:opacity .55s ease, transform .55s ease}
+.reveal.in{opacity:1; transform:none}
+
+/* ---------- quiz ---------- */
+.quiz{max-width:840px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+.qcard{padding:clamp(20px,4vw,38px); display:flex; flex-direction:column; gap:18px}
+.qcard h2{font-size:clamp(1.45rem,3.2vw,1.95rem)}
+.muted{color:var(--muted)}
+.label{font-family:var(--f-mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block}
+.seg{display:flex; flex-wrap:wrap; gap:8px}
+.chip{appearance:none; border:1px solid var(--line); background:var(--glass-strong); color:var(--ink); font:600 .9rem var(--f-body); padding:8px 14px; border-radius:999px; cursor:pointer; transition:background .15s, border-color .15s}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--accent-ink); border-color:transparent}
+.chip small{opacity:.75; font-weight:400; margin-left:4px}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.row.between{justify-content:space-between}
+.qhead{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; font-size:.92rem}
+.counter{font-family:var(--f-mono); color:var(--muted)}
+.tag{font-family:var(--f-mono); font-size:.72rem; letter-spacing:.05em; padding:4px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent)}
+.live{font-family:var(--f-mono); font-size:.86rem}
+.live .g{color:var(--good)} .live .r{color:var(--bad)}
+.qbar{height:6px; border-radius:6px; background:var(--accent-soft); overflow:hidden}
+.qbar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease}
+.question{font-family:var(--f-display); font-size:clamp(1.12rem,2.4vw,1.38rem); line-height:1.38; font-weight:600; margin:0}
+.mode{margin:-6px 0 0; font-size:.9rem; color:var(--muted); font-style:italic}
+.opts{display:grid; gap:10px; list-style:none; padding:0; margin:0}
+.opt{appearance:none; width:100%; text-align:left; border:1.5px solid var(--line); background:var(--glass-strong); color:var(--ink); font:400 1.02rem/1.45 var(--f-body); padding:13px 16px; border-radius:16px; cursor:pointer; display:flex; gap:14px; align-items:flex-start; transition:border-color .15s, background .15s, transform .15s}
+.opt:hover:not(:disabled){border-color:var(--accent); transform:translateX(3px)}
+.opt .k{flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background:var(--accent-soft); font:700 .82rem var(--f-mono); color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.sel{border-color:var(--accent); background:var(--accent-soft)}
+.opt.sel .k{background:var(--accent); color:var(--accent-ink)}
+.opt.correct{border-color:var(--good); background:var(--good-soft)}
+.opt.correct .k{background:var(--good); color:#fff}
+.opt.answer{border-color:var(--good); border-style:dashed}
+.opt.answer .k{background:var(--good-soft); color:var(--good)}
+.opt.answer::after{content:"correct answer"; margin-left:auto; align-self:center; font:600 .68rem var(--f-mono); color:var(--good); text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; padding-left:8px}
+.opt.wrong{border-color:var(--bad); background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad); color:#fff}
+.opt.dim{opacity:.55}
+.opt.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.explain{border-radius:16px; padding:14px 18px; background:var(--accent-soft); border:1px solid var(--edge-soft); border-left:4px solid var(--accent); animation:pop .3s ease}
+.explain.ok{border-left-color:var(--good); background:var(--good-soft)}
+.explain.no{border-left-color:var(--bad); background:var(--bad-soft)}
+.explain b{font-family:var(--f-display)}
+.explain p{margin:6px 0 0}
+@keyframes pop{from{opacity:0; transform:translateY(6px)}}
+.hint{font-size:.82rem; color:var(--muted); margin:0}
+kbd{border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:1px 6px; background:var(--glass-strong)}
+.result-top{display:flex; gap:24px; align-items:center; flex-wrap:wrap}
+.ring{--p:0; width:140px; height:140px; border-radius:50%; flex:none; display:grid; place-items:center;
+  background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--accent-soft) 0)}
+.ring div{width:112px; height:112px; border-radius:50%; background:var(--glass-strong); display:grid; place-items:center; text-align:center; line-height:1.1}
+.ring b{font:800 1.9rem var(--f-display)} .ring small{color:var(--muted); font-size:.78rem}
+.topics{display:grid; gap:8px}
+.trow{display:grid; grid-template-columns:minmax(0,1fr) 120px 52px; gap:10px; align-items:center; font-size:.92rem}
+.trow .tb{height:8px; border-radius:8px; background:var(--accent-soft); overflow:hidden}
+.trow .tb i{display:block; height:100%; background:var(--good)}
+.trow .tb i.mid{background:var(--amber)} .trow .tb i.low{background:var(--bad)}
+.trow span:last-child{font-family:var(--f-mono); text-align:right; color:var(--muted)}
+.review{display:grid; gap:12px}
+.ritem{border:1px solid var(--line); border-radius:16px; padding:14px 16px; background:var(--glass-strong)}
+.ritem p{margin:4px 0}
+.ritem .q{font-weight:700}
+.ritem .you{color:var(--bad)} .ritem .ans{color:var(--good)}
+.ritem .why{color:var(--muted); font-size:.94rem}
+.best{font-size:.9rem}
+
+/* lightbox */
+dialog.lb{border:0; padding:0; background:transparent; max-width:min(1200px,96vw); width:100%}
+dialog.lb::backdrop{background:rgba(5,8,20,.86)}
+dialog.lb img{width:100%; height:auto; background:#fff; border-radius:14px; display:block; padding:12px}
+dialog.lb p{color:#e7ebf7; text-align:center; font-size:.95rem; margin:10px 0 0}
+dialog.lb button{position:absolute; top:8px; right:8px; background:rgba(0,0,0,.6); color:#fff; border:0; width:38px; height:38px; border-radius:10px; font-size:1.2rem; cursor:pointer}
+
+footer{position:relative; z-index:1; text-align:center; color:var(--muted); font-size:.85rem; padding:0 16px 40px}
+footer a{color:var(--muted)}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1; transform:none; transition:none} html{scroll-behavior:auto}
+  .opt, .btn, .fig button{transition:none} .opt.shake{animation:none}
+}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+/* ---------- additions for Reading 05 (Web Programming) ---------- */
+.opts.multi .opt .k{border-radius:8px}
+.opt.missed{border-color:var(--good); border-style:dashed}
+.opt.missed .k{background:var(--good-soft); color:var(--good)}
+.opt.missed::after{content:"missed"; margin-left:auto; align-self:center; font:600 .68rem var(--f-mono); color:var(--good); text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; padding-left:8px}
+.ritem ul{margin:2px 0 6px; padding-left:1.2em}
+.ritem ul.you li{color:var(--bad)} .ritem ul.ans li{color:var(--good)}
+.flow{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:26px; position:relative; padding:6px 0}
+.flow .node{position:relative; background:var(--glass-strong); border:1.5px solid var(--accent); border-radius:16px; padding:14px 10px; text-align:center; line-height:1.3}
+.flow .node b{display:block; font-family:var(--f-display); font-size:1.02rem}
+.flow .node span{font-size:.84rem; color:var(--muted)}
+.flow .node + .node::before{content:"→"; position:absolute; left:-22px; top:50%; transform:translateY(-50%); color:var(--accent2); font:700 1.1rem var(--f-mono)}
+@media (max-width:640px){.flow{grid-template-columns:1fr; gap:22px}.flow .node + .node::before{content:"↓"; left:50%; top:-21px; transform:translateX(-50%)}}
+.http-groups{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px}
+.http-groups div{border-radius:16px; padding:12px 16px; border:1px solid var(--edge-soft); line-height:1.4}
+.http-groups b{font-family:var(--f-mono); font-size:1.2rem; display:block}
+.http-groups .ok{background:var(--good-soft)} .http-groups .ok b{color:var(--good)}
+.http-groups .cl{background:var(--amber-soft)} .http-groups .cl b{color:var(--amber)}
+.http-groups .sv{background:var(--bad-soft)} .http-groups .sv b{color:var(--bad)}
+.m{font-family:var(--f-mono); font-size:.8em; font-weight:600; padding:1px 7px; border-radius:6px; background:var(--accent-soft); color:var(--accent); white-space:nowrap}
+.dodont{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px}
+.dodont > div{border-radius:16px; padding:12px 16px; border:1px solid var(--edge-soft)}
+.dodont .no{background:var(--bad-soft)} .dodont .yes{background:var(--good-soft)}
+.dodont .lbl{font-family:var(--f-mono); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:4px}
+.dodont code{display:block; margin-top:4px; background:transparent; padding:0}
+</style>
+<body>
+<div class="backdrop" aria-hidden="true">
+  <svg id="bg-grid" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1600 1000"></svg>
+  <div class="grain"></div>
+</div>
+
+<header class="top">
+  <div class="bar glass">
+    <a class="brand" href="../../index.html" title="All courses">
+      <span class="logo"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7 3 12l5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></span>
+      <span><small>IT 2001 · Week 05</small><b>Presentation Layer</b></span>
+    </a>
+    <div class="tabs" role="tablist" aria-label="View">
+      <button class="tab" role="tab" id="tab-read" aria-selected="true" aria-controls="view-read">Reading</button>
+      <button class="tab" role="tab" id="tab-quiz" aria-selected="false" aria-controls="view-quiz">Quiz</button>
+    </div>
+    <button class="icon-btn saver-btn" id="battery-saver" aria-pressed="false" title="Reduce visual effects while keeping the page readable">Battery saver: off</button>
+    <button class="icon-btn" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="progress" id="progress"></div>
+  </div>
+</header>
+
+<main>
+<div class="shell">
+
+<!-- ======================= READING ======================= -->
+<section id="view-read" role="tabpanel" aria-labelledby="tab-read">
+  <div class="hero glass">
+    <div class="eyebrow"><span><i class="dot"></i>IT 2001 · Web Programming</span><span>Reading 05 · Presentation Layer</span><span>2026/2027</span></div>
+    <h1>The presentation <em>layer</em></h1>
+    <p class="lede">The top layer of the backend: routes that receive HTTP requests and answer with JSON. Frameworks and FlightPHP, Composer and the vendor folder, .htaccess, HTTP and REST, URL parameters, JSON responses and error handling in one place.</p>
+    <div class="cta">
+      <a class="btn primary" href="#s1">Start reading ↓</a>
+      <button class="btn" data-go="quiz">Take the quiz →</button>
+    </div>
+    <div class="stats">
+      <span class="stat"><b>16</b>sections</span>
+      <span class="stat"><b>2</b>figures</span>
+      <span class="stat"><b id="qcount-hero">—</b>quiz questions</span>
+      <span class="stat"><b>~30</b>min read</span>
+    </div>
+    <svg class="hero-art" viewBox="0 0 380 300" aria-hidden="true" fill="none">
+      <defs>
+        <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent2)"/></linearGradient>
+      </defs>
+      <g stroke-linejoin="round">
+        <rect x="20" y="40" width="190" height="96" rx="16" fill="var(--glass-strong)" stroke="var(--accent)" stroke-width="2"/>
+        <rect x="170" y="166" width="190" height="96" rx="16" fill="var(--glass-strong)" stroke="var(--accent2)" stroke-width="2"/>
+        <path d="M115 136v64h50" stroke="url(#hg)" stroke-width="3" stroke-linecap="round"/>
+        <path d="M157 192l10 8-10 8" stroke="var(--accent2)" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="13" font-weight="600">
+        <text x="36" y="72" fill="var(--accent)">POST /restaurants</text>
+        <text x="36" y="96" fill="var(--muted)" font-size="11">Content-Type: json</text>
+        <text x="36" y="118" fill="var(--muted)" font-size="11">{"name":"Kilim"}</text>
+        <text x="186" y="198" fill="var(--accent2)">201 Created</text>
+        <text x="186" y="222" fill="var(--muted)" font-size="11">{"id": 7,</text>
+        <text x="186" y="244" fill="var(--muted)" font-size="11"> "name":"Kilim"}</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="reading">
+    <nav class="toc glass" aria-label="Contents">
+      <h4>Contents</h4>
+      <ol id="toc">
+        <li><a href="#s1">How to use this reading</a></li>
+        <li><a href="#s2">Frameworks &amp; their benefits</a></li>
+        <li><a href="#s3">Overview of FlightPHP</a></li>
+        <li><a href="#s4">Microservices</a></li>
+        <li><a href="#s5">Composer &amp; the vendor folder</a></li>
+        <li><a href="#s6">.htaccess &amp; the front controller</a></li>
+        <li><a href="#s7">HTTP requests &amp; responses</a></li>
+        <li><a href="#s8">REST: designing URLs</a></li>
+        <li><a href="#s9">Handling requests in FlightPHP</a></li>
+        <li><a href="#s10">Parameters in URLs</a></li>
+        <li><a href="#s11">JSON responses</a></li>
+        <li><a href="#s12">Routes for restaurants</a></li>
+        <li><a href="#s13">Handling errors in one place</a></li>
+        <li><a href="#s14">Trying your routes</a></li>
+        <li><a href="#s15">Common mistakes</a></li>
+        <li><a href="#s16">Check yourself &amp; glossary</a></li>
+      </ol>
+      <button class="btn primary quiz-link" data-go="quiz">Take the quiz →</button>
+    </nav>
+
+    <article>
+      <!-- 01 -->
+      <section class="sec glass reveal" id="s1">
+        <h2><span class="n">01</span>How to use this reading</h2>
+        <p>Read this before the lab and keep it open during the lab. In Weeks 3 and 4 you built the two lower layers of the backend, the <b>DAOs</b> and the <b>services</b>. This week you build the <b>top layer</b>: the <b>routes</b> that receive HTTP requests and send back JSON. Type the examples yourself instead of copying them.</p>
+        <div class="flow" aria-label="The three layers of the backend">
+          <div class="node"><b>Routes</b><span>presentation layer · Week 5</span></div>
+          <div class="node"><b>Services</b><span>business logic · Week 4</span></div>
+          <div class="node"><b>DAOs</b><span>data access · Week 3</span></div>
+          <div class="node"><b>Database</b><span>MySQL</span></div>
+        </div>
+        <h3>After this week you can</h3>
+        <ul>
+          <li>explain what a framework is and why we use the micro-framework <b>FlightPHP</b>;</li>
+          <li>install a library with <b>Composer</b> and explain <code>composer.json</code>, <code>composer.lock</code> and the <code>vendor</code> folder;</li>
+          <li>describe the parts of an <b>HTTP request</b> and an <b>HTTP response</b>;</li>
+          <li>design the URLs of a <b>REST API</b> for one resource and choose the right method and status code;</li>
+          <li>write FlightPHP routes that read <b>path parameters</b>, <b>query parameters</b> and a <b>JSON body</b>;</li>
+          <li>connect the routes to the services from Week 4 and <b>handle errors in one place</b>.</li>
+        </ul>
+        <div class="callout"><span class="lbl">What you need</span>The backend folder with the DAOs and services from Weeks 3 and 4, <b>Composer</b>, and <b>Postman</b>.</div>
+      </section>
+
+      <!-- 02 -->
+      <section class="sec glass reveal" id="s2">
+        <h2><span class="n">02</span>Frameworks &amp; their benefits</h2>
+        <p>A <b>framework</b> is a pre-built structure that provides developers with tools, reusable code libraries and established best practices for building software. Think of it as the foundation and scaffolding of a building: you do not lay every brick from scratch. Frameworks give predefined ways to handle <b>routing, database interaction, input validation, error handling</b> and more, so developers can focus on the <b>unique logic</b> of their application while the framework abstracts away common, repetitive tasks.</p>
+        <h3>Four benefits</h3>
+        <div class="defs">
+          <div class="def"><b><span class="sym">1</span>Faster development</b><span>Built-in features such as routing systems, middleware and database abstraction let you achieve more with less code.</span></div>
+          <div class="def"><b><span class="sym">2</span>Best practices</b><span>Most frameworks follow patterns like <b>MVC</b>: data (<b>Model</b>), user interface (<b>View</b>) and application logic (<b>Controller</b>) are kept apart, so code is easier to understand, test and modify.</span></div>
+          <div class="def"><b><span class="sym">3</span>Security</b><span>Many frameworks protect by default against <b>SQL injection</b>, <b>cross-site scripting (XSS)</b> and <b>cross-site request forgery (CSRF)</b>.</span></div>
+          <div class="def"><b><span class="sym">4</span>Easier maintenance</b><span>Modular, well-structured code, often with documentation, is easier to update or scale later.</span></div>
+        </div>
+        <h3>Two categories of PHP frameworks</h3>
+        <div class="tbl"><table>
+          <tr><th>Category</th><th>Examples</th><th>What you get</th><th>Best for</th></tr>
+          <tr><td><b>Full-stack</b></td><td>Laravel, Symfony, CodeIgniter</td><td>Everything out of the box: ORM (Object Relational Mapping), authentication, templating engines and more</td><td>Large applications with many features</td></tr>
+          <tr><td><b>Micro-framework</b></td><td>FlightPHP, Slim, Lumen</td><td>Lightweight; only the essentials such as <b>routing</b> and <b>middleware</b></td><td>Small applications or services where simplicity and speed matter</td></tr>
+        </table></div>
+      </section>
+
+      <!-- 03 -->
+      <section class="sec glass reveal" id="s3">
+        <h2><span class="n">03</span>Overview of FlightPHP</h2>
+        <p><b>FlightPHP</b> is a micro-framework written in PHP. It is designed to be <b>fast, simple and flexible</b>, which makes it ideal for lightweight web applications and <b>REST APIs</b>. Unlike full-stack frameworks, it focuses only on what is necessary for a functional backend, without extra layers of complexity.</p>
+        <p>Key features:</p>
+        <ul>
+          <li>a simple <b>routing system</b> that maps URLs to functions;</li>
+          <li>built-in support for <b>middleware</b> and request handling;</li>
+          <li>it can be <b>extended with custom plugins</b>;</li>
+          <li>easy <b>JSON response</b> handling, which makes it ideal for APIs.</li>
+        </ul>
+        <p>FlightPHP is particularly good for learning how web applications are structured and how APIs are built: its simplicity helps beginners understand the core concepts without being overwhelmed.</p>
+        <div class="callout key"><span class="lbl">Version</span>This course uses <b>FlightPHP version 3</b>. Its documentation is short and worth opening next to this reading: <b>docs.flightphp.com</b>.</div>
+      </section>
+
+      <!-- 04 -->
+      <section class="sec glass reveal" id="s4">
+        <h2><span class="n">04</span>Microservices in web development</h2>
+        <p><b>Microservices</b> are an architectural style in which an application is composed of many <b>small, independent services</b>. Each service performs a <b>single function</b> and can be <b>developed, deployed and scaled independently</b>.</p>
+        <div class="pair">
+          <div class="callout story"><span class="lbl">Benefits</span>Scalability, faster development, resilience, and flexibility in technology use.</div>
+          <div class="callout warn"><span class="lbl">Challenges</span>Increased complexity, network latency, and keeping data consistent across services.</div>
+        </div>
+        <p>Even with these challenges, the model offers greater agility and modularity in large applications.</p>
+      </section>
+
+      <!-- 05 -->
+      <section class="sec glass reveal" id="s5">
+        <h2><span class="n">05</span>Composer &amp; the vendor folder</h2>
+        <p><b>Composer</b> is the <b>dependency manager</b> for PHP. Dependencies are external libraries or packages your project needs to work. You list them in a file named <code>composer.json</code>. To install FlightPHP you run:</p>
+        <pre class="code">composer require flightphp/core</pre>
+        <p>This adds FlightPHP to <code>composer.json</code>. Composer then installs it into a special folder called <code>vendor</code>, where all dependencies are stored.</p>
+        <h3>The vendor folder</h3>
+        <p><code>vendor/</code> is created <b>automatically</b> by Composer and holds every library the project needs. <b>Do not edit files in it.</b> Because it is large and generated, add it to <code>.gitignore</code> so it is not uploaded to Git. Someone who clones the project runs <code>composer install</code> to regenerate it.</p>
+        <div class="tbl"><table>
+          <tr><th>File or folder</th><th>What it is</th><th>In Git?</th></tr>
+          <tr><td><code>composer.json</code></td><td>the list of libraries your project needs</td><td class="y">yes</td></tr>
+          <tr><td><code>composer.lock</code></td><td>the exact versions that were installed, so everyone on the team gets the same ones</td><td class="y">yes</td></tr>
+          <tr><td><code>vendor/</code></td><td>the downloaded libraries and the autoloader</td><td class="no">no (add it to .gitignore)</td></tr>
+        </table></div>
+        <p>One line at the top of <code>index.php</code> makes every installed library available:</p>
+        <pre class="code"><span class="k">require</span> <span class="s">'vendor/autoload.php'</span>;</pre>
+      </section>
+
+      <!-- 06 -->
+      <section class="sec glass reveal" id="s6">
+        <h2><span class="n">06</span>.htaccess &amp; the front controller</h2>
+        <p>The <code>.htaccess</code> file configures <b>Apache</b> web servers: URL rewriting, access permissions and redirections. For PHP applications it is especially useful for <b>clean URLs and routing</b>. Without it, users would reach PHP files through full paths such as <code>index.php?page=home</code>; with it, URLs become clean, such as <code>/home</code>.</p>
+        <p class="codecap">A typical .htaccess for FlightPHP</p>
+        <pre class="code">RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]</pre>
+        <ol class="steps">
+          <li>Turn rewriting on.</li>
+          <li>If the requested path is <b>not a real file</b> (<code>!-f</code>)…</li>
+          <li>…and <b>not a real folder</b> (<code>!-d</code>)…</li>
+          <li>…send the request to <code>index.php</code> and <b>keep the query string</b> (<code>QSA</code>).</li>
+        </ol>
+        <p>So every request goes through <code>index.php</code>, which lets your routing logic handle it. <code>index.php</code> is the <b>single entry point</b> of the backend, also called the <b>front controller</b>:</p>
+        <p class="codecap">backend/index.php</p>
+        <pre class="code">&lt;?php
+<span class="c">// backend/index.php</span>
+<span class="k">require</span> <span class="s">'vendor/autoload.php'</span>;
+
+<span class="k">require_once</span> <span class="s">'rest/services/RestaurantService.php'</span>;
+Flight::register(<span class="s">'restaurantService'</span>, <span class="s">'RestaurantService'</span>);
+
+<span class="k">require_once</span> <span class="s">'rest/routes/RestaurantRoutes.php'</span>;
+
+Flight::start();</pre>
+        <figure>
+          <div class="flow" aria-label="How FlightPHP routes a request">
+            <div class="node"><b>Client</b><span>browser / Postman</span></div>
+            <div class="node"><b>Apache</b><span>.htaccess</span></div>
+            <div class="node"><b>index.php</b><span>FlightPHP</span></div>
+            <div class="node"><b>Route</b><span>your function</span></div>
+          </div>
+          <figcaption style="text-align:center; margin-top:10px"><b>Figure 1.</b> Every request enters through index.php; FlightPHP then finds the route that matches the method and the URL.</figcaption>
+        </figure>
+      </section>
+
+      <!-- 07 -->
+      <section class="sec glass reveal" id="s7">
+        <h2><span class="n">07</span>HTTP in five minutes: requests &amp; responses</h2>
+        <p>Routes speak HTTP, so you need to read it. Every exchange between a client and your backend is <b>one request followed by one response</b>. Both are plain text with the same <b>three parts</b>: a <b>first line</b>, <b>headers</b>, and an <b>optional body</b>.</p>
+        <figure class="fig">
+          <button data-zoom aria-label="Enlarge figure 2"><img src="images/fig-http.png" alt="A POST /restaurants request with headers Host and Content-Type and a JSON body, and the 201 Created response with a Content-Type header and the JSON of the created restaurant with id 7." loading="lazy" width="1280" height="720"></button>
+          <figcaption><b>Figure 2.</b> The parts of an HTTP request and of the response to it.</figcaption>
+        </figure>
+        <div class="tbl"><table>
+          <tr><th>Part</th><th>In the request</th><th>In the response</th></tr>
+          <tr><td><b>First line</b></td><td>the method and the path: <code>POST /restaurants</code></td><td>the status code: <code>201 Created</code></td></tr>
+          <tr><td><b>Headers</b></td><td>extra information, e.g. <code>Content-Type: application/json</code></td><td>the same idea, e.g. <code>Content-Type: application/json</code></td></tr>
+          <tr><td><b>Body</b></td><td>the data the client sends (empty for GET and DELETE)</td><td>the data the server returns; in our API always JSON</td></tr>
+        </table></div>
+        <h3>Status codes our API uses</h3>
+        <p>The status code tells the client how the request went <b>before it even reads the body</b>. You do not need to learn all of them:</p>
+        <div class="tbl"><table>
+          <tr><th>Code</th><th>Name</th><th>When the API returns it</th></tr>
+          <tr><td class="num">200</td><td>OK</td><td>the request worked and the body holds the result</td></tr>
+          <tr><td class="num">201</td><td>Created</td><td>a new object was created (after POST)</td></tr>
+          <tr><td class="num">204</td><td>No Content</td><td>the request worked and there is nothing to return</td></tr>
+          <tr><td class="num">400</td><td>Bad Request</td><td>the input is missing or invalid</td></tr>
+          <tr><td class="num">401</td><td>Unauthorized</td><td>the client is not logged in (Week 7)</td></tr>
+          <tr><td class="num">403</td><td>Forbidden</td><td>the client is logged in but not allowed to do this</td></tr>
+          <tr><td class="num">404</td><td>Not Found</td><td>the URL or the object does not exist</td></tr>
+          <tr><td class="num">500</td><td>Internal Server Error</td><td>a bug or an unexpected problem on the server</td></tr>
+        </table></div>
+        <div class="http-groups">
+          <div class="ok"><b>2xx</b>it worked</div>
+          <div class="cl"><b>4xx</b>the client made a mistake</div>
+          <div class="sv"><b>5xx</b>the server made a mistake</div>
+        </div>
+      </section>
+
+      <!-- 08 -->
+      <section class="sec glass reveal" id="s8">
+        <h2><span class="n">08</span>REST: designing the URLs of an API</h2>
+        <p><b>REST</b> is a set of conventions for web APIs. The main idea: a <b>URL names a resource</b> (a thing, such as <code>restaurants</code>), and the <b>HTTP method says what to do with it</b>. You do not put verbs into the URL.</p>
+        <div class="tbl"><table>
+          <tr><th>Method and URL</th><th>Meaning</th><th>Success code</th></tr>
+          <tr><td><code>GET /restaurants</code></td><td>list all restaurants</td><td class="num">200</td></tr>
+          <tr><td><code>GET /restaurants/2</code></td><td>get restaurant 2</td><td class="num">200, or 404 if it does not exist</td></tr>
+          <tr><td><code>POST /restaurants</code></td><td>create a restaurant (data in the body)</td><td class="num">201</td></tr>
+          <tr><td><code>PUT /restaurants/2</code></td><td>replace restaurant 2 (data in the body)</td><td class="num">200</td></tr>
+          <tr><td><code>PATCH /restaurants/2</code></td><td>change some fields of restaurant 2</td><td class="num">200</td></tr>
+          <tr><td><code>DELETE /restaurants/2</code></td><td>delete restaurant 2</td><td class="num">200 or 204</td></tr>
+          <tr><td><code>GET /restaurants/2/menu-items</code></td><td>list the menu items of restaurant 2</td><td class="num">200</td></tr>
+        </table></div>
+        <h3>Rules</h3>
+        <ul>
+          <li>Use <b>plural nouns</b> for resources: <code>/restaurants</code>, <code>/orders</code>, <code>/menu-items</code>.</li>
+          <li>Use the <b>path</b> to identify a resource (<code>/restaurants/2</code>) and the <b>query string</b> to filter, sort or search a list (<code>/restaurants?city=Mostar</code>).</li>
+          <li>Do not write <code>/getRestaurants</code> or <code>/deleteRestaurant?id=2</code>. The method already says what happens.</li>
+          <li><b>GET never changes data.</b> A client must be able to repeat a GET as often as it likes.</li>
+          <li>Always answer in the <b>same format</b>. In our API both data and errors are JSON.</li>
+        </ul>
+        <div class="dodont">
+          <div class="no"><span class="lbl">Not REST</span><code>GET /deleteRestaurant?id=2</code><code>POST /restaurants/delete/2</code></div>
+          <div class="yes"><span class="lbl">REST</span><code>DELETE /restaurants/2</code><code>GET /restaurants?city=Mostar</code></div>
+        </div>
+      </section>
+
+      <!-- 09 -->
+      <section class="sec glass reveal" id="s9">
+        <h2><span class="n">09</span>Handling requests in FlightPHP</h2>
+        <p>FlightPHP handles the HTTP methods GET, POST, PUT and DELETE. Routes are defined with <code>Flight::route()</code>. A <b>route</b> is a rule that tells the application <b>which code to run</b> when a certain URL is requested with a specific HTTP method. It connects your application to the outside world: what happens when a user visits a page, submits a form or sends data to the server.</p>
+        <p>In the first example the route is defined for <b>GET</b> on the path <code>/hello</code>. A GET request usually happens when you open a URL in a browser, so typing <code>http://yourdomain.com/hello</code> matches this route, its function runs, and the server sends back the text “Hello, FlightPHP!”.</p>
+        <pre class="code">Flight::route(<span class="s">'GET /hello'</span>, <span class="k">function</span>() {
+    <span class="k">echo</span> <span class="s">"Hello, FlightPHP!"</span>;
+});
+
+Flight::route(<span class="s">'POST /student'</span>, <span class="k">function</span>() {
+    <span class="k">echo</span> <span class="s">"Student created!"</span>;
+});</pre>
+        <h3>Reading data from the request</h3>
+        <div class="defs">
+          <div class="def"><b><code>Flight::request()-&gt;query</code></b><span>GET parameters (the query string)</span></div>
+          <div class="def"><b><code>Flight::request()-&gt;data</code></b><span>POST data (the body)</span></div>
+          <div class="def"><b><code>Flight::request()-&gt;files</code></b><span>uploaded files</span></div>
+        </div>
+        <pre class="code">Flight::route(<span class="s">'POST /register'</span>, <span class="k">function</span>() {
+    $name = Flight::request()-&gt;data-&gt;name;
+    <span class="k">echo</span> <span class="s">"Welcome, $name!"</span>;
+});</pre>
+      </section>
+
+      <!-- 10 -->
+      <section class="sec glass reveal" id="s10">
+        <h2><span class="n">10</span>Working with parameters in URLs</h2>
+        <p>Parameters make an application dynamic. FlightPHP reads them either from the <b>path</b> of the URL or from the <b>query string</b>.</p>
+        <h3>A parameter in the path</h3>
+        <p>In <code>/student/123</code>, <code>@id</code> is a <b>placeholder</b>; visiting <code>/student/123</code> passes <code>123</code> to the <code>$id</code> parameter of the function.</p>
+        <pre class="code">Flight::route(<span class="s">'GET /student/@id'</span>, <span class="k">function</span>($id) {
+    <span class="k">echo</span> <span class="s">"Fetching data for student with ID: $id"</span>;
+});</pre>
+        <h3>A parameter in the query string</h3>
+        <p>For <code>/students?name=John</code>, read the value with <code>Flight::request()-&gt;query</code>:</p>
+        <pre class="code">Flight::route(<span class="s">'GET /students'</span>, <span class="k">function</span>() {
+    $name = Flight::request()-&gt;query[<span class="s">'name'</span>];  <span class="c">// Example: ?name=John</span>
+    <span class="k">echo</span> <span class="s">"Searching for students named: $name"</span>;
+});</pre>
+        <h3>Several parameters in the path</h3>
+        <pre class="code">Flight::route(<span class="s">'GET /student/@id/course/@courseId'</span>, <span class="k">function</span>($id, $courseId) {
+    <span class="k">echo</span> <span class="s">"Fetching data for student with ID: $id enrolled in course with ID: $courseId"</span>;
+});</pre>
+        <p>This captures both <code>id</code> and <code>courseId</code> from the path.</p>
+        <h3>Path and query parameters together</h3>
+        <pre class="code">Flight::route(<span class="s">'GET /student/@id'</span>, <span class="k">function</span>($id) {
+    $search = Flight::request()-&gt;query[<span class="s">'search'</span>] ?? <span class="k">null</span>;
+    <span class="k">echo</span> <span class="s">"Fetching data for student with ID: $id. Search term: $search"</span>;
+});</pre>
+        <p>For <code>/student/123?search=math</code> this prints: <i>Fetching data for student with ID: 123. Search term: math</i>. The <code>??</code> operator gives a default (<code>null</code>) when the parameter is missing.</p>
+        <h3>A path parameter with body data (POST)</h3>
+        <pre class="code">Flight::route(<span class="s">'POST /student/@id'</span>, <span class="k">function</span>($id) {
+    $name = Flight::request()-&gt;data-&gt;name;
+    <span class="k">echo</span> <span class="s">"Student $name with ID: $id has been registered."</span>;
+});</pre>
+        <p>A POST to <code>/student/123</code> with <code>name=John</code> prints: <i>Student John with ID: 123 has been registered.</i></p>
+        <h3>Several query parameters</h3>
+        <pre class="code">Flight::route(<span class="s">'GET /search'</span>, <span class="k">function</span>() {
+    $name = Flight::request()-&gt;query[<span class="s">'name'</span>] ?? <span class="s">'No name provided'</span>;
+    $age  = Flight::request()-&gt;query[<span class="s">'age'</span>]  ?? <span class="s">'No age provided'</span>;
+    <span class="k">echo</span> <span class="s">"Searching for name: $name, age: $age"</span>;
+});</pre>
+        <p>For <code>/search?name=John&amp;age=25</code> this prints: <i>Searching for name: John, age: 25</i>.</p>
+      </section>
+
+      <!-- 11 -->
+      <section class="sec glass reveal" id="s11">
+        <h2><span class="n">11</span>Generating JSON responses</h2>
+        <p>APIs usually answer with JSON. <code>Flight::json()</code> <b>sets the correct headers automatically</b> and formats the data as JSON:</p>
+        <pre class="code">Flight::route(<span class="s">'GET /student/@id'</span>, <span class="k">function</span>($id) {
+    $user = [<span class="s">"id"</span> =&gt; $id, <span class="s">"name"</span> =&gt; <span class="s">"John Doe"</span>];
+    Flight::json($user);
+});</pre>
+        <p>This makes FlightPHP ideal for RESTful APIs that exchange data as JSON. <code>Flight::json()</code> takes the <b>status code as its second argument</b>. Without it the code is <b>200</b>:</p>
+        <pre class="code">Flight::json($restaurant);                              <span class="c">// 200 OK</span>
+Flight::json($created, 201);                            <span class="c">// 201 Created</span>
+Flight::json([<span class="s">'error'</span> =&gt; <span class="s">'Restaurant not found'</span>], 404); <span class="c">// 404 Not Found</span></pre>
+      </section>
+
+      <!-- 12 -->
+      <section class="sec glass reveal" id="s12">
+        <h2><span class="n">12</span>Putting it together: routes for restaurants</h2>
+        <p>The examples so far used <code>echo</code> to keep things short. Real routes in our project do <b>three things and nothing more</b>:</p>
+        <ol class="steps">
+          <li><b>read the input</b>;</li>
+          <li><b>call one service method</b>;</li>
+          <li><b>answer with JSON and a status code</b>.</li>
+        </ol>
+        <p>This is the complete route file for restaurants, built on the <code>RestaurantService</code> from Week 4:</p>
+        <p class="codecap">rest/routes/RestaurantRoutes.php</p>
+        <pre class="code">&lt;?php
+<span class="c">// rest/routes/RestaurantRoutes.php</span>
+
+<span class="c">// GET /restaurants              all restaurants</span>
+<span class="c">// GET /restaurants?city=Mostar  filtered by city</span>
+Flight::route(<span class="s">'GET /restaurants'</span>, <span class="k">function</span> () {
+    $city = Flight::request()-&gt;query[<span class="s">'city'</span>] ?? <span class="k">null</span>;
+    $service = Flight::restaurantService();
+    Flight::json($city ? $service-&gt;getByCity($city) : $service-&gt;getAll());
+});
+
+<span class="c">// GET /restaurants/2          one restaurant</span>
+Flight::route(<span class="s">'GET /restaurants/@id'</span>, <span class="k">function</span> ($id) {
+    $restaurant = Flight::restaurantService()-&gt;getById((int) $id);
+    <span class="k">if</span> ($restaurant === <span class="k">null</span>) {
+        Flight::json([<span class="s">'error'</span> =&gt; <span class="s">'Restaurant not found'</span>], 404);
+        <span class="k">return</span>;
+    }
+    Flight::json($restaurant);
+});
+
+<span class="c">// POST /restaurants           create; JSON in the body</span>
+Flight::route(<span class="s">'POST /restaurants'</span>, <span class="k">function</span> () {
+    $data = Flight::request()-&gt;data-&gt;getData();
+    Flight::json(Flight::restaurantService()-&gt;create($data), 201);
+});
+
+<span class="c">// PUT /restaurants/2          update; JSON in the body</span>
+Flight::route(<span class="s">'PUT /restaurants/@id'</span>, <span class="k">function</span> ($id) {
+    $data = Flight::request()-&gt;data-&gt;getData();
+    $updated = Flight::restaurantService()-&gt;update((int) $id, $data);
+    <span class="k">if</span> ($updated === <span class="k">null</span>) {
+        Flight::json([<span class="s">'error'</span> =&gt; <span class="s">'Restaurant not found'</span>], 404);
+        <span class="k">return</span>;
+    }
+    Flight::json($updated);
+});
+
+<span class="c">// DELETE /restaurants/2       delete</span>
+Flight::route(<span class="s">'DELETE /restaurants/@id'</span>, <span class="k">function</span> ($id) {
+    <span class="k">if</span> (!Flight::restaurantService()-&gt;delete((int) $id)) {
+        Flight::json([<span class="s">'error'</span> =&gt; <span class="s">'Restaurant not found'</span>], 404);
+        <span class="k">return</span>;
+    }
+    Flight::json([<span class="s">'message'</span> =&gt; <span class="s">'Restaurant deleted'</span>]);
+});</pre>
+        <ul>
+          <li><code>@id</code> in the path <b>arrives as a string</b>, so the route converts it with <code>(int)</code> before it calls the service.</li>
+          <li><code>Flight::request()-&gt;data-&gt;getData()</code> returns the JSON body as a <b>PHP array</b> when the client sends the header <code>Content-Type: application/json</code>.</li>
+          <li>There is <b>no validation and no SQL</b> here. The route trusts the service to check the data and to <b>throw an exception</b> when something is wrong.</li>
+          <li><code>update()</code> in <code>RestaurantService</code> is <b>your task in the lab</b>: validate like <code>create()</code>, call the DAO, and return the updated restaurant or <code>null</code>.</li>
+        </ul>
+        <h3>Where the inputs come from</h3>
+        <div class="tbl"><table>
+          <tr><th>Input</th><th>Example</th><th>How the route reads it</th></tr>
+          <tr><td>Path parameter</td><td><code>/restaurants/2</code></td><td><code>function ($id)</code> with <code>@id</code> in the route</td></tr>
+          <tr><td>Query parameter</td><td><code>/restaurants?city=Mostar</code></td><td><code>Flight::request()-&gt;query['city']</code></td></tr>
+          <tr><td>JSON body</td><td><code>{"name": "Kilim"}</code></td><td><code>Flight::request()-&gt;data-&gt;getData()</code></td></tr>
+          <tr><td>Header</td><td><code>Authorization: Bearer ...</code></td><td><code>Flight::request()-&gt;getHeader('Authorization')</code> (Week 7)</td></tr>
+        </table></div>
+      </section>
+
+      <!-- 13 -->
+      <section class="sec glass reveal" id="s13">
+        <h2><span class="n">13</span>Handling errors in one place</h2>
+        <p>The POST route above has no <code>try</code> and <code>catch</code>. If <code>create()</code> throws an <code>InvalidArgumentException</code>, who answers the client? Instead of repeating try/catch in every route, tell FlightPHP <b>once</b> what to do with any exception. Put this into <code>index.php</code>, <b>before</b> <code>Flight::start()</code>:</p>
+        <pre class="code"><span class="c">// one handler for every exception thrown in a route or a service</span>
+Flight::map(<span class="s">'error'</span>, <span class="k">function</span> (Throwable $e) {
+    <span class="k">if</span> ($e <span class="k">instanceof</span> InvalidArgumentException) {
+        Flight::json([<span class="s">'error'</span> =&gt; $e-&gt;getMessage()], 400);
+        <span class="k">return</span>;
+    }
+    error_log($e-&gt;getMessage());     <span class="c">// the real message goes to the server log</span>
+    Flight::json([<span class="s">'error'</span> =&gt; <span class="s">'Something went wrong on the server'</span>], 500);
+});
+
+<span class="c">// a URL that matches no route</span>
+Flight::map(<span class="s">'notFound'</span>, <span class="k">function</span> () {
+    Flight::json([<span class="s">'error'</span> =&gt; <span class="s">'Route not found'</span>], 404);
+});</pre>
+        <ul>
+          <li>A <b>validation problem</b> becomes <b>400</b> with the message from the service, which is safe to show.</li>
+          <li><b>Anything else</b> becomes <b>500</b> with a general message. The details (for example a database error) are <b>written to the log and never sent to the client</b>.</li>
+          <li>Every answer of the API is now <b>JSON, including the errors</b>. A frontend can rely on that.</li>
+        </ul>
+      </section>
+
+      <!-- 14 -->
+      <section class="sec glass reveal" id="s14">
+        <h2><span class="n">14</span>Trying your routes</h2>
+        <p>You do not need a frontend to test an API. Use <b>Postman</b> (Week 2), or <b>curl</b> in a terminal:</p>
+        <pre class="code"><span class="c"># list</span>
+curl http://localhost/project/backend/restaurants
+
+<span class="c"># create (note the header and the JSON body)</span>
+curl -X POST http://localhost/project/backend/restaurants \
+     -H <span class="s">"Content-Type: application/json"</span> \
+     -d <span class="s">'{"name": "Kilim", "city": "Ilidža"}'</span>
+
+<span class="c"># show the status code and the headers of the response</span>
+curl -i http://localhost/project/backend/restaurants/999</pre>
+        <div class="defs">
+          <div class="def"><b><code>-X POST</code></b><span>chooses the HTTP method</span></div>
+          <div class="def"><b><code>-H</code></b><span>adds a header</span></div>
+          <div class="def"><b><code>-d</code></b><span>sends the body</span></div>
+          <div class="def"><b><code>-i</code></b><span>also prints the status line and the response headers</span></div>
+        </div>
+        <div class="callout key"><span class="lbl">Test three cases for every route</span>A <b>correct request</b>, a request with <b>invalid data</b>, and a request for something that <b>does not exist</b>. Check the <b>status code</b> each time, not only the body.</div>
+      </section>
+
+      <!-- 15 -->
+      <section class="sec glass reveal" id="s15">
+        <h2><span class="n">15</span>Common mistakes</h2>
+        <div class="tbl"><table>
+          <tr><th>Mistake</th><th>Why it is wrong / what to do</th></tr>
+          <tr><td>Verbs in the URL: <code>/getRestaurants</code>, <code>/restaurants/delete/2</code></td><td>Use the method instead.</td></tr>
+          <tr><td>Always answering 200, even for errors</td><td>The status code is part of the answer.</td></tr>
+          <tr><td><code>echo</code> instead of <code>Flight::json()</code></td><td><code>echo</code> sends text without the JSON header and without a status code.</td></tr>
+          <tr><td>Business rules or SQL in a route</td><td>A route reads input, calls one service method and answers.</td></tr>
+          <tr><td>Forgetting <code>Content-Type: application/json</code> in Postman or curl</td><td>The body then arrives empty.</td></tr>
+          <tr><td>Forgetting <code>.htaccess</code> or placing it in the wrong folder</td><td>Every URL except <code>index.php</code> then answers 404 from Apache.</td></tr>
+          <tr><td>Committing the <code>vendor</code> folder to Git</td><td>It is generated; add it to <code>.gitignore</code>.</td></tr>
+          <tr><td>Showing database exception messages to the client</td><td>Log them and send a general message.</td></tr>
+        </table></div>
+        <div class="callout story"><span class="lbl">Summary</span>Frameworks like FlightPHP make web development faster, cleaner and more secure. Composer, the .htaccess file, routing methods and JSON responses are the basics of a professional backend. With a microservices architecture you can build scalable and resilient systems.</div>
+      </section>
+
+      <!-- 16 -->
+      <section class="sec glass reveal" id="s16">
+        <h2><span class="n">16</span>Check yourself &amp; glossary</h2>
+        <p>Try to answer before you open the answers. These are the kinds of questions you will meet in the quiz.</p>
+        <details class="ex"><summary>1. What is the difference between a full-stack framework and a micro-framework? Name one of each.</summary>
+          <p>A full-stack framework (Laravel, Symfony) brings almost everything; a micro-framework (FlightPHP, Slim) brings mainly routing and you add the rest.</p></details>
+        <details class="ex"><summary>2. What is stored in composer.json, composer.lock and vendor/? Which go into Git?</summary>
+          <p>The needed libraries; the exact installed versions; the downloaded code. composer.json and composer.lock go into Git, vendor/ does not.</p></details>
+        <details class="ex"><summary>3. What does the .htaccess file in our backend do?</summary>
+          <p>It sends every request that is not a real file or folder to index.php, so that FlightPHP can route it.</p></details>
+        <details class="ex"><summary>4. Name the three parts of an HTTP request.</summary>
+          <p>The first line with method and path, the headers, and the body.</p></details>
+        <details class="ex"><summary>5. Which method and URL would you use to delete menu item 15?</summary>
+          <p><code>DELETE /menu-items/15</code>.</p></details>
+        <details class="ex"><summary>6. A client asks for GET /restaurants/999 and there is no such restaurant. Which status code?</summary>
+          <p>404 Not Found.</p></details>
+        <details class="ex"><summary>7. What is wrong with the route GET /deleteRestaurant?id=2?</summary>
+          <p>The URL contains a verb and uses GET to change data. It should be <code>DELETE /restaurants/2</code>.</p></details>
+        <details class="ex"><summary>8. How does a route read (a) @id from the path, (b) ?city=Mostar, (c) a JSON body?</summary>
+          <p>(a) as the function parameter <code>$id</code>, (b) <code>Flight::request()-&gt;query['city']</code>, (c) <code>Flight::request()-&gt;data-&gt;getData()</code>.</p></details>
+        <details class="ex"><summary>9. A service throws InvalidArgumentException. Which status code should the client receive, and where is that decided?</summary>
+          <p>400 Bad Request. It is decided in the presentation layer: in the route or in the central error handler.</p></details>
+        <details class="ex"><summary>10. Why should the message of a PDOException not be sent to the client?</summary>
+          <p>It can reveal table names, queries and other details that help an attacker. Log it and send a general message.</p></details>
+        <h3>Glossary</h3>
+        <div class="defs">
+          <div class="def"><b>Framework</b><span>Ready-made code and conventions that give an application its basic structure.</span></div>
+          <div class="def"><b>Micro-framework</b><span>A small framework that offers mainly routing; FlightPHP is one.</span></div>
+          <div class="def"><b>Composer</b><span>PHP’s package manager; it installs libraries into vendor/.</span></div>
+          <div class="def"><b>Front controller</b><span>The single file (index.php) through which every request enters the application.</span></div>
+          <div class="def"><b>Route</b><span>A rule that connects an HTTP method and a URL pattern with a function.</span></div>
+          <div class="def"><b>Endpoint</b><span>One method + URL of an API, for example GET /restaurants.</span></div>
+          <div class="def"><b>HTTP method</b><span>The action of a request: GET, POST, PUT, PATCH or DELETE.</span></div>
+          <div class="def"><b>Status code</b><span>A three-digit number in the response that says how the request went.</span></div>
+          <div class="def"><b>Header</b><span>A name and value sent with a request or response, for example Content-Type.</span></div>
+          <div class="def"><b>Path parameter</b><span>A variable part of the URL path, such as 2 in /restaurants/2.</span></div>
+          <div class="def"><b>Query string</b><span>The part of the URL after ?, used for filters and options.</span></div>
+          <div class="def"><b>REST</b><span>Conventions for web APIs: URLs name resources, methods say what to do.</span></div>
+          <div class="def"><b>Resource</b><span>A kind of thing the API manages, such as restaurants or orders.</span></div>
+          <div class="def"><b>JSON</b><span>The text format in which our API sends and receives data.</span></div>
+        </div>
+        <h3>Further reading</h3>
+        <ul>
+          <li>FlightPHP documentation: routing, requests, responses and error handling.</li>
+          <li>MDN: An overview of HTTP; MDN: HTTP response status codes.</li>
+          <li>Microsoft: Web API design best practices.</li>
+          <li>Composer: Basic usage (composer.json, composer.lock and the autoloader).</li>
+          <li>Roy Fielding: Architectural Styles, Chapter 5 (REST), for the curious.</li>
+        </ul>
+      </section>
+
+      <div class="glass end-cta reveal">
+        <h3>Ready to test yourself?</h3>
+        <button class="btn primary" data-go="quiz">Take the quiz →</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ======================= QUIZ ======================= -->
+<section id="view-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+  <div class="quiz">
+    <!-- setup -->
+    <div class="qcard glass" id="q-setup">
+      <div class="eyebrow"><span><i class="dot"></i>Reading 05 · Quiz</span></div>
+      <h2>Presentation Layer</h2>
+      <p class="muted" style="margin:0">Five options per question and <b>every question has several correct answers</b> (two, three or four). A question counts as correct only if you pick every correct option and no wrong one. Options are shuffled on every run, so learn the idea, not the letter.</p>
+      <div>
+        <span class="label">How many questions?</span>
+        <div class="seg" id="count-seg"></div>
+      </div>
+      <div>
+        <span class="label">Mode</span>
+        <div class="seg" id="mode-seg">
+          <button class="chip" data-m="practice">Practice <small>· feedback after every question</small></button>
+          <button class="chip" data-m="exam">Exam <small>· answers and explanations only at the end</small></button>
+        </div>
+      </div>
+      <div>
+        <div class="row between"><span class="label">Topics</span><button class="chip" id="all-topics" aria-pressed="true">All topics</button></div>
+        <div class="seg" id="topic-seg"></div>
+      </div>
+      <div class="row between">
+        <span class="best muted" id="best"></span>
+        <button class="btn primary" id="start">Start quiz →</button>
+      </div>
+      <div class="row between">
+        <span id="mistakes-status" class="muted" role="status" aria-live="polite"></span>
+        <button class="btn" id="review-mistakes" disabled>Review saved mistakes →</button>
+      </div>
+      <p class="hint">Saved on this browser. A later correct answer removes a question from the list. Review uses the topics selected above and Practice feedback. Private browsing or clearing browser data may remove saved progress.</p>
+      <p class="hint">Keyboard: <kbd>1</kbd>–<kbd>5</kbd> or <kbd>A</kbd>–<kbd>E</kbd> to tick or untick an option, <kbd>Enter</kbd> to check (Practice) or go to the next question (Exam).</p>
+    </div>
+
+    <!-- question -->
+    <div class="qcard glass" id="q-play" hidden>
+      <div class="qhead">
+        <span class="counter" id="q-counter"></span>
+        <span class="tag" id="q-topic"></span>
+        <span class="live" id="q-live"></span>
+      </div>
+      <div class="qbar"><i id="q-bar"></i></div>
+      <p class="question" id="q-text"></p>
+      <p class="mode" id="q-mode">Select one or more:</p>
+      <ul class="opts multi" id="q-opts" role="group" aria-labelledby="q-text"></ul>
+      <div id="q-explain" hidden></div>
+      <div class="row between">
+        <button class="btn" id="q-quit">✕ End quiz</button>
+        <button class="btn primary" id="q-next" disabled>Check</button>
+      </div>
+    </div>
+
+    <!-- results -->
+    <div class="qcard glass" id="q-result" hidden>
+      <div class="result-top">
+        <div class="ring" id="r-ring"><div><span><b id="r-pct">0%</b><br><small id="r-raw"></small></span></div></div>
+        <div style="flex:1; min-width:220px">
+          <h2 id="r-title"></h2>
+          <p class="muted" id="r-msg" style="margin:6px 0 0"></p>
+        </div>
+      </div>
+      <div><span class="label">By topic</span><div class="topics" id="r-topics"></div></div>
+      <div class="row">
+        <button class="btn primary" id="r-retry">Retry mistakes</button>
+        <button class="btn" id="r-new">New quiz</button>
+        <button class="btn" data-go="read">Back to reading</button>
+      </div>
+      <div id="r-review-wrap"><span class="label">Your mistakes</span><div class="review" id="r-review"></div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<footer>IT 2001 · Web Programming · International Burch University · 2026/2027 · <a href="../../index.html">All courses</a></footer>
+
+<dialog class="lb" id="lb"><button aria-label="Close" id="lb-close">✕</button><img id="lb-img" alt=""><p id="lb-cap"></p></dialog>
+
+<script>
+/* ---------------- theme ---------------- */
+const root = document.documentElement;
+const store = {
+  get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } },
+  set(k,v){ try{ localStorage.setItem(k,v); return true }catch(e){ return false } },
+  remove(k){ try{ localStorage.removeItem(k) }catch(e){} }
+};
+const SAVER_KEY = "ibu-it2001-r05-battery-saver";
+const savedSaver = store.get(SAVER_KEY);
+let batterySaver = savedSaver === null ? matchMedia("(prefers-reduced-transparency: reduce)").matches : savedSaver === "true";
+function renderSaver(){
+  root.dataset.batterySaver = String(batterySaver);
+  const button = document.getElementById("battery-saver");
+  button.setAttribute("aria-pressed", String(batterySaver));
+  button.textContent = `Battery saver: ${batterySaver ? "on" : "off"}`;
+}
+renderSaver();
+document.getElementById("battery-saver").onclick = () => {
+  batterySaver = !batterySaver; store.set(SAVER_KEY, String(batterySaver)); renderSaver();
+};
+const savedTheme = store.get("ibu-theme");
+if (savedTheme) root.dataset.theme = savedTheme;
+document.getElementById("theme").onclick = () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  store.set("ibu-theme", root.dataset.theme);
+};
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- static backdrop: a soft grid with a few tinted cells ----------------
+   Drawn once. Nothing animates behind the frosted panels. */
+(function drawGrid(){
+  const svg = document.getElementById("bg-grid"), NS = "http://www.w3.org/2000/svg", S = 56, W = 1600, H = 1000;
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let d = "";
+  for (let x = 0; x <= W; x += S) d += `M${x} 0V${H}`;
+  for (let y = 0; y <= H; y += S) d += `M0 ${y}H${W}`;
+  const g = document.createElementNS(NS, "g");
+  const p = document.createElementNS(NS, "path");
+  p.setAttribute("d", d); p.setAttribute("stroke", "var(--grid)"); p.setAttribute("stroke-width", "1"); p.setAttribute("fill", "none");
+  g.appendChild(p);
+  const fills = ["var(--cell1)", "var(--cell2)", "var(--cell3)"];
+  for (let k = 0; k < 46; k++){
+    const r = document.createElementNS(NS, "rect");
+    r.setAttribute("x", Math.floor(rnd() * W / S) * S + 4); r.setAttribute("y", Math.floor(rnd() * H / S) * S + 4);
+    r.setAttribute("width", S - 8); r.setAttribute("height", S - 8); r.setAttribute("rx", 10);
+    r.setAttribute("fill", fills[k % 3]);
+    g.appendChild(r);
+  }
+  svg.appendChild(g);
+})();
+
+/* ---------------- views ---------------- */
+const views = { read:document.getElementById("view-read"), quiz:document.getElementById("view-quiz") };
+const tabs = { read:document.getElementById("tab-read"), quiz:document.getElementById("tab-quiz") };
+function show(v, push=true){
+  for (const k in views){ views[k].hidden = k!==v; tabs[k].setAttribute("aria-selected", k===v); }
+  if (push) history.replaceState(null, "", v==="quiz" ? "#quiz" : location.pathname + location.search);
+  scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+  updateProgress();
+}
+tabs.read.onclick = () => show("read"); tabs.quiz.onclick = () => show("quiz");
+document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g){ e.preventDefault(); show(g.dataset.go); } });
+
+/* reading progress + toc highlight */
+const bar = document.getElementById("progress");
+function updateProgress(){
+  const h = document.documentElement.scrollHeight - innerHeight;
+  bar.style.width = (views.read.hidden ? 0 : Math.min(100, Math.max(0, scrollY / (h||1) * 100))) + "%";
+}
+if (location.hash === "#quiz") show("quiz", false);
+addEventListener("scroll", updateProgress, {passive:true});
+const tocLinks = [...document.querySelectorAll("#toc a")];
+const secObs = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting){ tocLinks.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#"+e.target.id)); }
+}), {rootMargin:"-40% 0px -55% 0px"});
+document.querySelectorAll(".sec").forEach(s => secObs.observe(s));
+const revObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add("in"); revObs.unobserve(e.target); } }), {rootMargin:"0px 0px -8% 0px"});
+document.querySelectorAll(".reveal").forEach(s => revObs.observe(s));
+
+/* lightbox */
+const lb = document.getElementById("lb");
+document.querySelectorAll("[data-zoom]").forEach(b => b.onclick = () => {
+  const img = b.querySelector("img"), cap = b.closest("figure").querySelector("figcaption");
+  document.getElementById("lb-img").src = img.src; document.getElementById("lb-img").alt = img.alt;
+  document.getElementById("lb-cap").textContent = cap ? cap.textContent : "";
+  lb.showModal();
+});
+document.getElementById("lb-close").onclick = () => lb.close();
+lb.addEventListener("click", e => { if (e.target === lb) lb.close(); });
+
+/* ---------------- quiz data ---------------- */
+// Q(topic, question, [correct answers], [wrong answers], explanation). Every question has 2–4 correct answers out of 5; options are shuffled at run time.
+function Q(t,q,a,w,e){ return {t,q,a,w,e}; }
+const T = {
+ "fw":     "Frameworks",
+ "flight": "FlightPHP & microservices",
+ "comp":   "Composer & vendor",
+ "ht":     ".htaccess & front controller",
+ "http":   "HTTP & status codes",
+ "rest":   "REST URL design",
+ "req":    "Routes & request data",
+ "param":  "URL parameters",
+ "json":   "JSON responses",
+ "routes": "Restaurant routes",
+ "err":    "Error handling",
+ "test":   "Testing & common mistakes"
+};
+const READING_SECTIONS = {fw:"s2", flight:"s3", comp:"s5", ht:"s6", http:"s7", rest:"s8", req:"s9", param:"s10", json:"s11", routes:"s12", err:"s13", test:"s14"};
+const QUESTIONS = [
+
+/* ---------- fw: frameworks (s2) ---------- */
+Q("fw", "Which statements describe a framework, as the reading defines it?",
+ ["A pre-built structure that gives developers tools and reusable code.", "A set of established best practices for building applications.", "Something that saves you from laying every brick from scratch.", "Something that gives predefined ways to handle routing and validation."],
+ ["A database engine that stores the data of an application."],
+ "A framework is a pre-built structure with tools, reusable libraries and best practices — the foundation and scaffolding of a building."),
+Q("fw", "According to the reading, which tasks do frameworks give you predefined ways to handle?",
+ ["Routing.", "Input validation.", "Error handling.", "Database interaction."],
+ ["Designing the logo and colours of the site."],
+ "Frameworks provide predefined ways to handle routing, database interaction, input validation, error handling and more."),
+Q("fw", "What does a framework let developers do instead of coding everything manually?",
+ ["Focus on the unique logic of their own application.", "Let the framework abstract away common, repetitive tasks."],
+ ["Skip testing, because the framework proves the code is correct.", "Avoid learning HTTP, because the framework hides it entirely.", "Write no PHP at all and configure the app in a GUI."],
+ "Developers use frameworks to focus on the unique logic of their applications; the tools abstract away common and repetitive tasks."),
+Q("fw", "Which of these are the four benefits of frameworks named in the reading?",
+ ["Faster development.", "Enforced best practices.", "Better security.", "Simpler maintenance."],
+ ["Smaller hosting bills."],
+ "The reading lists four benefits: it speeds up development, enforces best practices, enhances security and simplifies maintenance."),
+Q("fw", "In the MVC pattern, which pairings are correct?",
+ ["Model: the data.", "View: the user interface.", "Controller: the application logic."],
+ ["Model: the routing table.", "View: the database queries."],
+ "MVC separates the concerns of data (Model), user interface (View) and application logic (Controller)."),
+Q("fw", "Why does following a pattern like MVC help, according to the reading?",
+ ["Code becomes easier to understand.", "Code becomes easier to test."],
+ ["Code no longer needs a database.", "Code runs without any web server or PHP installed.", "Code no longer needs comments."],
+ "Separating data, interface and logic makes code easier to understand, test and modify."),
+Q("fw", "Which common web vulnerabilities do many frameworks protect against by default?",
+ ["SQL injection.", "Cross-site scripting (XSS).", "Cross-site request forgery (CSRF)."],
+ ["Weak passwords chosen by users.", "Physical theft of the server."],
+ "By default many frameworks protect against SQL injection, XSS and CSRF, which are common web vulnerabilities."),
+Q("fw", "Why do frameworks simplify maintenance?",
+ ["The code is modular.", "The code is well structured.", "The code is often accompanied by documentation."],
+ ["The framework updates your business rules for you.", "Bugs in your own code are fixed automatically."],
+ "Modular, well-structured, documented code makes it easier to update or scale the application later."),
+Q("fw", "Which of these are full-stack PHP frameworks?",
+ ["Laravel.", "Symfony."],
+ ["FlightPHP.", "Slim.", "Lumen."],
+ "Full-stack frameworks named in the reading: Laravel, Symfony and CodeIgniter. FlightPHP and Slim are micro-frameworks."),
+Q("fw", "Which of these are micro-frameworks?",
+ ["FlightPHP.", "Slim."],
+ ["Laravel.", "Symfony.", "CodeIgniter."],
+ "Micro-frameworks named in the reading: FlightPHP, Slim and Lumen."),
+Q("fw", "What do full-stack frameworks typically offer out of the box?",
+ ["An ORM (Object Relational Mapping).", "Authentication.", "Templating engines.", "More built-in features than a micro-framework."],
+ ["A built-in replacement for the PHP language."],
+ "Full-stack frameworks offer everything you need out of the box: ORM, authentication, templating engines and more."),
+Q("fw", "Which statements about micro-frameworks are true?",
+ ["They are lightweight.", "They focus on essentials such as routing and middleware.", "They suit small applications where simplicity and speed matter."],
+ ["They are best for very large applications with many built-in features.", "They always include an ORM and authentication."],
+ "Micro-frameworks are lightweight, focus on routing and middleware, and are ideal for small applications or services."),
+Q("fw", "When is a full-stack framework a better fit than a micro-framework?",
+ ["For a large application with many features.", "When you want ORM, authentication and templating ready-made."],
+ ["For a tiny service with two routes and no database at all.", "When you want as little code as possible in the project.", "When you only need routing and JSON responses."],
+ "Full-stack frameworks are great for large applications with many features; micro-frameworks fit small services."),
+
+/* ---------- flight: FlightPHP & microservices (s3, s4) ---------- */
+Q("flight", "Which statements describe FlightPHP?",
+ ["It is a micro-framework written in PHP.", "It is designed to be fast, simple and flexible.", "It is ideal for lightweight web apps and REST APIs.", "It focuses only on what a functional backend needs."],
+ ["It is a full-stack framework like Laravel."],
+ "FlightPHP is a fast, simple and flexible PHP micro-framework, ideal for lightweight applications and REST APIs."),
+Q("flight", "Which key features of FlightPHP does the reading list?",
+ ["A simple routing system that maps URLs to functions.", "Built-in support for middleware and request handling.", "It can be extended with custom plugins.", "Easy JSON response handling."],
+ ["A built-in ORM that generates database tables."],
+ "The key features: simple routing, middleware and request handling, custom plugins, and easy JSON responses."),
+Q("flight", "How does FlightPHP differ from full-stack frameworks?",
+ ["It focuses only on what is needed for a functional backend.", "It avoids extra layers of complexity."],
+ ["It includes more built-in features than Laravel.", "It cannot be used to build APIs.", "It requires a separate templating engine to run."],
+ "Unlike full-stack frameworks, FlightPHP focuses only on what is necessary, without extra layers of complexity."),
+Q("flight", "Why is FlightPHP good for learning, according to the reading?",
+ ["It shows how web applications are structured.", "It shows how APIs are built.", "Its simplicity keeps beginners from being overwhelmed."],
+ ["It hides HTTP completely from the developer.", "It writes the services and DAOs for you."],
+ "FlightPHP is good for learning how apps are structured and APIs are built; its simplicity helps beginners understand core concepts."),
+Q("flight", "Which facts about FlightPHP in this course are correct?",
+ ["The course uses FlightPHP version 3.", "Its documentation is at docs.flightphp.com."],
+ ["The course uses FlightPHP version 1.", "FlightPHP must be downloaded manually into the project root.", "FlightPHP is installed with npm."],
+ "The course uses FlightPHP v3; the docs are at docs.flightphp.com. It is installed with Composer."),
+Q("flight", "Which statements describe the microservices architectural style?",
+ ["An application is made of many small, independent services.", "Each service performs a single function.", "Each service can be deployed independently.", "Each service can be scaled independently."],
+ ["All services must share one codebase and one deployment."],
+ "In microservices each small service performs one function and can be developed, deployed and scaled independently."),
+Q("flight", "Which are benefits of microservices named in the reading?",
+ ["Scalability.", "Resilience.", "Flexibility in technology use.", "Faster development."],
+ ["Lower network latency."],
+ "Benefits: scalability, faster development, resilience and flexibility in technology. Latency and data consistency are challenges."),
+Q("flight", "Which are challenges of microservices named in the reading?",
+ ["Increased complexity.", "Network latency.", "Keeping data consistent across services."],
+ ["Services can only be written in PHP.", "Services can never be scaled."],
+ "Challenges include increased complexity, network latency and maintaining data consistency across services."),
+Q("flight", "Overall, what does the microservices model offer large applications?",
+ ["Greater agility.", "Greater modularity."],
+ ["No need for network communication.", "Guaranteed lower complexity.", "A single shared database table for all services."],
+ "Despite the challenges, the model offers greater agility and modularity in large applications."),
+Q("flight", "Which features make FlightPHP a good fit for REST APIs?",
+ ["Routes map URLs and methods to functions.", "JSON responses are easy to send.", "It handles requests with little setup.", "It handles different HTTP methods such as GET, POST, PUT and DELETE."],
+ ["It renders HTML pages with a built-in template engine."],
+ "Routing by URL and HTTP method, easy JSON responses and little setup make FlightPHP ideal for building APIs."),
+
+/* ---------- comp: Composer & vendor (s5) ---------- */
+Q("comp", "Which statements about Composer are true?",
+ ["It is a dependency manager for PHP.", "It installs the external libraries a project needs.", "It places installed libraries in the vendor folder.", "It reads the list of needed libraries from composer.json."],
+ ["It compiles PHP into faster bytecode files."],
+ "Composer is PHP's dependency manager: it installs the libraries listed in composer.json into vendor/."),
+Q("comp", "What are dependencies, in the sense of the reading?",
+ ["External libraries or packages your project needs to work.", "Code written by others that your project relies on."],
+ ["The tables that your database depends on.", "The routes that depend on each other.", "The users and frontends that depend on your API."],
+ "Dependencies are external libraries or packages that the project needs to function."),
+Q("comp", "What happens when you run `composer require flightphp/core`?",
+ ["FlightPHP is added to composer.json.", "Composer downloads FlightPHP.", "FlightPHP is placed in the vendor folder.", "The exact installed version is recorded in composer.lock."],
+ ["FlightPHP is copied into index.php."],
+ "The command lists FlightPHP in composer.json, installs it and puts it into vendor/."),
+Q("comp", "Which statements about the vendor folder are true?",
+ ["Composer creates it automatically.", "It contains all installed libraries.", "It contains the autoloader.", "You should not edit files in it."],
+ ["You should write your own routes inside it."],
+ "vendor/ is generated by Composer and holds the downloaded libraries and the autoloader; do not edit it."),
+Q("comp", "Which files or folders belong in Git?",
+ ["composer.json", "composer.lock"],
+ ["vendor/", "the vendor/autoload.php file", "the downloaded FlightPHP source code"],
+ "composer.json and composer.lock go into Git; vendor/ (including autoload.php and the libraries) does not."),
+Q("comp", "Why should vendor/ be added to .gitignore?",
+ ["It is large.", "It is generated automatically.", "Anyone can rebuild it with composer install.", "It contains no code that you wrote yourself."],
+ ["It contains your database password."],
+ "Since the folder is large and generated, it is best practice to ignore it; a clone runs composer install to regenerate it."),
+Q("comp", "What does composer.lock store, and why?",
+ ["The exact versions that were installed.", "It makes everyone on the team get the same versions."],
+ ["Only the names of the libraries, without versions.", "A lock that stops other developers from editing the code.", "The password to the Composer account."],
+ "composer.lock records the exact installed versions so that every team member installs the same ones."),
+Q("comp", "A classmate clones your project and vendor/ is missing. What is true?",
+ ["That is expected, because vendor/ is not in Git.", "They should run composer install.", "Composer will use composer.json and composer.lock to rebuild it.", "composer.json and composer.lock are in the cloned repository."],
+ ["The project is broken and must be recreated."],
+ "vendor/ is not committed; composer install regenerates it from composer.json and composer.lock."),
+Q("comp", "Which statements about `require 'vendor/autoload.php';` are true?",
+ ["It is placed at the top of index.php.", "It makes every installed library available.", "It loads Composer's autoloader.", "Without it, PHP would not find the Flight class."],
+ ["It must be repeated in every route file."],
+ "One line at the top of index.php loads the autoloader, which makes every installed library available."),
+Q("comp", "Match each item to its content. Which pairings are correct?",
+ ["composer.json: the list of libraries the project needs.", "composer.lock: the exact installed versions.", "vendor/: the downloaded libraries and the autoloader."],
+ ["composer.json: the downloaded library code.", "vendor/: the list of exact versions only."],
+ "json = what you need, lock = exact versions, vendor = downloaded code and autoloader."),
+Q("comp", "Which commands or actions are correct uses of Composer?",
+ ["`composer require flightphp/core` to add a library.", "`composer install` to rebuild vendor/ after cloning."],
+ ["`composer delete vendor` before every commit.", "`composer start` to run the web server.", "`composer route` to define a route."],
+ "require adds a library; install installs what composer.json/lock describe."),
+
+/* ---------- ht: .htaccess & front controller (s6) ---------- */
+Q("ht", "What is the .htaccess file used for?",
+ ["Configuring Apache web servers.", "URL rewriting.", "Access permissions.", "Redirections."],
+ ["Storing the database connection details."],
+ ".htaccess controls Apache settings such as URL rewriting, access permissions and redirections."),
+Q("ht", "What does .htaccess give a PHP application?",
+ ["Clean, user-friendly URLs such as /home.", "Routing through one entry point."],
+ ["Faster SQL queries in the DAO layer.", "Automatic JSON responses.", "Automatic installation of libraries."],
+ "With .htaccess you get clean URLs like /home instead of index.php?page=home, and routing through index.php."),
+Q("ht", "In `RewriteCond %{REQUEST_FILENAME} !-f` and `!-d`, what is true?",
+ ["`!-f` means the path is not a real file.", "`!-d` means the path is not a real folder."],
+ ["`!-f` means the file is forbidden.", "`!-d` means the request should be deleted.", "The rule applies when either one of them holds."],
+ "If the requested path is not a real file (!-f) and not a real directory (!-d), the request is rewritten."),
+Q("ht", "What does `RewriteRule ^(.*)$ index.php [QSA,L]` do?",
+ ["Sends the request to index.php.", "Keeps the query string (QSA).", "Marks this as the last rule (L)."],
+ ["Deletes the query string before routing.", "Sends the request to the vendor folder."],
+ "The rule sends the request to index.php; QSA appends the query string, L makes it the last rule."),
+Q("ht", "Which statements about index.php in our backend are true?",
+ ["It is the single entry point of the backend.", "It is also called the front controller.", "Every request whose path is neither a real file nor a real folder goes through it.", "It registers the services and includes the route files."],
+ ["Each route lives in its own separate PHP entry file."],
+ "The .htaccess rules send requests to index.php when the requested path is neither a real file nor a real folder. index.php is the front controller."),
+Q("ht", "Which lines belong in backend/index.php, as shown in the reading?",
+ ["`require 'vendor/autoload.php';`", "`Flight::register('restaurantService', 'RestaurantService');`", "`require_once 'rest/routes/RestaurantRoutes.php';`", "`Flight::start();`"],
+ ["`composer require flightphp/core`"],
+ "index.php loads the autoloader, registers the service, includes the routes and calls Flight::start(). The composer command runs in a terminal."),
+Q("ht", "What does `Flight::register('restaurantService', 'RestaurantService')` allow?",
+ ["Routes can get the service with `Flight::restaurantService()`.", "The service class is attached to Flight under a short name."],
+ ["It creates the restaurants table.", "It defines the GET /restaurants route.", "It installs RestaurantService with Composer."],
+ "Registering the class lets routes call Flight::restaurantService() to get the service."),
+Q("ht", "Which statements describe the steps a request follows to reach a FlightPHP route?",
+ ["The client (browser or Postman) sends the request.", "Apache applies .htaccess.", "index.php with FlightPHP finds the matching route.", "Your route function runs."],
+ ["The DAO receives the request before Apache does."],
+ "Client → Apache (.htaccess) → index.php (FlightPHP) → route. FlightPHP matches by method and URL."),
+Q("ht", "Which two things does FlightPHP use to find the matching route?",
+ ["The HTTP method.", "The URL."],
+ ["The client's IP address.", "The size of the body.", "The browser name."],
+ "FlightPHP finds the route that matches the method and the URL."),
+Q("ht", "What happens if .htaccess is missing or in the wrong folder?",
+ ["Every URL except index.php answers 404.", "The 404 comes from Apache, not from your API."],
+ ["All routes still work normally.", "Composer recreates it automatically on the next request.", "Only POST routes stop working."],
+ "Without .htaccess Apache looks for real files, so every URL except index.php answers 404 from Apache."),
+Q("ht", "What must be the last line of index.php after setup, and why?",
+ ["`Flight::start();`", "It starts FlightPHP so it can match the request to a route."],
+ ["`Flight::stop();`", "`composer install`", "It closes the database connection."],
+ "Flight::start() runs the framework; the error handlers must be mapped before it."),
+
+/* ---------- http: HTTP & status codes (s7) ---------- */
+Q("http", "Which parts do both an HTTP request and an HTTP response have?",
+ ["A first line.", "Headers.", "An optional body."],
+ ["A session cookie.", "A route name."],
+ "Both are plain text with the same three parts: a first line, headers and an optional body."),
+Q("http", "What is in the first line of an HTTP request?",
+ ["The method.", "The path."],
+ ["The status code.", "The JSON body.", "The database name."],
+ "The first line of a request holds the method and the path, e.g. POST /restaurants."),
+Q("http", "What is in the first line of an HTTP response?",
+ ["The status code.", "The reason phrase, for example Created."],
+ ["The method.", "The request body.", "The length of the JSON body in bytes."],
+ "The first line of a response holds the status, e.g. HTTP/1.1 201 Created."),
+Q("http", "In the figure, the request is `POST /restaurants` with a JSON body. Which statements about the response are true?",
+ ["Its status is 201 Created.", "It has the header Content-Type: application/json.", "Its body contains the new restaurant with its id.", "It answers exactly one request."],
+ ["Its status is 404 Not Found."],
+ "The response to the POST is 201 Created with a JSON body holding id 7, name and city."),
+Q("http", "For which requests is the body usually empty?",
+ ["GET.", "DELETE."],
+ ["POST.", "PUT.", "PATCH."],
+ "The request body is empty for GET and DELETE; POST, PUT and PATCH carry data."),
+Q("http", "Which statements about headers are true?",
+ ["They carry extra information about the request or response.", "Content-Type: application/json is an example.", "Both requests and responses have them.", "Each header is a name and a value."],
+ ["They contain only the status code."],
+ "Headers are name-value pairs with extra information, such as Content-Type, in requests and responses."),
+Q("http", "Which status codes mean the request worked?",
+ ["200 OK", "201 Created", "204 No Content"],
+ ["400 Bad Request", "404 Not Found"],
+ "2xx means it worked: 200, 201 and 204."),
+Q("http", "Which status codes mean the client made a mistake?",
+ ["400 Bad Request", "401 Unauthorized", "403 Forbidden", "404 Not Found"],
+ ["500 Internal Server Error"],
+ "4xx codes mean the client made a mistake; 5xx means the server made one."),
+Q("http", "Which pairs of code and situation are correct?",
+ ["201: a new object was created after POST.", "400: the input is missing or invalid.", "500: a bug or unexpected problem on the server.", "404: the URL or the object does not exist."],
+ ["403: the client is not logged in at all."],
+ "204 means success with nothing to return; 401 means not logged in, 403 means logged in but not allowed."),
+Q("http", "Which statements about 401 and 403 are true?",
+ ["401 means the client is not logged in.", "403 means the client is logged in but not allowed.", "Login is covered in Week 7."],
+ ["403 means the server crashed.", "401 and 403 mean exactly the same thing."],
+ "401 Unauthorized: not logged in (Week 7). 403 Forbidden: logged in but not allowed to do this."),
+Q("http", "Why does the status code matter?",
+ ["The client learns how the request went before reading the body.", "It is part of the answer, not an optional extra."],
+ ["The browser ignores the body if the code is 200.", "It tells the server which database table the client wants to use.", "It replaces the need for a body."],
+ "The status code tells the client how the request went before it reads the body; always answering 200 is a mistake."),
+Q("http", "Which ways of remembering the code groups match the reading?",
+ ["2xx: it worked.", "4xx: the client made a mistake."],
+ ["3xx: the database made a mistake.", "1xx: the request was rejected.", "5xx: the client sent too much data."],
+ "2xx it worked, 4xx client mistake, 5xx server mistake."),
+Q("http", "When does our API return 404 Not Found?",
+ ["When the URL does not exist.", "When the requested object does not exist."],
+ ["When the input in the JSON body is missing or invalid.", "When the server has a bug.", "When the object was created."],
+ "404 means the URL or the object does not exist. Invalid input is 400; a server bug is 500."),
+
+/* ---------- rest: REST URL design (s8) ---------- */
+Q("rest", "What is the main idea of REST, according to the reading?",
+ ["A URL names a resource.", "The HTTP method says what to do with it.", "Verbs do not belong in the URL."],
+ ["Each action gets its own PHP file.", "Every request must use POST."],
+ "In REST a URL names a resource and the method says what to do; you do not put verbs into the URL."),
+Q("rest", "Which URLs follow the REST rules of the reading?",
+ ["`GET /restaurants`", "`DELETE /restaurants/2`", "`GET /restaurants?city=Mostar`", "`POST /restaurants`"],
+ ["`GET /deleteRestaurant?id=2`"],
+ "Use plural nouns and let the method say the action; /getRestaurants and /deleteRestaurant put verbs into the URL."),
+Q("rest", "What is wrong with `GET /deleteRestaurant?id=2`?",
+ ["The URL contains a verb.", "It uses GET to change data.", "The id should be in the path, not the query string."],
+ ["The id should be a string, not a number.", "Nothing; it is a valid REST endpoint."],
+ "It should be DELETE /restaurants/2: no verb in the URL, GET never changes data, and the path identifies the resource."),
+Q("rest", "Which pairs of endpoint and meaning are correct?",
+ ["`GET /restaurants/2`: get restaurant 2.", "`POST /restaurants`: create a restaurant.", "`PUT /restaurants/2`: replace restaurant 2.", "`PATCH /restaurants/2`: change some fields of restaurant 2."],
+ ["`DELETE /restaurants`: delete restaurant 2."],
+ "Deleting restaurant 2 is DELETE /restaurants/2; the other pairs match the reading's table."),
+Q("rest", "Which success codes match the reading's REST table?",
+ ["`POST /restaurants`: 201.", "`GET /restaurants`: 200.", "`DELETE /restaurants/2`: 200 or 204.", "`PUT /restaurants/2`: 200."],
+ ["`POST /restaurants`: 204."],
+ "POST returns 201; GET returns 200 (or 404); DELETE returns 200 or 204."),
+Q("rest", "Which endpoints send data in the request body?",
+ ["`POST /restaurants`", "`PUT /restaurants/2`"],
+ ["`GET /restaurants/2`", "`DELETE /restaurants/2`", "`GET /restaurants?city=Mostar`"],
+ "POST, PUT and PATCH carry data in the body; GET and DELETE do not."),
+Q("rest", "How do you list the menu items of restaurant 2 in REST style?",
+ ["`GET /restaurants/2/menu-items`", "It nests one resource under another in the path."],
+ ["`GET /getMenuItems?restaurant=2&action=list`", "`POST /restaurants/2/list-menu`", "`DELETE /restaurants/2/menu-items`"],
+ "GET /restaurants/2/menu-items lists the menu items of restaurant 2."),
+Q("rest", "Which statements about resource names are correct?",
+ ["Use plural nouns.", "`/menu-items` is a good name.", "`/orders` is a good name.", "`/restaurants` is a good name."],
+ ["`/getOrder` is a good name."],
+ "Use plural nouns for resources: /restaurants, /orders, /menu-items."),
+Q("rest", "When should the query string be used instead of the path?",
+ ["To filter a list.", "To sort a list.", "To search a list."],
+ ["To identify one resource by its id.", "To say which HTTP method to use."],
+ "The path identifies a resource (/restaurants/2); the query string filters, sorts or searches a list."),
+Q("rest", "Which statements about GET are true?",
+ ["GET never changes data.", "A client must be able to repeat a GET as often as it likes.", "GET usually happens when you open a URL in a browser.", "Repeating the same GET must have no side effects."],
+ ["GET is the right method to delete a record."],
+ "GET only reads; repeating it must be safe. Opening a URL in a browser sends a GET."),
+Q("rest", "What is the correct REST request to delete menu item 15?",
+ ["Method DELETE.", "URL /menu-items/15."],
+ ["Method GET.", "URL /deleteMenuItem?id=15.", "URL /menu-items/delete/15."],
+ "DELETE /menu-items/15."),
+Q("rest", "What does the reading say about the format of answers?",
+ ["Always answer in the same format.", "Data is sent as JSON.", "Errors are also sent as JSON."],
+ ["Errors are sent as plain HTML pages.", "Each route may choose its own format."],
+ "Always answer in the same format: in our API both data and errors are JSON."),
+Q("rest", "What is the difference between PUT and PATCH in the reading's table?",
+ ["PUT replaces the whole restaurant.", "PATCH changes only some fields.", "Both return 200 on success."],
+ ["PUT creates a new restaurant with 201.", "PATCH deletes the fields it receives."],
+ "PUT /restaurants/2 replaces restaurant 2; PATCH changes some fields. Both answer 200."),
+
+/* ---------- req: routes & request data (s9) ---------- */
+Q("req", "Which statements about `Flight::route()` are true?",
+ ["It defines a route.", "It connects an HTTP method and a URL pattern with a function.", "The function runs when a matching request arrives.", "The pattern starts with the method, e.g. 'GET /hello'."],
+ ["It sends an HTTP request to another server."],
+ "Flight::route() defines a rule: for this method and URL, run this code."),
+Q("req", "What is a route, according to the reading?",
+ ["A rule that tells the app which code to run.", "It depends on the URL requested.", "It depends on the HTTP method used."],
+ ["A folder on the web server.", "A row in the database."],
+ "A route is a rule that tells the application what code to run when a URL is requested with a specific method."),
+Q("req", "For `Flight::route('GET /hello', function() { echo \"Hello, FlightPHP!\"; });`, which statements are true?",
+ ["It matches a GET request to /hello.", "Opening http://yourdomain.com/hello in a browser matches it.", "The browser receives the text Hello, FlightPHP!"],
+ ["It also matches POST /hello.", "It sends the text as JSON with status 201."],
+ "The route matches GET /hello, which a browser sends when you open the URL; echo returns plain text."),
+Q("req", "Which HTTP methods does the reading say FlightPHP can handle?",
+ ["GET", "POST"],
+ ["FETCH", "REMOVE", "LIST"],
+ "The reading names GET, POST, PUT and DELETE; FETCH and REMOVE are not HTTP methods."),
+Q("req", "Which pairs of request property and content are correct?",
+ ["`Flight::request()->query`: GET parameters.", "`Flight::request()->data`: POST data.", "`Flight::request()->files`: uploaded files."],
+ ["`Flight::request()->query`: uploaded files.", "`Flight::request()->files`: the query string."],
+ "query = GET parameters, data = POST data, files = uploaded files."),
+Q("req", "In the POST /register example, which statements are true?",
+ ["`$name` is read with `Flight::request()->data->name`.", "The name comes from the request body.", "The response is Welcome, followed by the name."],
+ ["The name comes from the path parameter @name.", "The name is read from Flight::request()->files."],
+ "The route reads $name = Flight::request()->data->name from the POST data and echoes a welcome message."),
+Q("req", "What does a route connect the application to, according to the reading?",
+ ["The outside world.", "What happens when a user visits a page or submits a form.", "What happens when a client sends data to the server."],
+ ["The internal structure of the database only.", "Composer's package list."],
+ "Routes connect parts of the application to the outside world: visits, form submissions and data sent to the server."),
+Q("req", "A client sends `POST /student`. Which statements are true?",
+ ["`Flight::route('POST /student', ...)` matches it.", "The route function runs and can echo Student created!"],
+ ["`Flight::route('GET /student', ...)` matches it too.", "`Flight::route('POST /students', ...)` matches it.", "No route can match a POST request."],
+ "A route matches only its own method and path: POST /student."),
+Q("req", "Why do the first examples use `echo`, and why do real routes not?",
+ ["echo keeps the examples short.", "Real routes answer with JSON and a status code.", "echo sends text without the JSON header."],
+ ["echo is faster than Flight::json() for APIs.", "Flight::json() only works for GET routes."],
+ "The examples use echo for brevity; real routes use Flight::json(), because echo sends plain text with no JSON header or status code."),
+
+/* ---------- param: URL parameters (s10) ---------- */
+Q("param", "For `Flight::route('GET /student/@id', function($id) {...})`, which statements are true?",
+ ["`@id` is a placeholder in the path.", "Visiting /student/123 passes 123 to `$id`.", "The value is a path parameter."],
+ ["The value is read from Flight::request()->files.", "The route matches only /student/@id literally."],
+ "@id is a placeholder; /student/123 passes 123 to the $id function parameter."),
+Q("param", "How do you read `name` from `/students?name=John`?",
+ ["`Flight::request()->query['name']`", "It is a query string parameter."],
+ ["As the function parameter `$name` with @name in the route.", "`Flight::request()->files['name']`", "It is a path parameter."],
+ "Query string values are read with Flight::request()->query['name']."),
+Q("param", "For `GET /student/@id/course/@courseId`, which statements are true?",
+ ["The route has two path parameters.", "The function receives `$id` and `$courseId`.", "/student/5/course/42 gives `$id` = 5 and `$courseId` = 42.", "The order of the arguments follows the order in the path."],
+ ["Only the last parameter can be read."],
+ "A route can capture several path parameters; they are passed to the function in order."),
+Q("param", "In `$search = Flight::request()->query['search'] ?? null;`, what does `??` do?",
+ ["It gives a default when the parameter is missing.", "Here the default is null."],
+ ["It makes the parameter required.", "It converts the value to an integer.", "It throws an exception whenever the search parameter is empty."],
+ "The null coalescing operator ?? returns the default (null) when query['search'] does not exist."),
+Q("param", "The route `GET /student/@id` reads `?search=`. For `/student/123?search=math`, what is true?",
+ ["`$id` is 123.", "`$search` is math.", "The output is Fetching data for student with ID: 123. Search term: math"],
+ ["`$id` is math.", "The route does not match because of the query string."],
+ "Path and query parameters can be combined in one route: id from the path, search from the query string."),
+Q("param", "A POST to /student/123 with body data name=John hits `POST /student/@id`. What is true?",
+ ["`$id` comes from the path.", "`$name` comes from `Flight::request()->data->name`.", "It prints Student John with ID: 123 has been registered."],
+ ["`$name` comes from the query string.", "`$id` comes from the body data."],
+ "The id is a path parameter; the name is body data read with Flight::request()->data."),
+Q("param", "For `/search?name=John&age=25` and the GET /search route, which statements are true?",
+ ["Both values are query parameters.", "`&` separates the parameters.", "It prints Searching for name: John, age: 25", "`$age` is read with `Flight::request()->query['age']`."],
+ ["Only the first parameter can be read."],
+ "Several query parameters are separated by & and each is read with query['...']."),
+Q("param", "The GET /search route is called as `/search?age=25`, with no name. What is true?",
+ ["`$name` becomes No name provided.", "`$age` becomes 25.", "The route still answers normally."],
+ ["`$name` becomes null.", "The route answers 400 Bad Request."],
+ "The ?? default No name provided is used for the missing name; age is read normally."),
+Q("param", "Which pairs of URL part and kind of parameter are correct?",
+ ["`2` in /restaurants/2: path parameter.", "`city=Mostar` in /restaurants?city=Mostar: query parameter."],
+ ["`restaurants` in /restaurants/2: query parameter.", "`city=Mostar`: path parameter.", "`?` in the URL: path parameter."],
+ "Path parameters are variable parts of the path; the query string is the part after ?."),
+Q("param", "Why use parameters in URLs at all?",
+ ["They make the application dynamic.", "They let one route serve many ids or search terms.", "They carry user input to the route."],
+ ["They replace the need for routes.", "They make the server skip .htaccess."],
+ "Parameters make the application dynamic and responsive to user input."),
+Q("param", "What is the type of `$id` when /restaurants/2 matches `@id`, and what does the project do about it?",
+ ["It arrives as a string.", "The route converts it with `(int) $id`."],
+ ["It arrives as an integer automatically.", "It arrives as an array with one element per path segment.", "The DAO converts it to a string."],
+ "@id in the path arrives as a string, so the route casts it with (int) before calling the service."),
+
+/* ---------- json: JSON responses (s11) ---------- */
+Q("json", "What does `Flight::json()` do?",
+ ["It formats the data as JSON.", "It sets the correct headers automatically.", "It can set the status code.", "It is used for both data answers and error answers."],
+ ["It writes the data into the database."],
+ "Flight::json() encodes the data as JSON, sets the JSON headers and takes an optional status code."),
+Q("json", "Which calls are correct, with the status they send?",
+ ["`Flight::json($restaurant);` sends 200 OK.", "`Flight::json($created, 201);` sends 201 Created.", "`Flight::json(['error' => 'Restaurant not found'], 404);` sends 404."],
+ ["`Flight::json($restaurant);` sends 204 No Content.", "`Flight::json(404, $created);` sends 404."],
+ "The status code is the second argument; without it the code is 200."),
+Q("json", "You call `Flight::json($data)` with no second argument. What is true?",
+ ["The status code is 200.", "The client reads it as OK.", "The body is the data encoded as JSON."],
+ ["The status code is 201.", "No status code is sent at all."],
+ "Without a second argument, Flight::json() sends 200 OK."),
+Q("json", "In `Flight::json($user)` with `$user = [\"id\" => $id, \"name\" => \"John Doe\"]`, what does the client receive?",
+ ["A JSON object with id and name.", "A Content-Type header for JSON.", "Status 200."],
+ ["An HTML page with a table.", "Plain text without headers."],
+ "The PHP array becomes a JSON object, sent with the JSON content type and status 200."),
+Q("json", "Why is FlightPHP called ideal for RESTful APIs in this section?",
+ ["APIs usually answer with JSON.", "Flight::json() makes JSON responses easy."],
+ ["It forbids HTML responses.", "It stores responses in a cache automatically.", "It converts JSON into SQL."],
+ "APIs exchange JSON, and Flight::json() makes sending it simple."),
+Q("json", "Which are problems of using `echo` instead of `Flight::json()` in an API route?",
+ ["No JSON Content-Type header is sent.", "No status code can be chosen with it.", "The client gets plain text instead of JSON.", "A frontend can no longer rely on the answer format."],
+ ["echo cannot print strings."],
+ "echo sends text without the JSON header and without a status code."),
+Q("json", "How should a route answer that restaurant 999 does not exist?",
+ ["With status 404.", "With a JSON body such as an error message.", "With `Flight::json(['error' => 'Restaurant not found'], 404)`."],
+ ["With status 200 and an empty body.", "With `echo 'not found';`"],
+ "The status code is part of the answer: errors are JSON with the right code, here 404."),
+Q("json", "In which format does our API send data and errors?",
+ ["Data: JSON.", "Errors: JSON."],
+ ["Errors: HTML.", "Data: XML.", "Errors: plain text."],
+ "Every answer of the API is JSON, including the errors."),
+Q("json", "Which arguments does `Flight::json()` take, in order?",
+ ["First: the data.", "Second: the status code (optional)."],
+ ["First: the status code.", "Second: the URL.", "Third: the method (required)."],
+ "Flight::json($data, $status); the status defaults to 200."),
+
+/* ---------- routes: restaurant routes (s12) ---------- */
+Q("routes", "Which three things does a real route in our project do?",
+ ["Read the input.", "Call one service method.", "Answer with JSON and a status code."],
+ ["Validate the data with its own rules.", "Run SQL queries directly."],
+ "A route reads input, calls one service method and answers with JSON and a status code — nothing more."),
+Q("routes", "Which things do NOT belong in a route, according to the reading?",
+ ["Business rules.", "SQL queries."],
+ ["Reading the path parameter.", "Calling Flight::json().", "Choosing the status code."],
+ "There is no validation and no SQL in a route; the service validates and the DAO runs SQL."),
+Q("routes", "How does `GET /restaurants` handle `?city=Mostar`?",
+ ["It reads city with `Flight::request()->query['city'] ?? null`.", "If city is set, it calls `getByCity($city)`.", "If city is missing, it calls `getAll()`."],
+ ["It uses a separate route GET /restaurants/city/@city.", "It answers 400 when city is missing."],
+ "One route lists all restaurants or filters them by city, depending on the query parameter."),
+Q("routes", "In `GET /restaurants/@id`, what happens when `getById()` returns null?",
+ ["The route answers 404.", "The body is a JSON error: Restaurant not found.", "`return` stops the function after the error."],
+ ["The route answers 200 with null.", "The route throws an exception for the error handler."],
+ "If the restaurant is null, the route sends a 404 JSON error and returns."),
+Q("routes", "Which statements about the `POST /restaurants` route are true?",
+ ["It reads the body with `Flight::request()->data->getData()`.", "It calls `create($data)` on the service.", "It answers with status 201.", "The status code is the second argument of Flight::json()."],
+ ["It contains a try/catch block."],
+ "POST reads the JSON body, calls create() and answers 201; there is no try/catch — the central handler does that."),
+Q("routes", "When does `Flight::request()->data->getData()` return the JSON body as a PHP array?",
+ ["When the client sends Content-Type: application/json.", "When the body contains valid JSON."],
+ ["Only for GET requests.", "Only when the route also has an @id parameter in its path.", "When the body is sent as a query string."],
+ "getData() returns the JSON body as an array when the client sends the header Content-Type: application/json."),
+Q("routes", "Which statements about `PUT /restaurants/@id` are true?",
+ ["It reads the new data from the body.", "It calls `update((int) $id, $data)`.", "It answers 404 when update() returns null.", "It answers with the updated restaurant on success."],
+ ["It answers 201 on success."],
+ "PUT reads the body, calls update(), returns 404 if null, otherwise the updated restaurant with 200."),
+Q("routes", "Which statements about `DELETE /restaurants/@id` are true?",
+ ["It calls `delete((int) $id)` on the service.", "If delete() returns false, it answers 404.", "On success it answers with a message: Restaurant deleted.", "It casts the id to an integer before calling the service."],
+ ["It always answers 204 even if nothing was deleted."],
+ "DELETE calls the service; false means not found (404), otherwise a JSON message with 200."),
+Q("routes", "What is your lab task for `update()` in RestaurantService?",
+ ["Validate like create().", "Call the DAO.", "Return the updated restaurant or null."],
+ ["Write the SQL inside the route.", "Return 404 directly from the service."],
+ "update() validates like create(), calls the DAO and returns the updated restaurant or null; the route decides the status."),
+Q("routes", "Which pairs of input and how a route reads it are correct?",
+ ["Path parameter: `function ($id)` with @id in the route.", "Query parameter: `Flight::request()->query['city']`.", "JSON body: `Flight::request()->data->getData()`.", "Header: `Flight::request()->getHeader('Authorization')`."],
+ ["JSON body: `Flight::request()->files`."],
+ "These are the four kinds of input; headers like Authorization come in Week 7."),
+Q("routes", "Why does the route call `(int) $id` before calling the service?",
+ ["@id from the path arrives as a string.", "The service methods expect an integer id."],
+ ["To make the id negative.", "Because Flight::json() only accepts integer values in its data.", "To read the id from the query string."],
+ "Path parameters arrive as strings, so the route converts them before calling the service."),
+Q("routes", "Who is responsible for what in the three layers?",
+ ["Route: reads input and answers with JSON.", "Service: checks the data and throws an exception when it is wrong.", "DAO: talks to the database."],
+ ["Route: writes SQL for the DAO.", "Service: chooses the HTTP status code."],
+ "Routes trust the service to validate; the DAO runs SQL; the presentation layer chooses status codes."),
+
+/* ---------- err: error handling (s13) ---------- */
+Q("err", "Why define one error handler instead of try/catch in every route?",
+ ["To avoid repeating try/catch in every route.", "So every exception is answered the same way.", "So FlightPHP knows once what to do with any exception.", "Validation errors and server errors get consistent answers."],
+ ["Because routes cannot throw exceptions."],
+ "Tell FlightPHP once what to do with any exception instead of repeating try/catch."),
+Q("err", "Where is the error handler placed?",
+ ["In index.php.", "Before `Flight::start()`."],
+ ["In every route file.", "After `Flight::start()`.", "In the DAO, next to the database connection."],
+ "Put Flight::map('error', ...) into index.php before Flight::start()."),
+Q("err", "In the error handler, what happens with an `InvalidArgumentException`?",
+ ["The status is 400.", "The message from the service is sent to the client.", "It is answered as JSON."],
+ ["The status is 500.", "The message is only written to the log."],
+ "A validation problem becomes 400 with the service's message, which is safe to show."),
+Q("err", "In the error handler, what happens with any other exception?",
+ ["The real message is written to the server log with error_log().", "The client gets status 500.", "The client gets a general message: Something went wrong on the server.", "Database details never leave the server."],
+ ["The client gets the full database error."],
+ "Anything else becomes 500 with a general message; details go to the log only."),
+Q("err", "Why should the message of a PDOException not be sent to the client?",
+ ["It can reveal table names.", "It can reveal queries.", "It can help an attacker."],
+ ["It is too short to be useful.", "Browsers cannot display it."],
+ "Database messages can reveal table names, queries and other details that help an attacker; log them instead."),
+Q("err", "What does `Flight::map('notFound', ...)` do in the reading?",
+ ["Handles URLs that match no route.", "Answers with status 404."],
+ ["Handles restaurants that are not in the database.", "Redirects the client to the home page.", "Answers with status 400."],
+ "notFound handles URLs with no matching route and answers a JSON 404."),
+Q("err", "A service throws InvalidArgumentException. Which statements are true?",
+ ["The client should receive 400 Bad Request.", "It is decided in the presentation layer.", "It can be decided in the central error handler."],
+ ["The client should receive 404 Not Found.", "It is decided in the DAO."],
+ "400 Bad Request; the presentation layer (a route or the central handler) decides it."),
+Q("err", "What are the results of handling errors in one place?",
+ ["Every answer of the API is JSON, including errors.", "A frontend can rely on the format.", "Routes stay short without try/catch.", "Server errors are still written to the log."],
+ ["The API never returns status 500."],
+ "Now every answer is JSON, so a frontend can rely on it, and routes stay short."),
+Q("err", "Which statements about `Flight::map('error', function (Throwable $e) {...})` are true?",
+ ["It receives the thrown exception as `$e`.", "It handles exceptions from routes and services.", "It can check the exception type with instanceof."],
+ ["It only handles exceptions from the DAO.", "It runs only for GET requests."],
+ "The handler gets every Throwable thrown in a route or service and decides the answer by type."),
+Q("err", "Which messages are safe to show to the client?",
+ ["The validation message from the service.", "A general message such as Something went wrong on the server."],
+ ["The SQL query that failed.", "The PDOException message with table names.", "The full stack trace of the error."],
+ "Validation messages are safe; real server errors are logged and replaced by a general message."),
+Q("err", "Which status codes can the central handlers in the reading send?",
+ ["400", "404", "500"],
+ ["201", "204"],
+ "error sends 400 or 500; notFound sends 404."),
+
+/* ---------- test: testing & common mistakes (s14, s15) ---------- */
+Q("test", "Which tools does the reading suggest for testing an API without a frontend?",
+ ["Postman.", "curl in a terminal."],
+ ["Composer.", "The .htaccess file.", "phpMyAdmin."],
+ "You do not need a frontend: use Postman (Week 2) or curl."),
+Q("test", "In the curl commands of the reading, which options are explained correctly?",
+ ["`-X POST` chooses the HTTP method.", "`-H` adds a header.", "`-d` sends the body.", "`-i` also shows the status code and response headers."],
+ ["`-i` installs the route."],
+ "-X sets the method, -H a header, -d the body, -i includes the status line and headers in the output."),
+Q("test", "Which three cases should you test for every route?",
+ ["A correct request.", "A request with invalid data.", "A request for something that does not exist."],
+ ["A request with no internet connection.", "A request sent from two browsers at once."],
+ "Test a correct request, invalid data, and a missing object — and check the status code each time."),
+Q("test", "What should you check when you test a route?",
+ ["The status code.", "The body."],
+ ["Only that the body is not empty.", "Only the response time.", "Only the browser console."],
+ "Check the status code each time, not only the body."),
+Q("test", "Why does the POST curl example add `-H \"Content-Type: application/json\"`?",
+ ["It tells the server the body is JSON.", "Without it the body arrives empty in the route.", "getData() needs it to return the array."],
+ ["It makes the response JSON.", "It is required for every GET request."],
+ "Forgetting Content-Type: application/json means the body arrives empty."),
+Q("test", "Which of these are common mistakes listed in the reading?",
+ ["Verbs in the URL such as /getRestaurants.", "Always answering 200, even for errors.", "Using echo instead of Flight::json()."],
+ ["Adding vendor/ to .gitignore.", "Using plural nouns for resources."],
+ "Verbs in URLs, always 200 and echo are mistakes; ignoring vendor/ and plural nouns are correct practice."),
+Q("test", "Which of these are also common mistakes from the reading?",
+ ["Business rules or SQL in a route.", "Committing the vendor folder to Git.", "Showing database exception messages to the client.", "Forgetting .htaccess or putting it in the wrong folder."],
+ ["Converting @id with (int)."],
+ "All four are listed as common mistakes; casting @id with (int) is what the reading does."),
+Q("test", "`curl -i http://localhost/project/backend/restaurants/999` returns 404. What does that tell you?",
+ ["Restaurant 999 does not exist.", "The route answered correctly with a status code.", "`-i` made the status visible.", "The status line and headers are printed before the body."],
+ ["The server crashed."],
+ "-i shows the status; 404 for a missing restaurant is the correct answer."),
+Q("test", "Every URL except index.php answers 404 from Apache. What are likely causes?",
+ [".htaccess is missing.", ".htaccess is in the wrong folder."],
+ ["vendor/ is in .gitignore.", "Flight::json() was called without a status.", "The DAO has a typo in a column name."],
+ "Without a working .htaccess, Apache does not send requests to index.php."),
+Q("test", "Your POST route receives an empty array as data. What could be the reason?",
+ ["The client forgot Content-Type: application/json.", "The body was not sent at all."],
+ ["The route uses Flight::json().", "The route uses (int) $id.", "The vendor folder is listed in .gitignore, so FlightPHP is missing."],
+ "A missing Content-Type header or missing -d body makes the data arrive empty."),
+Q("test", "Which statements about `curl -X POST ... -d '{\"name\": \"Kilim\", \"city\": \"Ilidža\"}'` are true?",
+ ["It sends a POST request.", "The JSON in -d is the body.", "A correct answer is 201 Created."],
+ ["The data is sent in the query string.", "A correct answer is 204 No Content."],
+ "-X POST with a JSON body creates a restaurant; the route answers 201."),
+Q("test", "According to the summary, what does using a framework like FlightPHP make web development?",
+ ["Faster.", "Cleaner."],
+ ["Impossible to test.", "Dependent on a full-stack ORM.", "Slower, but always safer."],
+ "Frameworks like FlightPHP make web development faster, cleaner and more secure."),
+];
+
+QUESTIONS.forEach((q,i) => { q.id = i; q.all = [...q.a, ...q.w]; });
+document.getElementById("qcount-hero").textContent = QUESTIONS.length;
+
+/* ---------------- quiz logic ---------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = s => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
+const shuffle = a => { a=[...a]; for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const BEST_KEY = "ibu-it2001-r05-best-v1";
+const RUN_KEY = "ibu-it2001-r05-run-v1";
+const MODE_KEY = "ibu-it2001-r05-mode";
+const MISTAKES_KEY = "ibu-it2001-r05-mistakes-v1";
+const canSaveMistakes = store.set(`${MISTAKES_KEY}-check`, "1");
+store.remove(`${MISTAKES_KEY}-check`);
+const questionRevision = q => JSON.stringify([q.q, q.a, q.w]);
+function readMistakes(){
+  try {
+    const saved = JSON.parse(store.get(MISTAKES_KEY));
+    if (!Array.isArray(saved)) return new Set();
+    return new Set(saved.filter(x => x && Number.isInteger(x.id) && QUESTIONS[x.id] &&
+      x.revision === questionRevision(QUESTIONS[x.id])).map(x => x.id));
+  } catch(e){ return new Set(); }
+}
+function updateMistake(it){
+  const saved = readMistakes();
+  if (judge(it)) saved.delete(it.q.id); else saved.add(it.q.id);
+  store.set(MISTAKES_KEY, JSON.stringify([...saved].map(id => ({id, revision:questionRevision(QUESTIONS[id])}))));
+}
+function savedMistakeQuestions(){
+  const saved = readMistakes();
+  return QUESTIONS.filter(q => saved.has(q.id) && chosenTopics.has(q.t));
+}
+// Any change to the bank invalidates saved progress and best scores.
+const BANK_VERSION = JSON.stringify(QUESTIONS.map(q => [q.q, q.a, q.w]));
+function readingLink(q){ return `<a href="#${READING_SECTIONS[q.t]}" data-reading="${READING_SECTIONS[q.t]}">Read this topic →</a>`; }
+document.addEventListener("click", e => {
+  const link = e.target.closest("[data-reading]");
+  if (!link) return;
+  e.preventDefault();
+  const section = $(link.dataset.reading);
+  show("read", false);
+  history.replaceState(null, "", link.getAttribute("href"));
+  section.scrollIntoView({behavior: reduce ? "auto" : "smooth", block:"start"});
+  section.setAttribute("tabindex", "-1");
+  section.focus({preventScroll:true});
+});
+
+let count = 25, chosenTopics = new Set(Object.keys(T));
+let mode = store.get(MODE_KEY) === "exam" ? "exam" : "practice";
+const COUNTS = [10, 25, 50, "All"];
+const bestKey = (topics, size) => `${BEST_KEY}:${mode}:${[...topics].sort().join(",")}:${size}`;
+function readBest(topics, size){
+  try {
+    const best = JSON.parse(store.get(bestKey(topics, size)));
+    return best && best.bank === BANK_VERSION && best.total === size &&
+      Number.isInteger(best.good) && best.good >= 0 && best.good <= size ? best : null;
+  } catch(e) { return null; }
+}
+function renderSetup(){
+  const pool = QUESTIONS.filter(q => chosenTopics.has(q.t)).length;
+  $("count-seg").innerHTML = COUNTS.map(c => `<button class="chip" data-c="${c}" aria-pressed="${c===count}">${c==="All" ? `All <small>(${pool})</small>` : c}</button>`).join("");
+  $("topic-seg").innerHTML = Object.entries(T).map(([k,v]) => `<button class="chip" data-t="${k}" aria-pressed="${chosenTopics.has(k)}">${esc(v)} <small>${QUESTIONS.filter(q=>q.t===k).length}</small></button>`).join("");
+  $("all-topics").setAttribute("aria-pressed", chosenTopics.size === Object.keys(T).length);
+  $("start").disabled = pool === 0;
+  const mistakes = readMistakes(), available = savedMistakeQuestions();
+  $("mistakes-status").textContent = !canSaveMistakes ? "Browser storage is unavailable; mistakes cannot be saved here." : `${mistakes.size} saved mistake${mistakes.size === 1 ? "" : "s"} · ${available.length} in selected topics`;
+  $("review-mistakes").disabled = available.length === 0;
+  $("mode-seg").querySelectorAll("[data-m]").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === mode));
+  const size = count === "All" ? pool : Math.min(count, pool);
+  const best = readBest(chosenTopics, size);
+  $("best").textContent = best ? `Your best (${mode === "exam" ? "Exam" : "Practice"}) for these topics · ${size} questions: ${Math.round(best.good / best.total * 100)}% (${best.good}/${best.total})` :
+    `${QUESTIONS.length} questions in the bank`;
+}
+$("mode-seg").onclick = e => { const b=e.target.closest("[data-m]"); if(!b) return; mode = b.dataset.m; store.set(MODE_KEY, mode); renderSetup(); };
+$("count-seg").onclick = e => { const b=e.target.closest("[data-c]"); if(!b) return; count = b.dataset.c==="All" ? "All" : +b.dataset.c; renderSetup(); };
+$("topic-seg").onclick = e => { const b=e.target.closest("[data-t]"); if(!b) return; const k=b.dataset.t; chosenTopics.has(k) ? chosenTopics.delete(k) : chosenTopics.add(k); renderSetup(); };
+$("all-topics").onclick = () => { chosenTopics = chosenTopics.size === Object.keys(T).length ? new Set() : new Set(Object.keys(T)); renderSetup(); };
+renderSetup();
+
+/* run.list items: {q, order:[indexes into q.all], sel:Set of displayed positions, done}. q.all[0 .. a.length-1] are the correct answers. */
+let run = null;
+const isOk = (it, pos) => it.order[pos] < it.q.a.length;
+const judge = it => it.sel.size > 0 && it.order.every((k,pos) => (k < it.q.a.length) === it.sel.has(pos));
+function saveRun(){
+  store.set(RUN_KEY, JSON.stringify({bank:BANK_VERSION, count, topics:[...chosenTopics], recordEligible:run.recordEligible, mode:run.mode, i:run.i,
+    list:run.list.map(it => ({id:it.q.id, order:it.order, sel:[...it.sel], done:!!it.done}))}));
+}
+function restoreRun(){
+  try {
+    const saved = JSON.parse(store.get(RUN_KEY));
+    if (!saved) return;
+    if (saved.bank !== BANK_VERSION || !Array.isArray(saved.list) || !saved.list.length ||
+        !Number.isInteger(saved.i) || saved.i < 0 || saved.i >= saved.list.length ||
+        !COUNTS.includes(saved.count) || !Array.isArray(saved.topics) || saved.topics.some(t => !Object.hasOwn(T,t))) throw Error("Invalid progress");
+    const list = saved.list.map((it,index) => {
+      const q = QUESTIONS[it.id];
+      if (!q || !Array.isArray(it.order) || it.order.length !== 5 || new Set(it.order).size !== 5 ||
+          it.order.some(k => !Number.isInteger(k) || k < 0 || k > 4) || !Array.isArray(it.sel) ||
+          it.sel.some(k => !Number.isInteger(k) || k < 0 || k > 4) || (it.done && !it.sel.length) || (index < saved.i && !it.done) || (index > saved.i && it.done)) throw Error("Invalid question");
+      return {q, order:it.order, sel:new Set(it.sel), done:!!it.done};
+    });
+    run = {list, i:saved.i, recordEligible:saved.recordEligible === true, mode:saved.mode === "exam" ? "exam" : "practice"};
+    if (run.recordEligible) mode = run.mode;
+    count = saved.count; chosenTopics = new Set(saved.topics);
+    $("q-setup").hidden = true; $("q-result").hidden = true; $("q-play").hidden = false;
+    renderQ();
+  } catch(e) { store.remove(RUN_KEY); }
+}
+function startWith(list, recordEligible = true, m = mode){
+  run = { list: list.map(q => ({ q, order: shuffle([0,1,2,3,4]), sel:new Set(), done:false })), i:0, recordEligible, mode:m };
+  $("q-setup").hidden = true; $("q-result").hidden = true; $("q-play").hidden = false;
+  renderQ();
+}
+$("review-mistakes").onclick = () => {
+  const list = shuffle(savedMistakeQuestions());
+  if (list.length) startWith(list, false, "practice");
+};
+$("start").onclick = () => {
+  const pool = shuffle(QUESTIONS.filter(q => chosenTopics.has(q.t)));
+  startWith(count === "All" ? pool : pool.slice(0, count));
+};
+const answered = () => run.list.filter(it => it.done);
+function renderLive(){
+  const a = answered(), g = a.filter(judge).length;
+  if (run.mode === "exam"){ $("q-live").innerHTML = `<span>Exam · answered ${a.length} / ${run.list.length}</span>`; return; }
+  $("q-live").innerHTML = `<span class="g">✓ ${g}</span> &nbsp; <span class="r">✕ ${a.length - g}</span>`;
+}
+function renderQ(){
+  const it = run.list[run.i], n = run.list.length;
+  $("q-counter").textContent = `Question ${run.i+1} / ${n}`;
+  $("q-topic").textContent = T[it.q.t];
+  renderLive();
+  $("q-bar").style.width = (run.i / n * 100) + "%";
+  $("q-text").innerHTML = fmt(it.q.q);
+  $("q-opts").innerHTML = it.order.map((k,pos) => `<li><button class="opt${it.sel.has(pos) ? " sel" : ""}" role="checkbox" aria-checked="${it.sel.has(pos)}" data-k="${pos}"><span class="k">${"ABCDE"[pos]}</span><span>${fmt(it.q.all[k])}</span></button></li>`).join("");
+  $("q-explain").hidden = true;
+  if (it.done && run.mode !== "exam") paintAnswer(); else setAction();
+  saveRun();
+}
+function setAction(){
+  const it = run.list[run.i], last = run.i === run.list.length-1, btn = $("q-next");
+  if (!it.done && run.mode === "exam"){ btn.textContent = last ? "Finish →" : "Next →"; btn.disabled = it.sel.size === 0; }
+  else if (!it.done){ btn.textContent = "Check"; btn.disabled = it.sel.size === 0; }
+  else { btn.textContent = last ? "See results →" : "Next →"; btn.disabled = false; }
+}
+function toggle(pos){
+  const it = run.list[run.i]; if (it.done) return;
+  it.sel.has(pos) ? it.sel.delete(pos) : it.sel.add(pos);
+  [...$("q-opts").querySelectorAll(".opt")].forEach((b,j) => { b.classList.toggle("sel", it.sel.has(j)); b.setAttribute("aria-checked", it.sel.has(j)); });
+  setAction(); saveRun();
+}
+function check(){
+  const it = run.list[run.i]; if (it.done || !it.sel.size) return;
+  it.done = true;
+  updateMistake(it);
+  if (run.mode === "exam"){
+    if (run.i < run.list.length-1){ run.i++; renderQ(); $("q-play").scrollIntoView({block:"nearest"}); } else results();
+    return;
+  }
+  paintAnswer(true); saveRun();
+  $("q-next").focus({preventScroll:true});
+}
+function paintAnswer(fresh){
+  const it = run.list[run.i], ok = judge(it);
+  [...$("q-opts").querySelectorAll(".opt")].forEach((b,j) => { b.disabled = true; b.classList.remove("sel");
+    const good = isOk(it, j), picked = it.sel.has(j);
+    if (good && picked) b.classList.add("correct");
+    else if (good) b.classList.add("missed");
+    else if (picked) b.classList.add("wrong", ...(fresh && !reduce ? ["shake"] : []));
+    else b.classList.add("dim"); });
+  const nGood = it.q.a.length, nHit = it.order.filter((k,pos) => k < nGood && it.sel.has(pos)).length;
+  const nBad = [...it.sel].filter(pos => !isOk(it,pos)).length;
+  const head = ok ? `Correct — all ${nGood} right answers.` : `Not quite — ${nHit} of ${nGood} correct answers chosen${nBad ? `, ${nBad} wrong one${nBad>1?"s":""} chosen` : ""}.`;
+  const ex = $("q-explain");
+  ex.className = "explain " + (ok ? "ok" : "no");
+  ex.innerHTML = `<b>${head}</b> ${fmt(it.q.e)} <p>${readingLink(it.q)}</p>`;
+  ex.hidden = false;
+  renderLive(); setAction();
+}
+$("q-opts").onclick = e => { const b = e.target.closest(".opt"); if (b) toggle(+b.dataset.k); };
+$("q-next").onclick = () => {
+  const it = run.list[run.i];
+  if (!it.done) return check();
+  if (run.i < run.list.length-1){ run.i++; renderQ(); $("q-play").scrollIntoView({block:"nearest"}); } else results();
+};
+$("q-quit").onclick = () => { if (answered().length) results(); else { store.remove(RUN_KEY); $("q-play").hidden = true; $("q-setup").hidden = false; } };
+document.addEventListener("keydown", e => {
+  if ($("q-play").hidden || views.quiz.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  // Let focused controls (End quiz, links...) handle Enter/Space natively.
+  // Answer buttons are excluded so that Enter still checks the selected answer.
+  const ctl = e.target.closest && e.target.closest("button, a, input, select, textarea, [contenteditable]");
+  if (ctl && !ctl.classList.contains("opt") && (e.key === "Enter" || e.key === " ")) return;
+  const m = "12345".indexOf(e.key) >= 0 ? "12345".indexOf(e.key) : "abcde".indexOf(e.key.toLowerCase());
+  if (m >= 0 && e.key.length === 1){ toggle(m); e.preventDefault(); }
+  else if (e.key === "Enter" && !$("q-next").disabled){ $("q-next").click(); e.preventDefault(); }
+});
+function results(){
+  store.remove(RUN_KEY);
+  const done = answered(), n = done.length, g = done.filter(judge).length, pct = n ? Math.round(g/n*100) : 0;
+  $("q-play").hidden = true; $("q-result").hidden = false;
+  $("r-pct").textContent = pct + "%";
+  $("r-raw").textContent = `${g} / ${n}${n < run.list.length ? ` · ${n} of ${run.list.length} done` : ""}`;
+  const ring = $("r-ring"); let p = 0;
+  const step = () => { p = Math.min(pct, p + 2); ring.style.setProperty("--p", p); if (p < pct && !batterySaver) requestAnimationFrame(step); else ring.style.setProperty("--p", pct); };
+  (reduce || batterySaver) ? ring.style.setProperty("--p", pct) : requestAnimationFrame(step);
+  $("r-title").textContent = pct >= 90 ? "Excellent!" : pct >= 75 ? "Very good" : pct >= 55 ? "Getting there" : "Keep studying";
+  $("r-msg").textContent = pct >= 90 ? "You know the presentation layer really well." : pct >= 75 ? "Review the topics with the lowest bars below." : "Re-read the sections for the red topics, then retry your mistakes.";
+  const by = {};
+  done.forEach(it => { by[it.q.t] ??= [0,0]; by[it.q.t][1]++; if (judge(it)) by[it.q.t][0]++; });
+  $("r-topics").innerHTML = Object.entries(by).sort((a,b) => a[1][0]/a[1][1] - b[1][0]/b[1][1]).map(([k,[x,y]]) => {
+    const r = x/y; return `<div class="trow"><span>${esc(T[k])}</span><span class="tb"><i class="${r<.5?"low":r<.8?"mid":""}" style="width:${r*100}%"></i></span><span>${x}/${y}</span></div>`; }).join("");
+  const wrong = done.filter(it => !judge(it));
+  run.wrong = wrong.map(it => it.q);
+  $("r-retry").hidden = !wrong.length; $("r-review-wrap").hidden = !wrong.length;
+  $("r-review").innerHTML = wrong.map(it => {
+    const picked = [...it.sel].sort((x,y) => x-y).map(pos => it.q.all[it.order[pos]]);
+    return `<div class="ritem"><p class="q">${fmt(it.q.q)}</p>` +
+      `<p class="you">You chose:</p><ul class="you">${picked.map(s => `<li>${fmt(s)}</li>`).join("")}</ul>` +
+      `<p class="ans">Correct answers:</p><ul class="ans">${it.q.a.map(s => `<li>${fmt(s)}</li>`).join("")}</ul>` +
+      `<p class="why">${fmt(it.q.e)}</p><p>${readingLink(it.q)}</p></div>`; }).join("");
+  if (run.recordEligible && n >= 10 && n === run.list.length){
+    const prev = readBest(chosenTopics, n);
+    if (!prev || g > prev.good) store.set(bestKey(chosenTopics, n), JSON.stringify({bank:BANK_VERSION, good:g, total:n}));
+  }
+  scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+}
+$("r-retry").onclick = () => startWith(shuffle(run.wrong), false, "practice");
+$("r-new").onclick = () => { $("q-result").hidden = true; $("q-setup").hidden = false; renderSetup(); };
+restoreRun();
+</script>
+</body>
+</html>
