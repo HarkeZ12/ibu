@@ -31,5 +31,18 @@ Study features
 - Saving needs browser storage; private browsing or clearing browser data can
   remove saved sessions, mistakes and settings.
 
+Lab 05 trainer (folder "lab05-trainer")
+- Practise the Lab 05 tasks: the services registration, the error handler,
+  notFound and the routes for categories, events and announcements, plus two
+  extra files to write from memory. Press Check and your code runs in real
+  PHP 8.4 inside the browser (FlightPHP, the original services and DAOs, an
+  SQLite copy of campusevents.sql); every request is compared with the
+  expected answer, like php rest/routes/test_tasks.php.
+- Easiest: open it online at https://harkez12.github.io/ibu/
+- From the ZIP it needs a small local web server (opening index.html directly
+  does not work): on Windows double-click "Start trainer.bat", on Linux/macOS
+  run "bash start.sh" in the lab05-trainer folder. Keep that window open while
+  you practise.
+
 Source: IT 2001 Web Programming, Reading 05 "Presentation Layer",
 International Burch University, 2026/2027.
