@@ -1,0 +1,1325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ethical Software Engineering</title>
+<meta name="description" content="IT 2003 Ethical and Legal Issues of IT, Reading 05: Ethical software engineering. Full study guide and a multiple-choice quiz.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Glass theme: a STATIC colourful backdrop (gradient orbs + a soft grid) behind frosted panels.
+   Nothing moves behind the blurred panels, so the blur is only recomputed while scrolling (battery-friendly). */
+:root{
+  --bg:#e8ebf8;
+  --orb1:rgba(124,92,255,.55); --orb2:rgba(56,182,255,.50); --orb3:rgba(255,150,110,.45); --orb4:rgba(40,210,170,.40);
+  --grid:rgba(60,70,140,.13); --cell1:rgba(124,92,255,.22); --cell2:rgba(56,182,255,.22); --cell3:rgba(255,150,110,.24);
+  --glass:rgba(255,255,255,.56); --glass2:rgba(255,255,255,.34); --glass-strong:rgba(255,255,255,.80);
+  --edge:rgba(255,255,255,.75); --edge-soft:rgba(40,50,110,.10); --shine:rgba(255,255,255,.85);
+  --ink:#10162e; --muted:#4c5675; --line:rgba(40,50,110,.14);
+  --accent:#5a46f0; --accent2:#0b93a8; --accent-ink:#ffffff; --accent-soft:rgba(90,70,240,.10);
+  --amber:#a86a00; --amber-soft:rgba(240,170,40,.16);
+  --good:#147a46; --good-soft:rgba(20,150,80,.13); --bad:#b8352b; --bad-soft:rgba(200,50,40,.11);
+  --shadow:0 24px 60px -30px rgba(30,30,90,.45);
+  --code-bg:rgba(14,18,40,.88); --code-ink:#e6e9f7;
+  --f-display:"Sora", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#060914;
+  --orb1:rgba(110,80,255,.42); --orb2:rgba(30,150,255,.32); --orb3:rgba(255,110,140,.24); --orb4:rgba(20,200,170,.26);
+  --grid:rgba(160,175,255,.09); --cell1:rgba(124,92,255,.20); --cell2:rgba(56,182,255,.16); --cell3:rgba(255,120,150,.16);
+  --glass:rgba(20,25,52,.52); --glass2:rgba(20,25,52,.30); --glass-strong:rgba(28,34,70,.80);
+  --edge:rgba(255,255,255,.13); --edge-soft:rgba(255,255,255,.06); --shine:rgba(255,255,255,.16);
+  --ink:#eef1fb; --muted:#a4adca; --line:rgba(170,185,255,.15);
+  --accent:#a191ff; --accent2:#5ad8e6; --accent-ink:#0b0d1d; --accent-soft:rgba(161,145,255,.14);
+  --amber:#ffc95e; --amber-soft:rgba(255,200,90,.12);
+  --good:#62d79c; --good-soft:rgba(98,215,156,.14); --bad:#ff8a8f; --bad-soft:rgba(255,120,130,.13);
+  --shadow:0 30px 70px -30px rgba(0,0,0,.8);
+  --code-bg:rgba(6,8,20,.78); --code-ink:#e6e9f7;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#060914;
+  --orb1:rgba(110,80,255,.42); --orb2:rgba(30,150,255,.32); --orb3:rgba(255,110,140,.24); --orb4:rgba(20,200,170,.26);
+  --grid:rgba(160,175,255,.09); --cell1:rgba(124,92,255,.20); --cell2:rgba(56,182,255,.16); --cell3:rgba(255,120,150,.16);
+  --glass:rgba(20,25,52,.52); --glass2:rgba(20,25,52,.30); --glass-strong:rgba(28,34,70,.80);
+  --edge:rgba(255,255,255,.13); --edge-soft:rgba(255,255,255,.06); --shine:rgba(255,255,255,.16);
+  --ink:#eef1fb; --muted:#a4adca; --line:rgba(170,185,255,.15);
+  --accent:#a191ff; --accent2:#5ad8e6; --accent-ink:#0b0d1d; --accent-soft:rgba(161,145,255,.14);
+  --amber:#ffc95e; --amber-soft:rgba(255,200,90,.12);
+  --good:#62d79c; --good-soft:rgba(98,215,156,.14); --bad:#ff8a8f; --bad-soft:rgba(255,120,130,.13);
+  --shadow:0 30px 70px -30px rgba(0,0,0,.8);
+  --code-bg:rgba(6,8,20,.78); --code-ink:#e6e9f7;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth; scroll-padding-top:96px}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--f-body); font-size:18px; line-height:1.7;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+a{color:var(--accent)}
+code,kbd,.mono{font-family:var(--f-mono); font-size:.85em; font-variant-ligatures:none}
+p code, li code, td code{background:var(--accent-soft); padding:1px 6px; border-radius:6px}
+
+/* ---------- static backdrop ---------- */
+.backdrop{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  background:
+    radial-gradient(42vmax 42vmax at 8% 6%, var(--orb1), transparent 70%),
+    radial-gradient(40vmax 40vmax at 96% 18%, var(--orb2), transparent 70%),
+    radial-gradient(46vmax 46vmax at 82% 96%, var(--orb3), transparent 70%),
+    radial-gradient(36vmax 36vmax at 18% 88%, var(--orb4), transparent 70%),
+    var(--bg)}
+.backdrop svg{position:absolute; inset:0; width:100%; height:100%}
+.grain{position:absolute; inset:0; opacity:.06; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+/* ---------- glass ---------- */
+.glass{
+  position:relative;
+  background:linear-gradient(145deg, var(--glass), var(--glass2));
+  -webkit-backdrop-filter:blur(18px) saturate(1.6); backdrop-filter:blur(18px) saturate(1.6);
+  border:1px solid var(--edge); border-radius:24px;
+  box-shadow:inset 0 1px 0 var(--shine), inset 0 0 0 1px var(--edge-soft), var(--shadow);
+}
+:root[data-battery-saver="true"] .glass{background:var(--glass-strong);backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-battery-saver="true"] .grain{display:none}
+:root[data-battery-saver="true"] .reveal{opacity:1;transform:none;transition:none}
+.icon-btn.saver-btn{width:auto;padding:0 10px;display:flex;white-space:nowrap;gap:6px;font:600 .8rem var(--f-body)}
+.saver-btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+@media(max-width:700px){html{scroll-padding-top:146px}.bar{flex-wrap:wrap}.brand{flex:1 1 0}.tabs{order:3;width:100%}.tab{flex:1}.saver-btn{font-size:.75rem}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .glass{background:var(--glass-strong)}
+}
+@media (prefers-reduced-transparency: reduce){ .glass{background:var(--glass-strong); backdrop-filter:none; -webkit-backdrop-filter:none} }
+
+/* ---------- top bar ---------- */
+.top{position:sticky; top:0; z-index:20; padding:12px max(16px, env(safe-area-inset-left)) 0}
+.bar{max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 10px 8px 14px; border-radius:18px; overflow:hidden}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); min-width:0; margin-right:auto}
+.brand .logo{flex:none; width:34px; height:34px; border-radius:11px; display:grid; place-items:center;
+  background:linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.brand b{font-family:var(--f-display); font-weight:700; font-size:.98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block}
+.brand small{display:block; font-family:var(--f-mono); font-size:.64rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); line-height:1.2}
+.brand span{min-width:0}
+.tabs{display:flex; background:var(--accent-soft); border-radius:13px; padding:4px; gap:2px; border:1px solid var(--edge-soft)}
+.tab{appearance:none; border:0; background:transparent; color:var(--ink); font:600 .95rem var(--f-body); padding:7px 16px; border-radius:10px; cursor:pointer; transition:background .2s, color .2s}
+.tab[aria-selected="true"]{background:linear-gradient(135deg, var(--accent), var(--accent2)); color:var(--accent-ink); box-shadow:0 6px 16px -8px var(--accent)}
+.icon-btn{appearance:none; border:1px solid var(--line); background:var(--glass2); color:var(--ink); width:40px; height:40px; border-radius:12px; display:grid; place-items:center; cursor:pointer; flex:none}
+.icon-btn:hover{background:var(--accent-soft)}
+.progress{position:absolute; left:0; bottom:0; height:3px; width:0; background:linear-gradient(90deg, var(--accent), var(--accent2)); transition:width .15s linear}
+@media (max-width:560px){ .brand small{display:none} .brand b{font-size:.9rem} .tab{padding:7px 11px} .brand .logo{display:none}}
+
+/* ---------- shell ---------- */
+main{position:relative; z-index:1; padding:22px max(16px, env(safe-area-inset-left)) 80px}
+.shell{max-width:1200px; margin:0 auto}
+
+/* hero */
+.hero{padding:clamp(28px,5vw,60px); display:grid; gap:22px; margin-bottom:22px; overflow:hidden}
+.eyebrow{font-family:var(--f-mono); font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 14px}
+.eyebrow span{display:inline-flex; align-items:center; gap:6px}
+.eyebrow .dot{width:7px; height:7px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2))}
+h1,h2,h3,h4{font-family:var(--f-display); letter-spacing:-.02em; text-wrap:balance; margin:0}
+h1{font-size:clamp(2.2rem, 6vw, 4.2rem); line-height:1.02; font-weight:800; max-width:15ch}
+h1 em{font-style:normal; background:linear-gradient(100deg, var(--accent), var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent}
+.lede{font-size:1.16rem; color:var(--muted); max-width:56ch; margin:0}
+.cta{display:flex; flex-wrap:wrap; gap:12px}
+.btn{appearance:none; border:1px solid var(--line); background:var(--glass-strong); color:var(--ink); font:600 1rem var(--f-body); padding:12px 20px; border-radius:14px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:transform .15s, background .2s, border-color .2s}
+.btn:hover{transform:translateY(-1px); border-color:var(--accent)}
+.btn.primary{background:linear-gradient(135deg, var(--accent), var(--accent2)); color:var(--accent-ink); border-color:transparent; box-shadow:0 10px 24px -12px var(--accent)}
+.btn:disabled{opacity:.45; cursor:not-allowed; transform:none; box-shadow:none}
+.stats{display:flex; flex-wrap:wrap; gap:10px}
+.stat{padding:8px 14px; border-radius:13px; background:var(--glass2); border:1px solid var(--edge-soft); font-size:.92rem; color:var(--muted)}
+.stat b{color:var(--ink); font-family:var(--f-display); font-size:1.04rem; margin-right:5px}
+.hero-art{position:absolute; right:40px; top:50%; transform:translateY(-50%); width:min(36%, 380px); pointer-events:none}
+.hero > :not(.hero-art){position:relative; z-index:1}
+@media (max-width:900px){.hero-art{display:none}}
+
+/* ---------- reading ---------- */
+.reading{display:grid; grid-template-columns:260px minmax(0,1fr); gap:22px; align-items:start}
+@media (max-width:1000px){.reading{grid-template-columns:minmax(0,1fr)}}
+.toc{position:sticky; top:90px; padding:18px 14px; max-height:calc(100vh - 112px); overflow:auto; font-size:.92rem}
+.toc h4{font-size:.72rem; font-family:var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:0 8px 8px}
+.toc ol{list-style:none; margin:0; padding:0; counter-reset:t}
+.toc a{display:flex; gap:8px; padding:6px 8px; border-radius:10px; color:var(--muted); text-decoration:none; line-height:1.3}
+.toc a::before{counter-increment:t; content:counter(t, decimal-leading-zero); font-family:var(--f-mono); font-size:.74em; color:var(--accent); min-width:1.7em; padding-top:.2em}
+.toc a:hover{background:var(--accent-soft); color:var(--ink)}
+.toc a.on{background:var(--accent-soft); color:var(--ink); font-weight:600}
+.toc .quiz-link{margin-top:12px; width:100%; justify-content:center}
+@media (max-width:1000px){.toc{position:static; max-height:none} .toc ol{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}}
+
+article{display:flex; flex-direction:column; gap:22px; min-width:0}
+.sec{padding:clamp(22px,4vw,46px)}
+.sec > * + *{margin-top:16px}
+.sec h2{font-size:clamp(1.5rem,3.2vw,2.1rem); line-height:1.12; display:flex; align-items:baseline; gap:14px}
+.sec h2 .n{font-family:var(--f-mono); font-size:.48em; color:var(--accent); background:var(--accent-soft); padding:4px 9px; border-radius:9px; letter-spacing:0; flex:none}
+.sec h3{font-size:1.22rem; margin-top:30px}
+.sec p, .sec li{max-width:74ch}
+.sec ul, .sec ol{padding-left:1.3em}
+.sec li + li{margin-top:6px}
+.sec li::marker{color:var(--accent)}
+.steps{list-style:none; padding:0!important; counter-reset:s; display:grid; gap:10px}
+.steps li{counter-increment:s; position:relative; padding:12px 14px 12px 54px; background:var(--glass2); border:1px solid var(--edge-soft); border-radius:14px; max-width:none}
+.steps li::before{content:counter(s); position:absolute; left:14px; top:12px; width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--accent-ink); display:grid; place-items:center; font:700 .85rem var(--f-display)}
+.callout{border-radius:16px; padding:14px 18px; border:1px solid var(--edge-soft); border-left:4px solid var(--accent); background:var(--accent-soft)}
+.callout.key{border-left-color:var(--amber); background:var(--amber-soft)}
+.callout.warn{border-left-color:var(--bad); background:var(--bad-soft)}
+.callout.story{border-left-color:var(--good); background:var(--good-soft)}
+.callout .lbl{font-style:normal; font-family:var(--f-mono); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; display:block; margin-bottom:4px; color:var(--muted)}
+.callout p{margin:6px 0 0}
+.callout ol, .callout ul{margin:6px 0 0}
+.defs{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px}
+.def{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:14px 16px; line-height:1.5}
+.def b{display:block; font-family:var(--f-display); font-size:1rem; margin-bottom:4px}
+.def b .sym{color:var(--accent); font-family:var(--f-mono); margin-right:6px}
+.def span{color:var(--muted); font-size:.95rem}
+.tbl{overflow-x:auto; border-radius:16px; border:1px solid var(--line)}
+table{border-collapse:collapse; width:100%; font-size:.95rem; line-height:1.45; background:var(--glass-strong)}
+th,td{padding:10px 14px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line)}
+th{font-family:var(--f-display); font-weight:600; background:var(--accent-soft); font-size:.88rem}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--f-mono); font-size:.86rem; white-space:nowrap}
+td.y{color:var(--good); font-weight:700} td.no{color:var(--bad); font-weight:700}
+.tblcap{font-family:var(--f-mono); font-size:.74rem; color:var(--muted); margin-bottom:-8px; letter-spacing:.04em}
+pre.code{margin:0; background:var(--code-bg); color:var(--code-ink); border-radius:16px; padding:16px 18px; overflow-x:auto; font:500 .84rem/1.6 var(--f-mono); border:1px solid rgba(255,255,255,.08); box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+pre.code .c{color:#8b95b8; font-style:italic}
+pre.code .k{color:#c4b5ff}
+pre.code .s{color:#7fe3c8}
+.codecap{font-family:var(--f-mono); font-size:.74rem; color:var(--muted); margin-bottom:-8px}
+figure{margin:0}
+.fig button{appearance:none; border:0; padding:clamp(8px,2vw,16px); background:#fff; border-radius:16px; width:100%; cursor:zoom-in; display:block; box-shadow:0 0 0 1px var(--line), 0 12px 30px -20px rgba(0,0,0,.4); transition:transform .2s}
+.fig button:hover{transform:scale(1.006)}
+.fig img{width:100%; height:auto; display:block; margin:0 auto}
+.fig.narrow button{max-width:520px; margin:0 auto}
+.fig.mid button{max-width:720px; margin:0 auto}
+.fig figcaption{font-size:.9rem; color:var(--muted); margin-top:8px; text-align:center; max-width:none}
+.fig figcaption b{color:var(--ink); font-family:var(--f-display); font-weight:600}
+.pair{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; align-items:start}
+.scan{display:grid; gap:8px; font-family:var(--f-mono); font-size:.9rem; overflow-x:auto}
+.scan .row{display:flex; gap:6px; align-items:center; flex-wrap:nowrap}
+.scan .lab{width:110px; flex:none; color:var(--muted); font-size:.76rem}
+.scan i{font-style:normal; flex:none; width:44px; height:38px; display:grid; place-items:center; border-radius:10px; background:var(--glass-strong); border:1px solid var(--line)}
+.scan .ex i{background:var(--accent-soft); border-color:transparent; color:var(--accent); font-weight:600}
+.scan .in i{background:rgba(11,147,168,.12); border-color:transparent; color:var(--accent2); font-weight:600}
+.takeaways{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; list-style:none; padding:0!important}
+.takeaways li{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:14px 16px; max-width:none; margin:0!important}
+details.ex{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:12px 16px}
+details.ex + details.ex{margin-top:10px}
+details.ex summary{cursor:pointer; font-weight:600}
+details.ex p{margin:8px 0 0}
+.end-cta{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(22px,4vw,46px)}
+.end-cta h3{font-size:1.35rem}
+
+.reveal{opacity:0; transform:translateY(16px); transition:opacity .55s ease, transform .55s ease}
+.reveal.in{opacity:1; transform:none}
+
+/* ---------- quiz ---------- */
+.quiz{max-width:840px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+.qcard{padding:clamp(20px,4vw,38px); display:flex; flex-direction:column; gap:18px}
+.qcard h2{font-size:clamp(1.45rem,3.2vw,1.95rem)}
+.muted{color:var(--muted)}
+.label{font-family:var(--f-mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block}
+.seg{display:flex; flex-wrap:wrap; gap:8px}
+.chip{appearance:none; border:1px solid var(--line); background:var(--glass-strong); color:var(--ink); font:600 .9rem var(--f-body); padding:8px 14px; border-radius:999px; cursor:pointer; transition:background .15s, border-color .15s}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--accent-ink); border-color:transparent}
+.chip small{opacity:.75; font-weight:400; margin-left:4px}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.row.between{justify-content:space-between}
+.qhead{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; font-size:.92rem}
+.counter{font-family:var(--f-mono); color:var(--muted)}
+.tag{font-family:var(--f-mono); font-size:.72rem; letter-spacing:.05em; padding:4px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent)}
+.live{font-family:var(--f-mono); font-size:.86rem}
+.live .g{color:var(--good)} .live .r{color:var(--bad)}
+.qbar{height:6px; border-radius:6px; background:var(--accent-soft); overflow:hidden}
+.qbar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease}
+.question{font-family:var(--f-display); font-size:clamp(1.12rem,2.4vw,1.38rem); line-height:1.38; font-weight:600; margin:0}
+.mode{margin:-6px 0 0; font-size:.9rem; color:var(--muted); font-style:italic}
+.opts{display:grid; gap:10px; list-style:none; padding:0; margin:0}
+.opt{appearance:none; width:100%; text-align:left; border:1.5px solid var(--line); background:var(--glass-strong); color:var(--ink); font:400 1.02rem/1.45 var(--f-body); padding:13px 16px; border-radius:16px; cursor:pointer; display:flex; gap:14px; align-items:flex-start; transition:border-color .15s, background .15s, transform .15s}
+.opt:hover:not(:disabled){border-color:var(--accent); transform:translateX(3px)}
+.opt .k{flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background:var(--accent-soft); font:700 .82rem var(--f-mono); color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.sel{border-color:var(--accent); background:var(--accent-soft)}
+.opt.sel .k{background:var(--accent); color:var(--accent-ink)}
+.opt.correct{border-color:var(--good); background:var(--good-soft)}
+.opt.correct .k{background:var(--good); color:#fff}
+.opt.answer{border-color:var(--good); border-style:dashed}
+.opt.answer .k{background:var(--good-soft); color:var(--good)}
+.opt.answer::after{content:"correct answer"; margin-left:auto; align-self:center; font:600 .68rem var(--f-mono); color:var(--good); text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; padding-left:8px}
+.opt.wrong{border-color:var(--bad); background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad); color:#fff}
+.opt.dim{opacity:.55}
+.opt.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.explain{border-radius:16px; padding:14px 18px; background:var(--accent-soft); border:1px solid var(--edge-soft); border-left:4px solid var(--accent); animation:pop .3s ease}
+.explain.ok{border-left-color:var(--good); background:var(--good-soft)}
+.explain.no{border-left-color:var(--bad); background:var(--bad-soft)}
+.explain b{font-family:var(--f-display)}
+.explain p{margin:6px 0 0}
+@keyframes pop{from{opacity:0; transform:translateY(6px)}}
+.hint{font-size:.82rem; color:var(--muted); margin:0}
+kbd{border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:1px 6px; background:var(--glass-strong)}
+.result-top{display:flex; gap:24px; align-items:center; flex-wrap:wrap}
+.ring{--p:0; width:140px; height:140px; border-radius:50%; flex:none; display:grid; place-items:center;
+  background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--accent-soft) 0)}
+.ring div{width:112px; height:112px; border-radius:50%; background:var(--glass-strong); display:grid; place-items:center; text-align:center; line-height:1.1}
+.ring b{font:800 1.9rem var(--f-display)} .ring small{color:var(--muted); font-size:.78rem}
+.topics{display:grid; gap:8px}
+.trow{display:grid; grid-template-columns:minmax(0,1fr) 120px 52px; gap:10px; align-items:center; font-size:.92rem}
+.trow .tb{height:8px; border-radius:8px; background:var(--accent-soft); overflow:hidden}
+.trow .tb i{display:block; height:100%; background:var(--good)}
+.trow .tb i.mid{background:var(--amber)} .trow .tb i.low{background:var(--bad)}
+.trow span:last-child{font-family:var(--f-mono); text-align:right; color:var(--muted)}
+.review{display:grid; gap:12px}
+.ritem{border:1px solid var(--line); border-radius:16px; padding:14px 16px; background:var(--glass-strong)}
+.ritem p{margin:4px 0}
+.ritem .q{font-weight:700}
+.ritem .you{color:var(--bad)} .ritem .ans{color:var(--good)}
+.ritem .why{color:var(--muted); font-size:.94rem}
+.best{font-size:.9rem}
+
+/* lightbox */
+dialog.lb{border:0; padding:0; background:transparent; max-width:min(1200px,96vw); width:100%}
+dialog.lb::backdrop{background:rgba(5,8,20,.86)}
+dialog.lb img{width:100%; height:auto; background:#fff; border-radius:14px; display:block; padding:12px}
+dialog.lb p{color:#e7ebf7; text-align:center; font-size:.95rem; margin:10px 0 0}
+dialog.lb button{position:absolute; top:8px; right:8px; background:rgba(0,0,0,.6); color:#fff; border:0; width:38px; height:38px; border-radius:10px; font-size:1.2rem; cursor:pointer}
+
+footer{position:relative; z-index:1; text-align:center; color:var(--muted); font-size:.85rem; padding:0 16px 40px}
+footer a{color:var(--muted)}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1; transform:none; transition:none} html{scroll-behavior:auto}
+  .opt, .btn, .fig button{transition:none} .opt.shake{animation:none}
+}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+</style>
+<body>
+<div class="backdrop" aria-hidden="true">
+  <svg id="bg-grid" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1600 1000"></svg>
+  <div class="grain"></div>
+</div>
+
+<header class="top">
+  <div class="bar glass">
+    <a class="brand" href="../../index.html" title="All courses">
+      <span class="logo"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M7 21h10M4 7h16M4 7l-3 7a4 4 0 0 0 6 0zM20 7l-3 7a4 4 0 0 0 6 0z"/></svg></span>
+      <span><small>IT 2003 · Week 05</small><b>Ethical Software Engineering</b></span>
+    </a>
+    <div class="tabs" role="tablist" aria-label="View">
+      <button class="tab" role="tab" id="tab-read" aria-selected="true" aria-controls="view-read">Reading</button>
+      <button class="tab" role="tab" id="tab-quiz" aria-selected="false" aria-controls="view-quiz">Quiz</button>
+    </div>
+    <button class="icon-btn saver-btn" id="battery-saver" aria-pressed="false" title="Reduce visual effects while keeping the page readable">Battery saver: off</button>
+    <button class="icon-btn" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="progress" id="progress"></div>
+  </div>
+</header>
+
+<main>
+<div class="shell">
+
+<!-- ======================= READING ======================= -->
+<section id="view-read" role="tabpanel" aria-labelledby="tab-read">
+  <div class="hero glass">
+    <div class="eyebrow"><span><i class="dot"></i>IT 2003 · Ethical and Legal Issues of IT</span><span>Reading 05 · Chapter 4</span><span>2026/2027</span></div>
+    <h1>Ethical software <em>engineering</em></h1>
+    <p class="lede">Why every technical decision also has an ethical side, told through three famous failures (Therac-25, the Challenger launch and Volkswagen’s “defeat device”) and through ethics in project management, design and testing.</p>
+    <div class="cta">
+      <a class="btn primary" href="#s1">Start reading ↓</a>
+      <button class="btn" data-go="quiz">Take the quiz →</button>
+    </div>
+    <div class="stats">
+      <span class="stat"><b>14</b>chapters</span>
+      <span class="stat"><b>5</b>figures</span>
+      <span class="stat"><b id="qcount-hero">—</b>quiz questions</span>
+      <span class="stat"><b>~35</b>min read</span>
+    </div>
+    <svg class="hero-art" viewBox="0 0 380 300" aria-hidden="true" fill="none">
+      <defs>
+        <linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent2)"/></linearGradient>
+      </defs>
+      <g stroke-linecap="round" stroke-linejoin="round">
+        <path d="M190 40v206" stroke="var(--accent)" stroke-width="5"/>
+        <path d="M130 254h120" stroke="var(--accent2)" stroke-width="6"/>
+        <circle cx="190" cy="36" r="9" fill="url(#hg)"/>
+        <path d="M60 78 320 62" stroke="url(#hg)" stroke-width="4"/>
+        <path d="M60 78 22 168M60 78l38 90M320 62l-38 90M320 62l38 90" stroke="var(--muted)" stroke-width="1.5" opacity=".7"/>
+        <path d="M14 168h92a46 22 0 0 1-92 0z" fill="var(--glass-strong)" stroke="var(--accent)" stroke-width="2"/>
+        <path d="M274 152h92a46 22 0 0 1-92 0z" fill="var(--glass-strong)" stroke="var(--accent2)" stroke-width="2"/>
+      </g>
+      <g font-family="JetBrains Mono, monospace" font-size="12" font-weight="600" text-anchor="middle">
+        <text x="60" y="160" fill="var(--accent)">SAFETY</text>
+        <text x="320" y="144" fill="var(--accent2)">DEADLINE</text>
+        <text x="190" y="284" fill="var(--muted)" font-size="11" letter-spacing="2">DO NO HARM</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="reading">
+    <nav class="toc glass" aria-label="Contents">
+      <h4>Contents</h4>
+      <ol id="toc">
+        <li><a href="#s1">What software engineering is</a></li>
+        <li><a href="#s2">Learning objectives</a></li>
+        <li><a href="#s3">Lifecycles &amp; quality practices</a></li>
+        <li><a href="#s4">The ethical software engineer</a></li>
+        <li><a href="#s5">Safety and ethics</a></li>
+        <li><a href="#s6">Therac-25 disaster</a></li>
+        <li><a href="#s7">Space Shuttle Challenger</a></li>
+        <li><a href="#s8">Ethical project management</a></li>
+        <li><a href="#s9">Bridge on the River Kwai</a></li>
+        <li><a href="#s10">Ethical design &amp; value centred design</a></li>
+        <li><a href="#s11">Data, bias, addiction &amp; security</a></li>
+        <li><a href="#s12">Volkswagen emissions scandal</a></li>
+        <li><a href="#s13">Ethical software testing</a></li>
+        <li><a href="#s14">Key takeaways &amp; review questions</a></li>
+      </ol>
+      <button class="btn primary quiz-link" data-go="quiz">Take the quiz →</button>
+    </nav>
+
+    <article>
+      <!-- 01 -->
+      <section class="sec glass reveal" id="s1">
+        <h2><span class="n">01</span>What software engineering is</h2>
+        <p>Software engineering is the discipline concerned with developing software. It covers requirements gathering and definition, design and development, and testing to verify that the software is correct. It is a <b>team activity</b> with roles such as project managers, system analysts, developers and testers. The book also calls it the <b>multi-person construction of multi-version programs</b>.</p>
+        <div class="callout key"><span class="lbl">IEEE 610.12 definition</span>Software engineering is the application of a <b>systematic, disciplined, quantifiable</b> approach to the development, operation and maintenance of software; that is, the application of engineering to software, and the study of such approaches.</div>
+        <p>According to the chapter, software engineering includes:</p>
+        <ol class="steps">
+          <li>Methodologies to design, develop and test software that meets customers’ needs.</li>
+          <li>Software that is <i>engineered</i>: properly designed, developed and tested by sound engineering principles.</li>
+          <li>Quality and safety that are properly addressed.</li>
+          <li>Mathematics to help design and verify the software. How much depends on how <b>safety critical</b> the product is: peer reviews and rigorous testing are often enough, and heavy mathematics is kept for safety- and security-critical software.</li>
+          <li>Sound project management and quality management practices.</li>
+          <li>Proper support and maintenance of the software.</li>
+        </ol>
+        <p>Software engineering is <b>not just programming</b>. The engineer states precisely what the product must do, so it is clear what is and is not required. The requirements are rigorously reviewed and the design is validated. Then code is written, and peer reviews and testing verify and validate it. For safety-critical systems this verification is extra rigorous and may use mathematical techniques. <b>Dijkstra and Hoare</b> argued that correct software should be derived from its specification with mathematics, with a mathematical proof of correctness.</p>
+        <h3>The title “engineer”</h3>
+        <p>In classical engineering the title is <b>earned on merit</b> through education and competence, and it brings a duty to behave professionally and ethically. In computing, “software engineer” is often used loosely for anyone who builds things.</p>
+        <div class="defs">
+          <div class="def"><b>David Parnas</b><span>Argued that computer scientists should be <b>educated as engineers</b> and use mathematics. Software engineers are responsible for safe, high-quality software, are <b>accountable</b> for their decisions, must <b>object</b> to decisions that violate professional standards, and should be <b>licensed</b> like other engineers. He also introduced <b>information hiding</b> in the 1970s.</span></div>
+          <div class="def"><b>Professional bodies</b><span>Membership of a professional engineering body requires following its <b>code of ethics</b>. Professional software engineers follow best practice and the defined software processes.</span></div>
+          <div class="def"><b>Training</b><span>Companies invest in training for each role (project management, design, testing, service management). A company that ignores its staff’s competence gets poor results and loses reputation and market share.</span></div>
+        </div>
+      </section>
+
+      <!-- 02 -->
+      <section class="sec glass reveal" id="s2">
+        <h2><span class="n">02</span>Learning objectives</h2>
+        <p>After this reading you should be able to:</p>
+        <ul>
+          <li>define software engineering (IEEE 610.12) and explain why it is more than programming;</li>
+          <li>explain why the ethical software engineer must look at both the technical and the ethical side of decisions;</li>
+          <li>describe the Therac-25 and Challenger disasters and the lessons they teach about safety-critical systems;</li>
+          <li>explain <b>separatism</b> and the <b>precautionary principle</b>;</li>
+          <li>name the PMI core values for ethical project management and typical ethical dilemmas of a project manager;</li>
+          <li>explain what the <i>Bridge on the River Kwai</i> teaches about the purpose of technology;</li>
+          <li>describe <b>value centred design</b> and trade-off decisions between ethical values;</li>
+          <li>explain the Volkswagen “Dieselgate” scandal and why no engineer spoke out;</li>
+          <li>summarise the ISTQB code of ethics and the ethical duties of testers and test managers.</li>
+        </ul>
+      </section>
+
+      <!-- 03 -->
+      <section class="sec glass reveal" id="s3">
+        <h2><span class="n">03</span>Lifecycles &amp; quality practices</h2>
+        <p>The lifecycle used on a project is chosen to fit <b>the needs of that project</b>. The chapter briefly reviews the best-known ones:</p>
+        <div class="defs">
+          <div class="def"><b>Waterfall</b><span>For projects where the requirements are known early. Phases: requirements, specification, design, coding, unit, integration, system and acceptance tests. Each phase has <b>entry and exit criteria</b>. (W. Royce, 1970)</span></div>
+          <div class="def"><b>Spiral</b><span>Developed by <b>Barry Boehm</b> in the 1980s for requirements that are not fully known or that evolve. Each spiral adds functionality: objectives and risk analysis, updated requirements, design, code, test and a user review.</span></div>
+          <div class="def"><b>Rational Unified Process</b><span>Developed at Rational (now IBM) in the late 1990s. Uses <b>UML</b>, the visual modelling language created by Rumbaugh, Booch and Jacobson for specifying, constructing and documenting object-oriented systems.</span></div>
+          <div class="def"><b>Agile</b><span>A lightweight methodology, more responsive to customer needs, with a strong collaborative style.</span></div>
+        </div>
+        <div class="callout"><span class="lbl">Halfway through the project</span>Waterfall: <b>100% of the requirements are about 50% done</b>. Agile: <b>50% of the requirements are about 100% done</b>.</div>
+        <ul>
+          <li><b>CMMI</b>: a framework, used by thousands of organisations, for implementing best practice in software and systems engineering and defining high-quality processes.</li>
+          <li><b>Software inspections</b> (the Fagan methodology, Gilb’s approach) build quality into software and reduce the cost of poor quality.</li>
+          <li>Companies that follow CMMI or <b>ISO 9001</b> use <b>audits</b> to check that processes were followed. Auditors report to management and the findings are addressed.</li>
+        </ul>
+      </section>
+
+      <!-- 04 -->
+      <section class="sec glass reveal" id="s4">
+        <h2><span class="n">04</span>The ethical software engineer</h2>
+        <p>Technical decisions are made all the time, and they often affect people’s lives, sometimes harmfully. So the ethical impact of a decision has to be part of the engineering process: the ethical engineer examines <b>both the technical and the ethical dimensions</b> of decisions that affect society.</p>
+        <div class="defs">
+          <div class="def"><b>Do no harm</b><span>The fundamental principle, taken from the <b>Hippocratic Oath</b>.</span></div>
+          <div class="def"><b>Do not take bribes</b><span>Decisions must not be bought.</span></div>
+          <div class="def"><b>Be fair to others</b><span>Treat clients, colleagues and the public fairly.</span></div>
+        </div>
+        <p>The Volkswagen scandal (section 12) breached “do no harm”: it deceived the public and harmed society, the company, its shareholders and its employees. It was both <b>unethical and illegal</b>.</p>
+        <p>The codes of ethics of the <b>IEEE, ACM and BCS</b> (chapter 3) guide how technology and values interact. Engineers must know their ethical responsibilities throughout development and <b>act whenever ethical standards are in danger of being violated</b>.</p>
+        <h3>Liability and qualifications (chapter footnotes)</h3>
+        <ul>
+          <li>An <b>individual programmer is unlikely to be sued</b> over a flaw. Software is a team effort, so it is hard to prove one engineer was negligent, and most software comes with a <b>disclaimer</b> rather than a guarantee of quality.</li>
+          <li><b>Companies</b> are more likely to be sued: they are legally responsible for their employees’ actions and are wealthier. For bespoke software, more protection for the customer can be written into the <b>contract</b>.</li>
+          <li>The <b>BCS</b> introduced qualifications for IT professionals. The most important is the <b>ISEB</b> (Information Systems Examination Board), covering service management, project management, software testing and more.</li>
+        </ul>
+      </section>
+
+      <!-- 05 -->
+      <section class="sec glass reveal" id="s5">
+        <h2><span class="n">05</span>Safety and ethics</h2>
+        <p>Releasing unreliable software can damage property or injure (even kill) third parties, so companies must be confident that a product is <b>fit for purpose</b> before release. Widely used software must be <b>dependable</b>: available when needed, and operating safely and reliably without adverse side effects. With billions of connected devices, it must also be <b>secure</b> and able to deal with and recover from attacks.</p>
+        <div class="callout key"><span class="lbl">Definition</span>A <b>safety critical system</b> is a system whose failure could result in <b>significant economic damage or loss of life</b>. Examples: aircraft flight control systems, nuclear power stations, missile systems.</div>
+        <ul>
+          <li>Rigorous processes are essential. <b>Testing alone is often insufficient</b> to verify these systems.</li>
+          <li>The safety-critical industry treats <b>any change to the software as creating a new program</b>, which must again be shown to be reliable and safe, so extensive testing follows.</li>
+          <li><b>Formal verification</b> and <b>model checking</b> can give extra assurance of correctness.</li>
+        </ul>
+      </section>
+
+      <!-- 06 -->
+      <section class="sec glass reveal" id="s6">
+        <h2><span class="n">06</span>Therac-25 disaster</h2>
+        <figure class="fig mid">
+          <button data-zoom aria-label="Enlarge figure 4.1"><img src="images/fig-4-1.jpg" alt="A radiotherapy machine in a treatment room" loading="lazy"></button>
+          <figcaption><b>Fig. 4.1</b> A radiotherapy machine</figcaption>
+        </figure>
+        <p>The Therac-25 was a computer-controlled <b>radiation therapy machine</b> (a linear accelerator) built by <b>Atomic Energy of Canada Limited (AECL)</b> in the early 1980s. It treated cancer by aiming a particle beam at malignant tissue.</p>
+        <p>On the earlier <b>Therac-20</b>, safety checks were done in <b>hardware</b>. On the Therac-25, <b>software took over many of these safety-critical checks</b>. The software was responsible for monitoring the machine’s status, accepting treatment input, setting the machine up, turning the beam on and off, and detecting hardware malfunctions.</p>
+        <p>Between <b>1985 and 1987</b> there were <b>six major accidents</b>: patients received doses <b>hundreds of times</b> too high. <b>Three people died</b> and <b>three were seriously injured</b>. The machine stayed in use for <b>over 18 months</b> after the first accident because AECL believed an accident was impossible.</p>
+        <div class="tbl"><table>
+          <tr><th>Accident</th><th>AECL’s response</th></tr>
+          <tr><td>1st</td><td>No action; an accident was believed to be impossible.</td></tr>
+          <tr><td>2nd (a month later)</td><td>Sent an engineer who <b>could not reproduce</b> the problem. Made some hardware and software changes and claimed the problem was solved and reliability increased many times.</td></tr>
+          <tr><td>3rd</td><td><b>Denied</b> that the Therac-25 could have caused it.</td></tr>
+          <tr><td>4th</td><td>Blamed a <b>wiring problem</b>.</td></tr>
+          <tr><td>5th</td><td>Together with <b>FDA</b> investigations, AECL finally launched a <b>thorough investigation</b>.</td></tr>
+        </table></div>
+        <p>The FDA ruled the machines <b>defective</b> and told AECL to prepare a <b>corrective action plan</b> and inform its customers. The plan worried the FDA: there was a <b>lack of software engineering documentation</b> and the <b>testing was inadequate</b>. The FDA directed AECL to test the system extensively <b>every time even a small software change was made</b>.</p>
+        <div class="callout warn"><span class="lbl">Main reasons for the disaster</span>
+          <ul>
+            <li>Initial failure to believe end users</li>
+            <li>Overconfidence of engineers in its correctness</li>
+            <li>Poor software design and development practices</li>
+            <li>Inadequate testing</li>
+            <li>Poor resolution of software defects</li>
+            <li>Software errors</li>
+          </ul></div>
+        <p>Software engineering was immature in the 1980s, but the book says this is <b>no excuse</b>. Common sense required a proper investigation after the first accident, and <b>all machines should have been treated as unsafe until proved otherwise</b> and withdrawn until the cause was found and fixed.</p>
+      </section>
+
+      <!-- 07 -->
+      <section class="sec glass reveal" id="s7">
+        <h2><span class="n">07</span>Space Shuttle Challenger</h2>
+        <div class="pair">
+          <div>
+            <p>In <b>January 1986</b> the Challenger broke apart <b>73 seconds</b> into its flight and all <b>seven crew members</b> were killed. The <b>Rogers Commission</b> found the cause: the <b>O-ring seals</b> on a joint of the <b>right solid rocket booster</b> (SRB) failed, because record low temperatures had stiffened the rubber and reduced its ability to seal. The commission also called the launch decision process <b>deeply flawed</b>, with conflicts between engineering data and management judgment.</p>
+          </div>
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 4.2"><img src="images/fig-4-2.jpg" alt="The Space Shuttle Challenger" loading="lazy"></button>
+            <figcaption><b>Fig. 4.2</b> Space Challenger disaster</figcaption>
+          </figure>
+        </div>
+        <h3>The night before the launch</h3>
+        <ol class="steps">
+          <li><b>Boisjoly</b>, an engineer at <b>Morton Thiokol</b> (the SRB contractor; the book spells it “Thiokel” and calls him Robert, his real first name was Roger), strongly objected: he knew the O-rings erode and fail at low temperature.</li>
+          <li>On the evening conference call the whole Thiokol team recommended a <b>postponement</b>. Their minimum launch temperature was <b>52 °F</b>, and the forecast was <b>30 °F</b> overnight.</li>
+          <li>They expected NASA to rubber-stamp the decision. Instead NASA said the briefing was based on <b>emotion rather than factual data</b> and asked Thiokol to review the data again.</li>
+          <li>Every subcontractor had to sign off. NASA seems to have pushed Thiokol to recommend launching <b>unless they could prove it was unsafe</b>.</li>
+          <li>Thiokol management met <b>without Boisjoly</b>, decided to proceed, and told NASA its data was <b>inconclusive</b>. Boisjoly later called this decision <b>unethical</b>.</li>
+        </ol>
+        <div class="defs">
+          <div class="def"><b>Separatism</b><span>Engineers and scientists give <b>technical input</b>, and <b>management decides</b>, weighing all inputs into a value judgment. It usually works, but fails when managers balance conflicting values (a strict deadline vs. safety) and believe, or push others to believe, that the risk is “small but manageable”.</span></div>
+          <div class="def"><b>Precautionary principle</b><span>A course of action must be <b>shown to be safe before it is carried out</b>. This was NASA’s normal practice, but the night before the launch NASA <b>reversed the burden of proof</b>: Thiokol had to prove it was <i>unsafe</i>.</span></div>
+        </div>
+        <p>Decisions need <b>openness and transparency</b>, must rest on objective facts and data, and must keep risks minimal and manageable. Once his input was ignored, Boisjoly arguably had a <b>moral responsibility to blow the whistle</b>. He may instead have reasoned, following separatism, that he had warned management and the decision was theirs.</p>
+        <div class="callout story"><span class="lbl">The cost</span>All seven crew died, among them the schoolteacher <b>Christa McAuliffe</b>, chosen through NASA’s <b>Teacher in Space</b> project to teach lessons from space and inspire students’ interest in science.</div>
+      </section>
+
+      <!-- 08 -->
+      <section class="sec glass reveal" id="s8">
+        <h2><span class="n">08</span>Ethical project management</h2>
+        <p>A <b>project</b> is a <b>temporary</b> group activity with a specific goal, such as delivering a product, and a clearly defined beginning and end. Project management covers planning and estimation, resources, issues and change requests, quality, risks, budget, progress monitoring and corrective action, communication with stakeholders, and delivering a high-quality product on time and on budget.</p>
+        <p>The <b>Project Management Institute (PMI)</b> has a code of ethics and professional conduct. Its four core values:</p>
+        <div class="defs">
+          <div class="def"><b>Responsibility</b><span>Own your decisions and actions, including those you fail to make or take. Accept only work you are competent for, keep commitments, fix errors promptly, protect proprietary information, report unethical or illegal conduct, know the relevant laws.</span></div>
+          <div class="def"><b>Respect</b><span>Be sensitive to people from other cultures, behave professionally, listen and try to understand others, and work through conflicts.</span></div>
+          <div class="def"><b>Fairness</b><span>Decide objectively and impartially. Stay out of decisions where you have a <b>conflict of interest</b>. No favouritism or discrimination.</span></div>
+          <div class="def"><b>Honesty</b><span>Be truthful in communication and conduct. Never make or condone misleading or false statements.</span></div>
+        </div>
+        <ul>
+          <li><b>Larger projects</b> offer more chances for ethics to be compromised than smaller ones.</li>
+          <li>Balancing budget, schedule, effort and quality can tempt a manager to <b>cut corners</b>, compromising quality, health and safety, or privacy.</li>
+          <li>Example: choosing a <b>subcontractor</b> the manager knows from earlier work or from family is a conflict of interest, so the manager should <b>step out of the supplier selection</b>.</li>
+          <li><b>Good project governance</b> enables ethical project management by keeping key stakeholders regularly informed of status and key decisions.</li>
+        </ul>
+      </section>
+
+      <!-- 09 -->
+      <section class="sec glass reveal" id="s9">
+        <h2><span class="n">09</span>Bridge on the River Kwai</h2>
+        <p>Ethical design asks <b>how a technology will be used</b> and whether it could harm people and society. Because the design decides how a technology is used, the design process needs an ethical dimension alongside the desired functionality.</p>
+        <figure class="fig mid">
+          <button data-zoom aria-label="Enlarge figure 4.3"><img src="images/fig-4-3.jpg" alt="The bridge over the River Kwai in Kanchanaburi, Thailand" loading="lazy"></button>
+          <figcaption><b>Fig. 4.3</b> Bridge over the River Kwai in Kanchanaburi</figcaption>
+        </figure>
+        <p><b>David Lean</b> directed <i>The Bridge on the River Kwai</i> in <b>1957</b>. The film is based on the building of the <b>Thailand–Burma railway</b> during the Japanese occupation of Burma in the Second World War. (It was actually filmed on the Kelani river near Kitulgala, in Ceylon, today Sri Lanka.)</p>
+        <ul>
+          <li>British prisoners of war are ordered to build a bridge. At first they and their leader, <b>Colonel Nicholson</b>, resist.</li>
+          <li>Nicholson then becomes <b>obsessed with building a proper bridge</b> that will outlast the war and show the skill of British engineers.</li>
+          <li>On opening day, as the first train is due, he finally sees what he has done, <b>collaborating with the enemy</b> and helping its further aggression, and <b>blows up the bridge</b>.</li>
+        </ul>
+        <div class="callout key"><span class="lbl">Lesson</span>The <b>purpose</b> of the technology must be considered, not only how well it is built. A finished bridge would have helped Japanese aggression spread to other countries, and collaborating with the enemy conflicted with Nicholson’s duty to his country and the army.</div>
+      </section>
+
+      <!-- 10 -->
+      <section class="sec glass reveal" id="s10">
+        <h2><span class="n">10</span>Ethical design &amp; value centred design</h2>
+        <p><b>Software design</b> translates required functions into a <b>blueprint</b> of a system that can fulfil them. There are usually several design options, and they differ in how well they support particular ethical values. The goal is to choose the design that best meets the <b>most important ethical values and technical considerations</b>. Design activities: problem analysis, requirements analysis and definition (maybe prototyping), architectural design (options and decisions), low-level design, implementation, testing and maintenance.</p>
+        <div class="callout key"><span class="lbl">Definition</span><b>Value centred design (VCD)</b> takes <b>human values</b> into account during design and solves value conflicts through <b>engineering design and technological innovation</b>. It finds the values relevant to the project, understands their conflicts in order to make trade-offs, analyses how well each design meets them, and develops innovative designs for the most relevant values.</div>
+        <p>Value centred design involves:</p>
+        <ol class="steps">
+          <li>Reasoning about and clarifying the values behind conflicting design requirements</li>
+          <li>Social cost–benefit analysis (including monetary costs for safety)</li>
+          <li>Evaluation criteria (value criteria; weightings may be used)</li>
+          <li>Thresholds for what is acceptable on each criterion</li>
+          <li>Evaluation of the options</li>
+          <li>The selected option</li>
+        </ol>
+        <div class="pair">
+          <div>
+            <p>When different designs score well on <b>different criteria</b>, designers cannot do justice to all values at once. Such moral dilemmas are often resolved by <b>balancing</b> the competing values.</p>
+            <div class="callout"><span class="lbl">Trade-off decision</span>A choice between <b>at least two options</b>, where <b>at least two moral values</b> are relevant as choice criteria.</div>
+          </div>
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 4.4"><img src="images/fig-4-4.jpg" alt="Egyptian painting of a heart being weighed against a feather" loading="lazy"></button>
+            <figcaption><b>Fig. 4.4</b> Balancing an ethical life against a feather in Egyptian religion</figcaption>
+          </figure>
+        </div>
+        <p>Designers are responsible for <b>ethical designs</b> that satisfy the requirements, are robust and protect public safety. Each option should be rated on the relevant ethical values as well as on technical criteria. Values the chapter lists:</p>
+        <p><code>safety</code> <code>accessibility</code> <code>usability</code> <code>sustainability</code> <code>privacy</code> <code>security</code> <code>honesty</code> <code>fairness</code> <code>loyalty</code></p>
+      </section>
+
+      <!-- 11 -->
+      <section class="sec glass reveal" id="s11">
+        <h2><span class="n">11</span>Data, bias, addiction &amp; security</h2>
+        <div class="defs">
+          <div class="def"><b>Data management</b><span>Protect personal data ownership, data rights, access rights, privacy and security rights. Follow the <b>legal requirements</b> and best practice when collecting, processing and protecting data.</span></div>
+          <div class="def"><b>Accessibility</b><span>Design for different users: people with visual or hearing impairments, or with different levels of language ability or education.</span></div>
+          <div class="def"><b>Honesty and legality</b><span>An ethical design gives an <b>open and accurate account</b> of the system and meets all relevant legal and regulatory requirements. Volkswagen’s defeat device is the counter-example.</span></div>
+          <div class="def"><b>Unbiased algorithms</b><span>Algorithms must not discriminate against minorities, especially AI pattern-matching ones. Examples: <b>Amazon’s hiring algorithm</b> discriminated against <b>women</b>; a <b>predictive policing</b> algorithm led to <b>racial profiling</b>. (More in chapter 6.)</span></div>
+          <div class="def"><b>Addictive design</b><span>Social media and other apps are <b>deliberately designed to be addictive</b>, capturing attention at a primal level for the company’s financial gain. People check their phones hundreds of times a day. Should consequences like this count in ethical decisions?</span></div>
+          <div class="def"><b>Environmental responsibility</b><span>Some cloud companies used <b>AI and machine learning</b> to build visual maps showing <b>Big Oil</b> where to drill for more fossil fuels. Companies must not turn a blind eye to how their products are used.</span></div>
+        </div>
+        <h3>Security by design</h3>
+        <ul>
+          <li>Design for security from the start: it is <b>difficult to add security after implementation</b>. <b>Security engineering</b> builds systems that prevent malicious attacks and recover from them.</li>
+          <li>Do a <b>risk assessment of security threats early</b>. It produces <b>security (and privacy) requirements</b> that design and development must implement.</li>
+          <li><b>Security testing</b>, including <b>penetration testing</b>, looks for flaws and verifies requirements such as <b>confidentiality, availability and integrity</b>.</li>
+          <li>Passing security testing <b>does not guarantee</b> there are no vulnerabilities. Hackers will keep trying.</li>
+        </ul>
+      </section>
+
+      <!-- 12 -->
+      <section class="sec glass reveal" id="s12">
+        <h2><span class="n">12</span>Volkswagen emissions scandal</h2>
+        <div class="pair">
+          <div>
+            <p>In “<b>Dieselgate</b>”, Volkswagen deliberately programmed its <b>turbocharged direct injection (TDI) diesel</b> engines to switch on their emission controls <b>only during laboratory emission tests</b>. The cars passed the US federal <b>NOx</b> limits in the lab, while according to the chapter, real-world emissions were <b>over 40 times higher</b>.</p>
+          </div>
+          <figure class="fig">
+            <button data-zoom aria-label="Enlarge figure 4.5"><img src="images/fig-4-5.jpg" alt="A Volkswagen Beetle" loading="lazy"></button>
+            <figcaption><b>Fig. 4.5</b> Volkswagen Beetle type 82E</figcaption>
+          </figure>
+        </div>
+        <div class="tbl"><table>
+          <tr><th>Fact</th><th>Detail</th></tr>
+          <tr><td>Vehicles</td><td>Over <b>11 million</b> worldwide, about <b>half a million</b> in the US, from <b>2009 to 2015</b></td></tr>
+          <tr><td>Discovery</td><td>In <b>2014</b> differences between European and US models became evident and regulators in several countries investigated</td></tr>
+          <tr><td>Guilty plea</td><td><b>2017</b>: criminal charges; admitted developing a “<b>defeat device</b>” and deliberately concealing it</td></tr>
+          <tr><td>Fine</td><td><b>$2.8 billion</b> for rigging the cars to cheat the tests</td></tr>
+          <tr><td>Total cost</td><td>About <b>$33 billion</b> in fines, penalties, settlements and buybacks by mid-2020</td></tr>
+          <tr><td>People</td><td>CEO <b>Martin Winterkorn</b> resigned in 2015 and was charged with fraud and conspiracy in the US in 2018. <b>Herbert Diess</b> became CEO in 2018, helped restore the reputation and led the move to electric vehicles.</td></tr>
+        </table></div>
+        <p>The scandal showed that <b>software-controlled machinery is prone to cheating</b>. It opened a debate on whether software used to meet <b>legal or regulatory requirements</b> should be <b>independently verified</b>: published for regulators to inspect and/or independently certified.</p>
+        <p>It also showed <b>corporate ethics failing to stop the pursuit of business self-interest</b>. An organisation’s code of ethics is sometimes just <b>“window dressing”</b> for the public, not part of daily work.</p>
+        <h3>Why did no engineer speak out?</h3>
+        <p>The book asks: why did the engineers not consider their ethical responsibilities or question the device? Why were there no whistleblowers? Was there a lack of moral courage, no structure for raising ethical concerns, or a total failure of corporate governance? Its possible reasons:</p>
+        <ul>
+          <li>Corporate environments focus on the business and the product, not on critical reflection about the technology’s wider effects.</li>
+          <li>Engineers are busy with their lives and building a career, and <b>speaking out is not seen as career-advancing</b>.</li>
+          <li><b>Hierarchical, command-driven</b> organisations do not encourage speaking out, and subordinates <b>fear the consequences</b>.</li>
+          <li>Engineers focus on making the software <b>meet its specification</b> and may not think about its wider social impact.</li>
+        </ul>
+        <p>Considering the bigger picture is in the interest of both companies and employees. Otherwise they pay later through <b>reputational damage and financial loss</b>.</p>
+      </section>
+
+      <!-- 13 -->
+      <section class="sec glass reveal" id="s13">
+        <h2><span class="n">13</span>Ethical software testing</h2>
+        <p>Testers are professionals and must behave ethically. The <b>ISTQB Code of Ethics</b> for test professionals is based on the <b>IEEE and ACM</b> codes. Certified software testers shall:</p>
+        <ol class="steps">
+          <li>act consistently in the <b>public interest</b>;</li>
+          <li>act in the best interests of their <b>client and employer</b>;</li>
+          <li>ensure their deliverables meet the <b>highest professional standards</b>;</li>
+          <li>maintain <b>independence and integrity</b> in professional judgment;</li>
+          <li>promote an ethical approach to the <b>management</b> of software testing;</li>
+          <li>advance the integrity and reputation of the <b>profession</b>;</li>
+          <li>be supportive of <b>colleagues</b> and cooperate with software developers;</li>
+          <li>participate in <b>lifelong learning</b> and promote ethics in the profession.</li>
+        </ol>
+        <ul>
+          <li>It is <b>impossible to test everything</b> in the time available, so testing focuses on the <b>areas of greatest risk</b> and the parts users use most. Testers need the right expertise, test environment, test plans and specifications, and tools.</li>
+          <li>Ethical issues arise when the project is <b>behind schedule</b> and the test team is pressed to keep the original delivery date. Too little time can mean serious defects are missed. The <b>test manager must resist</b> pressure that risks quality and <b>raise concerns at senior level</b>.</li>
+          <li>The <b>customer must be told about all quality problems</b> so they can manage the risks.</li>
+          <li>The <b>final test report</b> summarises the testing done, the results, open problems, the <b>problem arrival rate</b> and known risks. It usually ends with the test manager’s <b>release recommendation</b>, based on the facts, with a clear statement that all risks can be managed.</li>
+          <li>If the project manager wants to release on schedule but the test manager thinks it is unsafe, the decision must rest on the <b>facts and risks</b>, supported by objective data.</li>
+        </ul>
+      </section>
+
+      <!-- 14 -->
+      <section class="sec glass reveal" id="s14">
+        <h2><span class="n">14</span>Key takeaways &amp; review questions</h2>
+        <ul class="takeaways">
+          <li>Technical decisions have <b>ethical dimensions</b>; the ethical engineer examines both.</li>
+          <li>“<b>Do no harm</b>” (Hippocratic Oath) is the fundamental principle; also no bribes and fairness.</li>
+          <li><b>Therac-25</b>: software replaced hardware safety checks; disbelief and overconfidence led to 3 deaths and 3 serious injuries.</li>
+          <li><b>Challenger</b>: O-rings failed in the cold; management overruled engineering data and reversed the burden of proof.</li>
+          <li><b>PMI</b> values: responsibility, respect, fairness, honesty.</li>
+          <li><b>River Kwai</b>: consider the <b>purpose</b> of a technology, not only its quality.</li>
+          <li><b>Value centred design</b> builds human values into design and resolves conflicts by trade-offs and innovation.</li>
+          <li><b>Volkswagen</b>: a software “defeat device” cheated emission tests; illegal, unethical and with no whistleblowers.</li>
+          <li><b>Testers</b> follow the ISTQB code, resist schedule pressure and report all quality problems.</li>
+        </ul>
+        <h3>Review questions from the chapter (with short sample answers)</h3>
+        <details class="ex"><summary>1. What is ethical software engineering?</summary>
+          <p>Software engineering in which the engineer examines both the technical and the ethical dimensions of decisions that affect society, follows the professional codes of ethics (do no harm, no bribes, be fair) and acts when ethical standards are in danger.</p></details>
+        <details class="ex"><summary>2. Explain how the Therac-25 disaster occurred.</summary>
+          <p>Software took over safety checks that the Therac-20 did in hardware. Software errors caused massive radiation overdoses in six accidents (1985–87). AECL disbelieved users, was overconfident, and its poor design practice, inadequate testing and poor defect resolution kept the machine in use for over 18 months.</p></details>
+        <details class="ex"><summary>3. Explain how the Challenger disaster occurred.</summary>
+          <p>Record cold stiffened the O-rings on the right SRB so they failed to seal. Thiokol engineers recommended postponing (minimum 52 °F, forecast 30 °F), but NASA demanded proof it was unsafe, Thiokol management overruled its engineers, and the shuttle broke apart after 73 s, killing all seven crew.</p></details>
+        <details class="ex"><summary>4. What is ethical software design?</summary>
+          <p>Design that considers how the technology will be used and whether it could cause harm, rates every option on ethical values (safety, privacy, accessibility, fairness…) as well as technical criteria, and is honest, legal, unbiased and secure.</p></details>
+        <details class="ex"><summary>5. What is value centred design?</summary>
+          <p>An approach that takes human values into account during design and solves value conflicts through engineering design and innovation: clarify values, cost–benefit analysis, weighted criteria and thresholds, evaluate options, select one.</p></details>
+        <details class="ex"><summary>6. What is ethical software testing?</summary>
+          <p>Testing according to the ISTQB code: acting in the public interest with independence and integrity, focusing on the highest risks, resisting schedule pressure that threatens quality, and reporting all quality problems and risks honestly to the customer.</p></details>
+        <details class="ex"><summary>7. What is ethical project management?</summary>
+          <p>Managing a project according to the PMI values of responsibility, respect, fairness and honesty: not cutting corners on quality or safety, avoiding conflicts of interest, and keeping stakeholders informed through good governance.</p></details>
+        <details class="ex"><summary>8. Explain the concept of separatism.</summary>
+          <p>Engineers provide technical input and managers decide. It fails when managers balance conflicting values such as a deadline against safety and treat a real risk as small and manageable, as before the Challenger launch.</p></details>
+        <details class="ex"><summary>9. What are the ethical considerations in developing safety critical systems?</summary>
+          <p>Failure can cost lives, so rigorous processes are needed beyond testing (formal verification, model checking). Any change counts as a new program that must be shown safe again, and the precautionary principle applies: prove it is safe before going ahead.</p></details>
+        <details class="ex"><summary>10. Explain the ethical considerations in the Volkswagen Dieselgate scandal.</summary>
+          <p>Engineers built a defeat device to deceive regulators and the public, harming the environment and society. No one blew the whistle (hierarchy, career fears, focus on the spec), and the code of ethics was window dressing. It raised the question of independent verification of regulatory software.</p></details>
+        <details class="ex"><summary>11. Explain the ethical considerations in the film “Bridge on the River Kwai”.</summary>
+          <p>Colonel Nicholson built an excellent bridge but ignored its purpose: helping the enemy’s aggression. Engineers must consider what their technology will be used for, and collaborating with the enemy conflicted with his duty to his country.</p></details>
+      </section>
+
+      <div class="glass end-cta reveal">
+        <h3>Ready to test yourself?</h3>
+        <button class="btn primary" data-go="quiz">Take the quiz →</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ======================= QUIZ ======================= -->
+<section id="view-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+  <div class="quiz">
+    <!-- setup -->
+    <div class="qcard glass" id="q-setup">
+      <div class="eyebrow"><span><i class="dot"></i>Reading 05 · Quiz</span></div>
+      <h2>Ethical Software Engineering</h2>
+      <p class="muted" style="margin:0">Five options per question and <b>exactly one correct answer</b> each time. Options are shuffled on every run, so learn the idea, not the letter.</p>
+      <div>
+        <span class="label">How many questions?</span>
+        <div class="seg" id="count-seg"></div>
+      </div>
+      <div>
+        <span class="label">Mode</span>
+        <div class="seg" id="mode-seg">
+          <button class="chip" data-m="practice">Practice <small>· feedback after every question</small></button>
+          <button class="chip" data-m="exam">Exam <small>· answers and explanations only at the end</small></button>
+        </div>
+      </div>
+      <div>
+        <div class="row between"><span class="label">Topics</span><button class="chip" id="all-topics" aria-pressed="true">All topics</button></div>
+        <div class="seg" id="topic-seg"></div>
+      </div>
+      <div class="row between">
+        <span class="best muted" id="best"></span>
+        <button class="btn primary" id="start">Start quiz →</button>
+      </div>
+      <div class="row between">
+        <span id="mistakes-status" class="muted" role="status" aria-live="polite"></span>
+        <button class="btn" id="review-mistakes" disabled>Review saved mistakes →</button>
+      </div>
+      <p class="hint">Saved on this browser. A later correct answer removes a question from the list. Review uses the topics selected above and Practice feedback. Private browsing or clearing browser data may remove saved progress.</p>
+      <p class="hint">Keyboard: <kbd>1</kbd>–<kbd>5</kbd> or <kbd>A</kbd>–<kbd>E</kbd> to choose, <kbd>Enter</kbd> to check (Practice) or go to the next question (Exam).</p>
+    </div>
+
+    <!-- question -->
+    <div class="qcard glass" id="q-play" hidden>
+      <div class="qhead">
+        <span class="counter" id="q-counter"></span>
+        <span class="tag" id="q-topic"></span>
+        <span class="live" id="q-live"></span>
+      </div>
+      <div class="qbar"><i id="q-bar"></i></div>
+      <p class="question" id="q-text"></p>
+      <p class="mode">Select one:</p>
+      <ul class="opts" id="q-opts" role="radiogroup" aria-labelledby="q-text"></ul>
+      <div id="q-explain" hidden></div>
+      <div class="row between">
+        <button class="btn" id="q-quit">✕ End quiz</button>
+        <button class="btn primary" id="q-next" disabled>Check</button>
+      </div>
+    </div>
+
+    <!-- results -->
+    <div class="qcard glass" id="q-result" hidden>
+      <div class="result-top">
+        <div class="ring" id="r-ring"><div><span><b id="r-pct">0%</b><br><small id="r-raw"></small></span></div></div>
+        <div style="flex:1; min-width:220px">
+          <h2 id="r-title"></h2>
+          <p class="muted" id="r-msg" style="margin:6px 0 0"></p>
+        </div>
+      </div>
+      <div><span class="label">By topic</span><div class="topics" id="r-topics"></div></div>
+      <div class="row">
+        <button class="btn primary" id="r-retry">Retry mistakes</button>
+        <button class="btn" id="r-new">New quiz</button>
+        <button class="btn" data-go="read">Back to reading</button>
+      </div>
+      <div id="r-review-wrap"><span class="label">Your mistakes</span><div class="review" id="r-review"></div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<footer>IT 2003 · Ethical and Legal Issues of IT · International Burch University · 2026/2027 · <a href="../../index.html">All courses</a></footer>
+
+<dialog class="lb" id="lb"><button aria-label="Close" id="lb-close">✕</button><img id="lb-img" alt=""><p id="lb-cap"></p></dialog>
+
+<script>
+/* ---------------- theme ---------------- */
+const root = document.documentElement;
+const store = {
+  get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } },
+  set(k,v){ try{ localStorage.setItem(k,v); return true }catch(e){ return false } },
+  remove(k){ try{ localStorage.removeItem(k) }catch(e){} }
+};
+const SAVER_KEY = "ibu-it2003-r05-battery-saver";
+const savedSaver = store.get(SAVER_KEY);
+let batterySaver = savedSaver === null ? matchMedia("(prefers-reduced-transparency: reduce)").matches : savedSaver === "true";
+function renderSaver(){
+  root.dataset.batterySaver = String(batterySaver);
+  const button = document.getElementById("battery-saver");
+  button.setAttribute("aria-pressed", String(batterySaver));
+  button.textContent = `Battery saver: ${batterySaver ? "on" : "off"}`;
+}
+renderSaver();
+document.getElementById("battery-saver").onclick = () => {
+  batterySaver = !batterySaver; store.set(SAVER_KEY, String(batterySaver)); renderSaver();
+};
+const savedTheme = store.get("ibu-theme");
+if (savedTheme) root.dataset.theme = savedTheme;
+document.getElementById("theme").onclick = () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  store.set("ibu-theme", root.dataset.theme);
+};
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- static backdrop: a soft grid with a few tinted cells ----------------
+   Drawn once. Nothing animates behind the frosted panels. */
+(function drawGrid(){
+  const svg = document.getElementById("bg-grid"), NS = "http://www.w3.org/2000/svg", S = 56, W = 1600, H = 1000;
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let d = "";
+  for (let x = 0; x <= W; x += S) d += `M${x} 0V${H}`;
+  for (let y = 0; y <= H; y += S) d += `M0 ${y}H${W}`;
+  const g = document.createElementNS(NS, "g");
+  const p = document.createElementNS(NS, "path");
+  p.setAttribute("d", d); p.setAttribute("stroke", "var(--grid)"); p.setAttribute("stroke-width", "1"); p.setAttribute("fill", "none");
+  g.appendChild(p);
+  const fills = ["var(--cell1)", "var(--cell2)", "var(--cell3)"];
+  for (let k = 0; k < 46; k++){
+    const r = document.createElementNS(NS, "rect");
+    r.setAttribute("x", Math.floor(rnd() * W / S) * S + 4); r.setAttribute("y", Math.floor(rnd() * H / S) * S + 4);
+    r.setAttribute("width", S - 8); r.setAttribute("height", S - 8); r.setAttribute("rx", 10);
+    r.setAttribute("fill", fills[k % 3]);
+    g.appendChild(r);
+  }
+  svg.appendChild(g);
+})();
+
+/* ---------------- views ---------------- */
+const views = { read:document.getElementById("view-read"), quiz:document.getElementById("view-quiz") };
+const tabs = { read:document.getElementById("tab-read"), quiz:document.getElementById("tab-quiz") };
+function show(v, push=true){
+  for (const k in views){ views[k].hidden = k!==v; tabs[k].setAttribute("aria-selected", k===v); }
+  if (push) history.replaceState(null, "", v==="quiz" ? "#quiz" : location.pathname + location.search);
+  scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+  updateProgress();
+}
+tabs.read.onclick = () => show("read"); tabs.quiz.onclick = () => show("quiz");
+document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g){ e.preventDefault(); show(g.dataset.go); } });
+
+/* reading progress + toc highlight */
+const bar = document.getElementById("progress");
+function updateProgress(){
+  const h = document.documentElement.scrollHeight - innerHeight;
+  bar.style.width = (views.read.hidden ? 0 : Math.min(100, Math.max(0, scrollY / (h||1) * 100))) + "%";
+}
+if (location.hash === "#quiz") show("quiz", false);
+addEventListener("scroll", updateProgress, {passive:true});
+const tocLinks = [...document.querySelectorAll("#toc a")];
+const secObs = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting){ tocLinks.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#"+e.target.id)); }
+}), {rootMargin:"-40% 0px -55% 0px"});
+document.querySelectorAll(".sec").forEach(s => secObs.observe(s));
+const revObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add("in"); revObs.unobserve(e.target); } }), {rootMargin:"0px 0px -8% 0px"});
+document.querySelectorAll(".reveal").forEach(s => revObs.observe(s));
+
+/* lightbox */
+const lb = document.getElementById("lb");
+document.querySelectorAll("[data-zoom]").forEach(b => b.onclick = () => {
+  const img = b.querySelector("img"), cap = b.closest("figure").querySelector("figcaption");
+  document.getElementById("lb-img").src = img.src; document.getElementById("lb-img").alt = img.alt;
+  document.getElementById("lb-cap").textContent = cap ? cap.textContent : "";
+  lb.showModal();
+});
+document.getElementById("lb-close").onclick = () => lb.close();
+lb.addEventListener("click", e => { if (e.target === lb) lb.close(); });
+
+/* ---------------- quiz data ---------------- */
+// Q(topic, question, correct answer, [4 wrong answers], explanation). Exactly one correct answer; options are shuffled at run time.
+function Q(t,q,a,w,e){ return {t,q,a,w,e}; }
+const T = {
+ "se":   "Software engineering basics",
+ "lc":   "Lifecycles & quality",
+ "eth":  "The ethical engineer",
+ "safe": "Safety-critical systems",
+ "thr":  "Therac-25",
+ "chal": "Challenger",
+ "pm":   "Project management",
+ "kwai": "River Kwai & purpose",
+ "vcd":  "Value centred design",
+ "des":  "Data, bias & security",
+ "vw":   "Volkswagen scandal",
+ "test": "Ethical testing"
+};
+const READING_SECTIONS = {se:"s1", lc:"s3", eth:"s4", safe:"s5", thr:"s6", chal:"s7", pm:"s8", kwai:"s9", vcd:"s10", des:"s11", vw:"s12", test:"s13"};
+const QUESTIONS = [
+/* ---------- se: software engineering basics (s1) ---------- */
+Q("se", "According to the IEEE 610.12 definition, software engineering is the application of which kind of approach to software?", "A systematic, disciplined, quantifiable approach.", ["An iterative, informal, experience-driven approach.", "A creative, artistic, intuition-based approach.", "A purely mathematical, proof-based approach.", "A customer-led, unstructured, trial-and-error approach."], "IEEE 610.12: “the application of a systematic, disciplined, quantifiable approach to the development, operation, and maintenance of software”."),
+Q("se", "The IEEE 610.12 definition covers which activities of software?", "Development, operation and maintenance.", ["Requirements, coding and marketing.", "Design, sales and customer support.", "Development, licensing and distribution.", "Testing, certification and auditing only."], "The definition names development, operation and maintenance, i.e. the application of engineering to software."),
+Q("se", "How does the chapter describe software engineering in terms of people and programs?", "The multi-person construction of multi-version programs.", ["The single-person construction of single-version programs.", "The automated generation of programs without human input.", "The mathematical proof of programs before any are written.", "The multi-person maintenance of a single legacy program."], "Software engineering is a team activity: the multi-person construction of multi-version programs."),
+Q("se", "According to the chapter, how much mathematics should be used to design and verify software?", "It depends on how safety critical the product is.", ["None, because testing alone always proves correctness.", "The same heavy amount for every kind of product.", "Only as much as the customer explicitly asks for.", "Only for user interface and usability design."], "The level of mathematics depends on the safety-critical nature of the product; heavy techniques are kept for safety- and security-critical software."),
+Q("se", "For most software, what does the chapter say is often enough to build quality in, instead of heavy mathematics?", "Systematic peer reviews and rigorous testing.", ["Formal proofs for every single function.", "Customer acceptance with no internal testing.", "Hiring more programmers late in the project.", "Writing all of the code in a single language."], "Systematic peer reviews and rigorous testing are often sufficient; heavy maths is reserved for safety- and security-critical software."),
+Q("se", "Why does the chapter say software engineering is “not just programming”?", "The engineer must first state precisely what the product must and must not do.", ["The engineer starts with implementation and lets the requirements emerge from the code.","The engineer treats a working prototype as a complete definition of the required product.","The engineer delegates requirements entirely to the customer and concentrates on coding.","The engineer uses the final test results to decide what the product was meant to do."], "The requirements must precisely describe the problem, so it is evident what is and what is not required; then design, code, reviews and testing follow."),
+Q("se", "Which two computer scientists argued that correct software should be derived from its specification using mathematics and proof?", "Dijkstra and Hoare", ["Boehm and Royce", "Fagan and Gilb", "Rumbaugh and Booch", "Beck and Jacobson"], "Dijkstra and Hoare argued for deriving programs from specifications mathematically and proving correctness."),
+Q("se", "In classical engineering, how is the title “engineer” obtained?", "It is awarded on merit to people with the necessary education and competence.", ["It is given to anyone who builds things, with or without any formal training at all.", "It is bought by joining any technical company as an employee.", "It is assigned automatically after one year of programming work.", "It is a job title chosen freely by each employer for marketing."], "The title is awarded on merit and places responsibilities on its holder to behave professionally and ethically."),
+Q("se", "How does the chapter say the term “software engineer” is often used in computing?", "Loosely, for anyone who builds things.", ["Strictly, only for licensed and certified people.", "Only for people who hold a doctorate degree.", "Only for engineers who work on hardware.", "Only for managers of large software teams."], "In computing the term is often used loosely, rather than for someone with a core set of knowledge, experience and competence."),
+Q("se", "Which position does the chapter attribute to David Parnas?", "Software engineers should be educated as engineers and licensed like other engineers.", ["Software engineers do not need any mathematics in their work, since testing is enough.", "Only managers, not engineers, are accountable for software decisions.", "Licensing software engineers would only reduce the quality and the speed of software delivery.", "Computer scientists should avoid engineering methods entirely."], "Parnas argued for an engineering education with mathematics, professional accountability and licensing to show competence."),
+Q("se", "According to Parnas, what responsibility do software engineers have when a decision violates professional standards?", "They have a responsibility to object to it.", ["They must follow it because managers decide.", "They should quietly fix it after release.", "They should ignore it if the customer agrees.", "They should leave the company immediately."], "Parnas: engineers are accountable for decisions and actions, and have a responsibility to object to decisions that violate professional standards."),
+Q("se", "Which design concept, now part of object-oriented design, did Parnas introduce in the 1970s?", "Information hiding", ["Inheritance", "Garbage collection", "Pair programming", "Use case modelling"], "A footnote notes that Parnas introduced information hiding in the 1970s."),
+Q("se", "What does the chapter say happens to a company that pays little attention to the competence and development of its staff?", "It achieves poor results and loses reputation and market share.", ["It saves money on training and gains market share over its competitors.", "It is protected because its engineers are licensed anyway.", "It is not affected, because quality depends only on tools.", "It is fined by the professional bodies of its engineers."], "Training is essential; neglecting staff competence leads to poor results and loss of reputation and market share."),
+
+/* ---------- lc: lifecycles & quality practices (s3) ---------- */
+Q("lc", "According to the chapter, how should the lifecycle for a software project be chosen?", "From the needs of the specific project.", ["Always the waterfall model, as it is the standard.", "Always Agile, because it is the most popular.", "By the newest model available on the market.", "By the preference of the most senior programmer."], "The choice of a lifecycle is determined from the needs of the specific project."),
+Q("lc", "For which kind of project is the waterfall model used?", "One where the requirements are known early or in advance.", ["One where the requirements keep evolving during development.", "One where there are no requirements written down at all.", "One where only a prototype is needed for a demo.", "One where every phase can run fully in parallel."], "Waterfall suits projects where the requirements can be identified early; each phase has entry and exit criteria."),
+Q("lc", "What must be satisfied in the waterfall model before the next phase starts?", "The phase’s entry and exit criteria.", ["A user review at the end of each spiral.", "A full formal proof of the code.", "A sprint retrospective meeting.", "A penetration test of the design."], "In the waterfall model, each phase has entry and exit criteria that must be satisfied before the next phase begins."),
+Q("lc", "Who developed the spiral model, and in which decade?", "Barry Boehm, in the 1980s.", ["Winston Royce, in the 1970s.", "Ivar Jacobson, in the 1990s.", "Kent Beck, in the 2000s.", "Michael Fagan, in the 1960s."], "The spiral model was developed by Barry Boehm in the 1980s."),
+Q("lc", "For which kind of project is the spiral model useful?", "One where requirements are not fully known at the start or evolve.", ["One where all requirements are frozen and signed off before any work starts.", "One where no risk analysis is wanted by the customer.", "One where there is only a single release with no reviews.", "One where only maintenance of old code is needed."], "Each spiral adds functionality and includes objectives, risk analysis, requirement updates, design, code, test and a user review."),
+Q("lc", "Which modelling language does the Rational Unified Process use for specification and design?", "UML", ["SQL", "BPMN", "VDM", "Z notation"], "RUP, developed at Rational (now IBM) in the late 1990s, uses UML, created by Rumbaugh, Booch and Jacobson."),
+Q("lc", "Halfway through a project, how does the chapter compare waterfall with Agile?", "Waterfall: 100% of requirements about 50% done; Agile: 50% of requirements about 100% done.", ["Waterfall: 50% of requirements about 100% done; Agile: 100% of requirements about 50% done.", "Both have 100% of the requirements about 50% done at that point.", "Both have 50% of the requirements about 100% done at that point.", "Waterfall has finished everything; Agile has not yet started coding."], "Waterfall is a wide, slow-moving value stream; Agile completes fewer requirements fully, earlier."),
+Q("lc", "What is the CMMI?", "A framework to help organisations implement best practice in software and systems engineering.", ["A certification scheme assessing individual competence in software and systems engineering.","A lifecycle model prescribing the sequence of phases for software and systems development.","A product standard specifying acceptance criteria for software and systems reliability.","A testing methodology defining how to design and execute software and systems tests."], "CMMI is used worldwide by thousands of organisations and supports high-quality process definition."),
+Q("lc", "Which pair does the chapter name as well-known software inspection methodologies?", "The Fagan methodology and Gilb’s approach.", ["The spiral model and the waterfall lifecycle model.","Scrum and Extreme Programming.","Black-box testing and white-box testing.","Static analysis and dynamic testing."], "Software inspections (Fagan, Gilb) build quality into software and reduce the cost of poor quality."),
+Q("lc", "How do companies that follow CMMI or ISO 9001 check that their processes were followed?", "They use audits, whose findings are reported to management and addressed.", ["They rely on customers to report any process problems they notice after the release.", "They ask each developer to sign a declaration at the end of the year.", "They publish their source code so the public can check the process.", "They hire an outside firm to rewrite the code that broke a rule."], "A footnote: audits verify that processes and procedures were followed; findings are addressed by the team."),
+
+/* ---------- eth: the ethical engineer (s4) ---------- */
+Q("eth", "What must the ethical software engineer examine when making decisions that affect wider society?", "Both the technical and the ethical dimensions of the decisions.", ["Only the technical dimension, leaving the ethical questions to the lawyers.", "Only the financial dimension, as set by management.", "Only the legal dimension, as set by the regulator.", "Only the customer’s wishes, whatever they may be."], "Technical decisions can harm others, so the ethical engineer examines both technical and ethical dimensions."),
+Q("eth", "Which list matches the three things the chapter says an ethical software engineer should do?", "Do no harm, do not take bribes, be fair to others.", ["Work hard, meet deadlines, keep costs low.", "Obey managers, protect the company, stay quiet.", "Write tests, document code, review designs.", "Do no harm, maximise profit, always obey the customer."], "The chapter lists: do no harm, do not take bribes, be fair to others."),
+Q("eth", "The fundamental ethical principle “Do no harm” comes from which source?", "The Hippocratic Oath", ["The IEEE 610.12 standard", "The PMI code of ethics", "The ISTQB code of ethics", "The Agile Manifesto"], "A fundamental principle of ethics is based on the Hippocratic Oath “Do no harm”."),
+Q("eth", "According to the chapter, who was harmed by the Volkswagen emissions scandal?", "The public and society, the company, its shareholders and its employees.", ["Only the US regulators who ran the laboratory emission tests.", "Only the engineers, who were all sent to prison for the scandal.", "Nobody, because the cars were safe to drive and kept their full resale value.", "Only the competing car makers who lost sales to Volkswagen."], "It deceived the public and harmed society, Volkswagen, its shareholders and its employees; it was unethical and illegal."),
+Q("eth", "Which professional bodies’ codes of ethics does the chapter say were discussed in chapter 3?", "IEEE, ACM and BCS", ["IEEE, ACM and PMI","ACM, BCS and ISTQB","IEEE, BCS and PMI","BCS, PMI and ISTQB"], "Chapter 3 covered the codes of ethics/conduct of the IEEE, ACM and BCS."),
+Q("eth", "When should software engineers act on their ethical responsibilities, according to the chapter?", "Whenever ethical standards are in danger of being violated.", ["Only after a product has caused a reported accident.", "Only when their manager explicitly asks them to.", "Only during the final acceptance testing phase of the project.", "Only if the customer contract mentions ethics."], "Engineers must be aware of ethics throughout development and take action whenever standards are in danger."),
+Q("eth", "Why does the chapter say an individual programmer is unlikely to be sued over a software flaw?", "Software is a team effort, so proving one engineer’s negligence is hard.", ["Programmers are always protected by personal insurance from their union.", "Software flaws are not considered harmful in any country’s legal system.", "Only managers can be sued under the laws of most countries today.", "Programmers sign a contract that makes them immune from all lawsuits."], "Many people (reviewers, test groups) are involved, so it is hard to pin a problem on one engineer; companies are more likely to be sued."),
+Q("eth", "Why are companies more likely than individual programmers to face litigation over defective software?", "They are legally responsible for employees’ actions and are wealthier.", ["They write the code alone without any help from their employees.", "They are never allowed to use disclaimers in their licences.", "They are licensed by the BCS, which makes them legally liable for all defects.", "They are required by law to guarantee bug-free software."], "A company is legally responsible for its employees’ actions in the workplace and is a wealthier entity."),
+Q("eth", "What usually accompanies most software products instead of a guarantee of quality?", "A comprehensive disclaimer of responsibility.", ["A full refund policy for any defect that is found.", "A certificate signed by every developer.", "A mathematical proof of correctness.", "An insurance policy for every user."], "Most software comes with a disclaimer; for bespoke software, more protection can be written into the contract."),
+Q("eth", "How can a customer get greater legal protection for bespoke (custom) software?", "By building it into the contract between supplier and customer.", ["By relying on the standard licence disclaimer written by the supplier.", "By suing the individual programmers who wrote the code.", "By asking the BCS to certify the finished product.", "By refusing to test the software before accepting it."], "Footnote: greater legal protection for the customer can be built into the contract for bespoke development."),
+Q("eth", "What is the BCS ISEB?", "The BCS Information Systems Examination Board, which qualifies IT professionals.", ["The BCS Information Systems Engineering Board, which accredits software development methods.","The BCS Information Security Examination Board, which certifies security products.","The BCS International Software Evaluation Board, which audits software suppliers.","The BCS Information Standards Executive Board, which publishes engineering standards."], "ISEB qualifies IT professionals in service management, project management, software testing and more."),
+
+/* ---------- safe: safety-critical systems (s5) ---------- */
+Q("safe", "How does the chapter define a safety critical system?", "A system whose failure could cause significant economic damage or loss of life.", ["A system that is used by more than one million people every single day of the year.", "A system that has been certified by a professional engineering body.", "A system that runs without any human operator present.", "A system that stores personal data about its users."], "Examples include aircraft flight control systems, nuclear power stations and missile systems."),
+Q("safe", "Which of these does the chapter give as an example of a safety critical system?", "A nuclear power station", ["A word processor", "A music streaming app", "An online photo gallery", "A spreadsheet template"], "The chapter’s examples: aircraft flight control systems, nuclear power stations and missile systems."),
+Q("safe", "What does it mean for widely used software to be dependable?", "It is available when required and operates safely and reliably without adverse side effects.", ["It runs on every operating system and every device without needing any changes to its code.", "It has been written by engineers who hold a recognised licence.", "It never needs any maintenance, patches or updates of any kind after it has been released.", "It is open source, so anyone can inspect its code for errors."], "Dependable: available whenever required, safe and reliable, with no adverse side effects."),
+Q("safe", "What view does the safety critical industry take of any change to safety critical software?", "It creates a new program that must again be shown to be safe.", ["It is a minor patch that does not need to be tested again.", "It only matters if the customer notices a difference.", "It can be tested later, once the system is back in normal service.", "It is covered by the original certification forever."], "Any change creates a new program, so extensive testing must show again that it is reliable and safe."),
+Q("safe", "Why are rigorous processes essential for safety critical systems?", "Software testing alone is often insufficient to verify their correctness.", ["A completed test suite provides enough assurance, but regulators still require process records.","Process compliance establishes safety independently of the behaviour of the software.","Rigorous processes replace the need to verify the behaviour of the finished system.","The main purpose of rigorous processes is to reduce certification paperwork and cost."], "Testing alone is often insufficient, so extra techniques and rigorous processes are needed."),
+Q("safe", "Which techniques does the chapter mention for extra assurance of correctness in safety critical systems?", "Formal verification and model checking.", ["Code coverage measurement and regression testing.","Stress testing and fault injection.","Software inspections and acceptance testing.","Reliability testing and operational monitoring."], "Formal verification and model checking can provide an extra level of assurance."),
+Q("safe", "Why does the chapter say computer security must be carefully considered today?", "Billions of devices are connected to the Internet, which has increased attacks.", ["Most computers today are no longer connected to any network, so attacks are rare.", "Security is required only by the BCS ISEB qualification.", "Attackers can only target safety critical systems, so other systems are safe from them.", "Security problems disappear once software is tested."], "Billions of connected devices mean more attacks; systems must deal with and recover from external attacks."),
+Q("safe", "What must companies be confident of before releasing a software product?", "That it is fit for purpose.", ["That it is cheaper than competitors.", "That it uses the newest framework.", "That it has the most features.", "That it was built using Agile."], "Unreliable software may damage property or injure third parties, so it must be fit for purpose before release."),
+
+/* ---------- thr: Therac-25 (s6) ---------- */
+Q("thr", "What was the Therac-25?", "A computer-controlled radiation therapy machine.", ["A computer-controlled diagnostic X-ray imaging machine.","A computer-controlled magnetic resonance imaging scanner.","A computer-controlled infusion pump for cancer medication.","A computer-controlled machine for planning radiotherapy doses."], "The Therac-25 was a linear accelerator that treated cancer patients with a beam of particles."),
+Q("thr", "Which organisation developed the Therac-25?", "Atomic Energy of Canada Limited (AECL)", ["The US Food and Drug Administration (FDA)","General Electric Medical Systems","Siemens Medical Systems","Philips Medical Systems"], "AECL developed the Therac-25 in the early 1980s."),
+Q("thr", "What key change in the role of software was made from the Therac-20 to the Therac-25?", "Software took over safety checks that hardware performed on the Therac-20.", ["Software was removed and all of the checks were moved into hardware interlocks.", "The software was rewritten in a new language but kept the same role.", "Software was used only for billing patients, not for any treatment.", "The software was moved to a remote server outside the hospital."], "On the Therac-25, software performed many safety-critical checks that hardware had done on the Therac-20."),
+Q("thr", "Which of these was NOT one of the Therac-25 software’s responsibilities listed in the chapter?", "Calculating the patient’s hospital bill.", ["Monitoring the status of the machine.", "Accepting treatment input.", "Turning the treatment beam on and turning it off.", "Detecting hardware malfunction."], "The software monitored status, accepted input, set up the machine, turned the beam on/off and detected malfunctions."),
+Q("thr", "How many major Therac-25 accidents does the chapter describe, and over what period?", "Six, between 1985 and 1987.", ["Two, in 1981.", "Three, between 1990 and 1992.", "Ten, between 1983 and 1989.", "One, in January 1986."], "There were six major accidents in the mid-1980s (1985–1987)."),
+Q("thr", "What was the human toll of the Therac-25 accidents?", "Three people died and three were seriously injured.", ["Seven people died and nobody was injured.", "Six people died and three were slightly injured.", "One person died and five others were seriously injured.", "Nobody died, but six people were slightly injured."], "Patients got doses hundreds of times too high: three deaths and three serious injuries."),
+Q("thr", "How long did the Therac-25 stay in use after the first accident?", "Over 18 months", ["About 2 weeks", "About 3 months", "Exactly 1 year", "Over 5 years"], "The machine continued in use for over 18 months, as AECL believed an accident was impossible."),
+Q("thr", "How did AECL respond to the first reported Therac-25 accident?", "It took no action, believing an accident was impossible.", ["It immediately recalled every machine from service worldwide.", "It informed the FDA and all customers the same day.", "It launched a thorough independent investigation.", "It replaced the software with hardware interlocks."], "AECL believed an accident was impossible with the machine and took no action on the first report."),
+Q("thr", "What happened after the second Therac-25 accident?", "An AECL engineer could not reproduce the problem, but AECL made changes and claimed it was solved.", ["AECL admitted the fault immediately and withdrew all of the machines from use in every hospital.", "The FDA ruled the machines defective and ordered a corrective action plan.", "AECL blamed the hospital staff and refused to send anyone to investigate.", "AECL found the exact software bug, fixed it with a fully tested patch and informed every customer."], "AECL sent an engineer who could not reproduce it, made hardware and software changes and claimed much higher reliability."),
+Q("thr", "What did AECL blame for the fourth Therac-25 accident?", "A wiring problem", ["The operator’s typing", "A power outage", "A faulty patient record", "A virus in the software"], "AECL denied the third accident and claimed the fourth was the result of a wiring problem."),
+Q("thr", "What finally led AECL to launch a thorough investigation of the Therac-25?", "The fifth accident together with FDA investigations.", ["The first accident and a complaint from a patient.", "A newspaper article after the second accident.", "An internal audit carried out under the CMMI framework.", "A lawsuit filed by the engineer who found the bug."], "After the fifth accident and FDA investigations, AECL finally launched a thorough investigation."),
+Q("thr", "What did the FDA find worrying in AECL’s corrective action plan?", "A lack of software engineering documentation and inadequate testing.", ["A lack of operator training records and unclear treatment instructions.","Insufficient calibration records and incomplete hardware maintenance procedures.","An inadequate hospital reporting process and missing patient follow-up records.","A lack of radiation shielding assessments and incomplete installation inspections."], "The FDA was concerned about AECL’s practices: missing documentation and inadequate testing."),
+Q("thr", "What did the FDA direct AECL to do whenever a small software change was made?", "Do extensive testing on the system each time.", ["Skip testing, since small changes are low risk.", "Ask each hospital to test the change itself.", "Publish the source code for public review.", "Replace the whole machine with a new model."], "The FDA directed extensive testing each time a small software change was made to ensure safety."),
+Q("thr", "Which of these is one of the main reasons for the Therac-25 disaster listed in the chapter?", "Overconfidence of engineers in its correctness.", ["Too much testing delayed the release of fixes.", "Excessive documentation confused the operators.", "The use of formal mathematical verification.", "Pressure from NASA to launch on schedule."], "Reasons: failure to believe end users, overconfidence, poor practices, inadequate testing, poor defect resolution, software errors."),
+Q("thr", "Which reason for the Therac-25 disaster concerns how AECL treated reports from hospitals?", "Initial failure to believe end users.", ["Excessive trust in the FDA’s advice.", "Too many reviews by external auditors.", "Overuse of formal model checking.", "A focus on accessibility for operators."], "The first listed reason is the initial failure to believe end users."),
+Q("thr", "What does the chapter say should have been done after the first Therac-25 accident?", "Investigate properly and treat all machines as unsafe until proved otherwise.", ["Keep the machines running and wait to see if the same problem happened again.", "Increase the radiation dose limits to make the treatment faster.", "Blame the operator and retrain the staff at that hospital only.", "Sell the remaining machines quickly before the news spread."], "All Therac-25 machines should have been removed from use until the cause was found and fixed."),
+Q("thr", "How does the chapter treat the excuse that software engineering was immature in the 1980s?", "It is no excuse for what happened.", ["It fully explains and excuses the accidents.", "It means AECL had no ethical duty at all.", "It shifts all blame onto the hospitals.", "It proves the FDA was responsible instead."], "Practices were immature, but basic common sense required a proper investigation after the first accident."),
+
+/* ---------- chal: Challenger (s7) ---------- */
+Q("chal", "When did the Space Shuttle Challenger disaster happen?", "January 1986", ["July 1969", "March 1979", "October 1991", "February 2003"], "The disaster occurred in January 1986."),
+Q("chal", "How long into its flight did the Challenger break apart?", "73 seconds", ["7 seconds", "30 minutes", "3 seconds", "2 hours"], "The shuttle broke apart 73 s into its flight, killing all seven crew."),
+Q("chal", "Which body investigated the Challenger accident?", "The Rogers Commission", ["The Columbia Accident Investigation Board","The National Transportation Safety Board","An internal NASA launch readiness review board","A congressional space programme budget committee"], "The Rogers Commission was formed to investigate the accident."),
+Q("chal", "What technical failure caused the Challenger disaster?", "The O-ring seals on the right solid rocket booster failed in the cold.", ["A software bug in the flight control computer fired the engines early.", "The main fuel tank was overfilled before the launch.", "A bird strike damaged the heat shield during the ascent.", "The crew cabin lost pressure because a window cracked."], "Record low temperatures stiffened the rubber O-rings and reduced their ability to seal the joint."),
+Q("chal", "Besides the technical cause, what did the Rogers Commission criticise?", "The launch decision process, with conflicts between engineering data and management judgment.", ["The training of the crew, who were found to have made several errors during the actual flight.", "The cost of the shuttle programme, which it said was too high to continue.", "The weather forecast, which it said had been completely wrong that night.", "The design of the crew cabin, which it said should have had an escape pod."], "The report called the decision-making process deeply flawed."),
+Q("chal", "What was the minimum launch temperature recommended by the Morton Thiokol team?", "52 °F", ["30 °F", "0 °F", "73 °F", "100 °F"], "Thiokol recommended a minimum of 52 °F; temperatures were forecast to drop to 30 °F overnight."),
+Q("chal", "What overnight temperature was forecast before the Challenger launch?", "30 °F", ["52 °F", "60 °F", "-40 °F", "73 °F"], "The forecast of 30 °F was far below Thiokol’s recommended 52 °F minimum."),
+Q("chal", "How did NASA react to Morton Thiokol’s recommendation to postpone the launch?", "It said the briefing was based on emotion rather than factual data.", ["It agreed immediately and rubber-stamped the postponement of the launch.", "It cancelled the shuttle programme for one full year.", "It asked the FDA to decide whether to launch or not.", "It ignored Thiokol and never replied to the call."], "Thiokol expected NASA to rubber-stamp the postponement, but NASA called the briefing emotional and asked them to review the data."),
+Q("chal", "Who was excluded from the Morton Thiokol management meeting that decided to proceed?", "Boisjoly, the engineer who objected", ["The NASA launch director","The Thiokol senior management team","The Thiokol managers who approved the launch","The NASA managers requesting a new recommendation"], "The management meeting that decided to proceed excluded participation from Boisjoly."),
+Q("chal", "What did Morton Thiokol tell NASA about its data on the second conference call?", "That its data was inconclusive.", ["That its data proved the launch was unsafe.", "That it had no data on low temperatures.", "That its data had been lost overnight.", "That NASA must decide without any data."], "Thiokol stated its data was inconclusive and all subcontractors agreed to proceed."),
+Q("chal", "How did Boisjoly later describe Morton Thiokol’s decision to go ahead with the launch?", "Unethical", ["Unlucky but correct", "Fully justified", "A technical necessity", "Beyond his concern"], "Boisjoly later called the Morton Thiokol decision to go ahead unethical."),
+Q("chal", "What is separatism, as described in the chapter?", "Engineers give technical input and advice; management decides how to proceed.", ["Engineers make every final decision and management only signs the paperwork afterwards.", "Each team works in isolation and never shares data with other teams.", "Safety and quality are handled by separate companies from development.", "Management is kept apart from engineers so it cannot influence the data."], "Under separatism, managers make a value judgment taking all inputs, including engineers’ advice, into account."),
+Q("chal", "When does the chapter say separatism runs into problems?", "When managers balance conflicting values like deadlines and safety and see the risk as small but manageable.", ["When engineers and managers agree completely on all of the facts, data and risks before making a decision.", "When the project has no deadline and plenty of budget and time available.", "When the decision concerns only technical details with no business impact.", "When engineers refuse to give any technical input to management at all, so that managers must decide blind."], "Problems arise when managers balance conflicting values and believe (or encourage others to believe) the risk is manageable."),
+Q("chal", "What does the precautionary principle require?", "A course of action must be shown to be safe before it is carried out.", ["A course of action may go ahead unless someone proves it is unsafe.", "A course of action must be approved by the most senior manager present.", "A course of action must be cheaper than all of the alternatives.", "A course of action must be tested only after it has been carried out."], "This was NASA’s normal modus operandi, until the night before the launch."),
+Q("chal", "How did NASA change the burden of proof the night before the Challenger launch?", "It demanded that Thiokol prove it was unsafe to launch.", ["It demanded that Thiokol prove it was safe to launch.", "It dropped all sign-off requirements for subcontractors.", "It moved the decision to the Rogers Commission.", "It required the crew to vote on the launch."], "NASA normally required proof of safety, but reversed it to demand proof that it was unsafe."),
+Q("chal", "According to the chapter, what could be argued about Boisjoly once his input was ignored?", "He had a moral responsibility to be a whistleblower.", ["He had no further responsibility of any kind at all after that.", "He was legally required to resign at once.", "He should have launched the shuttle himself.", "He was responsible for the O-ring design."], "Given the likely safety risk, it could be argued Boisjoly had a moral duty to blow the whistle, though under separatism he may have felt the decision was management’s."),
+Q("chal", "What does the chapter say is essential in decision-making, using the Challenger case?", "Openness and transparency, with decisions based on objective facts and data.", ["Speed, so that decisions are made before the data can complicate them further.", "Secrecy, so that the public is not worried by technical disagreements.", "Unanimity, so that managers never have to overrule anyone.", "Hierarchy, so that only the most senior person has a say."], "Decisions must be open and transparent, based on facts and data, with risks kept minimal and manageable."),
+Q("chal", "Who was Christa McAuliffe?", "A schoolteacher on the Challenger crew, chosen through the Teacher in Space project.", ["The Morton Thiokol engineer who objected to the launch on the night before it happened.", "The chair of the commission that investigated the Challenger accident.", "The NASA manager who demanded proof that the launch was unsafe.", "The FDA official who investigated the Therac-25 radiation accidents."], "She was to be the first teacher in space and teach lessons to students from space."),
+Q("chal", "Which company built the solid rocket boosters and was represented by Boisjoly?", "Morton Thiokol", ["AECL", "Rational", "Volkswagen", "Lockheed Martin"], "Boisjoly was an engineer at Morton Thiokol (spelled “Thiokel” in the book)."),
+
+/* ---------- pm: project management (s8) ---------- */
+Q("pm", "How does the chapter define a project?", "A temporary group activity to achieve a specific goal, with a clear beginning and end.", ["A permanent department of a company that delivers ongoing services to its customers every day.", "A software product that is maintained indefinitely after release.", "A contract between a supplier and a customer for any amount of work.", "A set of processes defined by the CMMI for continuous improvement."], "A project is temporary and goal-specific, e.g. delivering a product to a customer."),
+Q("pm", "Which organisation defined the code of ethics and professional conduct for project managers discussed in the chapter?", "The Project Management Institute (PMI)", ["The IEEE", "The ISTQB", "The FDA", "The BCS Information Systems Examination Board"], "PMI defined a code of ethics and professional conduct for project management professionals."),
+Q("pm", "Which list gives the PMI core values for ethical project management?", "Responsibility, respect, fairness, honesty.", ["Speed, cost, scope, quality.", "Loyalty, obedience, secrecy, profit.", "Safety, privacy, usability, security, loyalty.", "Planning, estimation, tracking, reporting."], "The four core values: professional responsibility, respect, fairness and honesty."),
+Q("pm", "Under the PMI value of responsibility, which assignments should project managers accept?", "Only those for which they have the required competence.", ["Any assignment that offers them a higher salary or a bonus.", "Only assignments approved by the customer.", "Only those without any safety requirements.", "Every assignment, to show commitment."], "Responsibility includes accepting only assignments they are competent for and fulfilling commitments."),
+Q("pm", "Which behaviour belongs to the PMI value of respect?", "Listening to others’ views and working through conflicts with them.", ["Reporting all illegal conduct directly to the police before anyone else.", "Refusing to work with people from different cultures.", "Deciding without consulting anyone to save time.", "Keeping all project information secret from the team."], "Respect includes cultural sensitivity, professional behaviour, listening and working through conflicts."),
+Q("pm", "Under the PMI value of fairness, what should a project manager do when there is a potential conflict of interest?", "Refrain from participating in that decision.", ["Make the decision quickly before anyone notices.", "Ask the person involved to approve the decision.", "Make the decision but keep the reasons secret.", "Choose the option that benefits the project manager."], "Fairness: decide objectively and impartially, stay out of conflict-of-interest decisions, no favouritism or discrimination."),
+Q("pm", "Which behaviour breaks the PMI value of honesty?", "Making misleading statements to stakeholders about progress.", ["Reporting a delay to the stakeholders as soon as it becomes known.", "Admitting an error in the project plan and correcting it.", "Sharing accurate risk information with the customer.", "Correcting an estimate when new facts become known."], "Honesty: act truthfully and do not engage in or condone deceptive behaviour such as misleading or false statements."),
+Q("pm", "According to the chapter, which projects offer more opportunities for ethics to be compromised?", "Larger projects", ["Smaller projects", "Agile projects only", "Waterfall projects only", "Open source projects"], "Larger projects have more opportunities for ethics being compromised than smaller ones."),
+Q("pm", "What ethical dilemma can arise when a project manager balances budget, schedule, effort and quality?", "Temptation to cut corners, compromising quality, safety or privacy.", ["Temptation to over-test the product so that it is released very late.", "Temptation to hire too many senior engineers for small tasks.", "Temptation to document every decision in excessive detail.", "Temptation to share too much information with stakeholders."], "Cutting corners to deliver on time and budget can compromise quality, health and safety, privacy and so on."),
+Q("pm", "A project manager’s cousin runs one of the candidate subcontractors. What does the chapter advise?", "The project manager should exclude herself from the supplier selection.", ["The project manager should choose the cousin, since trust matters most.", "The project manager should hide the relationship and decide normally.", "The project manager should let the cousin set the contract price.", "The project manager should cancel the whole subcontracting process."], "Selecting a subcontractor known from earlier work or family is a conflict of interest, so she should step out of the selection."),
+Q("pm", "What does the chapter say is a good enabler of ethical project management?", "Good project governance that keeps key stakeholders informed.", ["Strict secrecy about project status until the final delivery.", "Letting each developer decide the schedule on their own.", "Replacing project managers with automated planning tools.", "Removing the customer from all project decisions."], "Good governance keeps stakeholders regularly informed of project status and key decisions."),
+Q("pm", "Under the PMI value of responsibility, what should a project manager do on discovering unethical or illegal conduct?", "Report it to management.", ["Ignore it if the project is on time.", "Handle it privately and tell no one.", "Post it publicly on social media first.", "Wait until the project has ended."], "Responsibility includes reporting unethical or illegal conduct and knowing the relevant laws and regulations."),
+
+/* ---------- kwai: River Kwai & purpose (s9) ---------- */
+Q("kwai", "Who directed the film “The Bridge on the River Kwai”, and when?", "David Lean, in 1957.", ["Stanley Kubrick, in 1964.", "Alfred Hitchcock, in 1945.", "David Lean, in 1986.", "Steven Spielberg, in 1998."], "David Lean directed the film in 1957."),
+Q("kwai", "Which historical construction is “The Bridge on the River Kwai” based on?", "The Thailand–Burma railway during the Japanese occupation of Burma in WWII.", ["The Panama Canal during the American construction in the early 1900s.", "The Golden Gate Bridge in San Francisco during the Great Depression of the 1930s.", "The Trans-Siberian railway during the Russian Empire in the 1890s.", "The Channel Tunnel between Britain and France in the 1990s."], "The film is based on the construction of the Thailand–Burma railway in the Second World War."),
+Q("kwai", "What happens to Colonel Nicholson’s attitude to building the bridge?", "He resists at first, then becomes obsessed with building a proper, lasting bridge.", ["He refuses throughout the whole film and is executed before the bridge is finished.", "He supports it from the start because he secretly works for the enemy.", "He builds a deliberately weak bridge to sabotage the enemy’s plans.", "He hands the project to the Japanese engineers and does not take part."], "Nicholson came to see the bridge as a tribute to the skill and ingenuity of British engineers."),
+Q("kwai", "What does Nicholson do when he finally realises what he has done, as told in the chapter?", "He blows up the bridge, sending the train into the river.", ["He opens the bridge with a ceremony for the enemy.", "He escapes with his men across the newly finished bridge.", "He asks the British army to protect the bridge.", "He writes a report praising the bridge’s design."], "On the opening day he realises the gravity of collaborating with the enemy and blows up the bridge."),
+Q("kwai", "What is the main ethical lesson the chapter draws from the River Kwai story?", "The purpose of a technology must be considered, not only how well it is built.", ["High-quality engineering always justifies whatever project it happens to serve.", "Engineers should never work on bridges or railways in a war.", "Prisoners of war are not responsible for anything they build.", "Films should not be used to teach engineering ethics."], "The finished bridge would have helped Japanese aggression spread; its purpose made it harmful."),
+Q("kwai", "Why was Nicholson’s collaboration also unethical, according to the chapter?", "It conflicted with his duties to his country and to the British army.", ["It violated his duty to protect only the welfare of the prisoners under his command.","It treated obedience to his captors as more important than the bridge’s engineering quality.","It allowed military rank to determine the design rather than technical competence.","It prioritised the bridge’s budget over the living conditions of the prisoners."], "Collaborating with an enemy who wished to harm him and his country conflicted with his duties."),
+Q("kwai", "Where was the film “The Bridge on the River Kwai” actually made?", "On the Kelani river near Kitulgala, in Ceylon (Sri Lanka).", ["On the actual River Kwai near Kanchanaburi, in Thailand.", "On the Thames near London, in England.", "On the Irrawaddy river near Mandalay, in Burma.", "In a studio in Hollywood, in the United States."], "A footnote says the film was made on the Kelani river near Kitulgala in Ceylon."),
+Q("kwai", "What does the chapter say ethical software design is concerned with?", "How the technology will be used and whether it could harm individuals and society.", ["How quickly the software can be built with the smallest possible development team.", "Which programming language gives the best runtime performance.", "How to make the user interface look as modern as possible.", "Which licence allows the company to charge the most."], "Because design determines use, it needs an ethical dimension alongside the desired functionality."),
+
+/* ---------- vcd: value centred design (s10) ---------- */
+Q("vcd", "How does the chapter describe software design?", "Translating required functions into a blueprint for a system that can fulfil them.", ["Writing the source code for a system directly from the user’s first rough ideas.", "Testing a finished system to find defects before it is released.", "Selling a software system to customers and supporting them.", "Choosing the hardware on which a system will later run."], "Software design translates functions into a blueprint; different designs may vary in how well they meet ethical values."),
+Q("vcd", "What is the goal when choosing among several design options, according to the chapter?", "Choose the design that best meets the most important ethical values and technical considerations.", ["Choose the design that is fastest to build, whatever its ethical impact on its users or on society.", "Choose the design that the most senior engineer on the team personally prefers above all others.", "Choose the design with the most features for the same price.", "Choose the first design proposed so the project starts on time."], "Responsible choices are needed, and trade-offs between conflicting values may be necessary."),
+Q("vcd", "What is value centred design (VCD)?", "Taking human values into account in design and solving value conflicts through engineering and innovation.", ["Designing software so that it creates the most financial value possible for the company’s shareholders.", "Measuring the market value of each feature before deciding to build it.", "Letting customers vote on every single design decision so that the product reflects their personal values.", "Removing any feature that could create a conflict between users."], "VCD identifies relevant values, understands conflicts to make trade-offs, and develops innovative designs."),
+Q("vcd", "Which of these is one of the activities listed for value centred design?", "Social cost–benefit analysis, including monetary costs for safety.", ["Ranking options by technical performance before considering whether values matter.","Using financial return as a substitute for evaluating conflicting human values.","Selecting a design before setting minimum acceptable levels for ethical criteria.","Treating the client’s preferred option as sufficient evidence of ethical acceptability."], "VCD: clarify values, social cost–benefit analysis, evaluation criteria, thresholds, evaluate options, select one."),
+Q("vcd", "In value centred design, what are thresholds used for?", "To define what is acceptable for each criterion.", ["To determine the relative importance of each evaluation criterion.","To calculate the combined score of each proposed design option.","To estimate the financial cost of implementing each ethical value.","To specify the number of alternatives included in the final evaluation."], "Thresholds set what is acceptable on each criterion before evaluating the options."),
+Q("vcd", "What may be applied to the evaluation criteria in value centred design?", "Weightings", ["Equal priority regardless of the importance of each value","A ranking based only on implementation cost","A fixed pass mark shared by every criterion","The order in which the design options were proposed"], "Evaluation criteria include value criteria, and weightings may be employed."),
+Q("vcd", "What is the final step of value centred design as listed in the chapter?", "The selected option", ["Social cost–benefit analysis", "Reasoning about values", "Thresholds per criterion", "Evaluation criteria"], "The list ends with evaluation of options and then the selected option."),
+Q("vcd", "How does the chapter define a trade-off decision?", "A choice between at least two options where at least two moral values are relevant.", ["A choice where only one option exists and only one single moral value is relevant to it.", "A choice made by flipping a coin when two options look equal.", "A choice between two suppliers based only on their price.", "A choice that the customer makes without any engineer involved."], "Designers often cannot satisfy all values at once, so they must balance competing values."),
+Q("vcd", "Why do moral dilemmas arise when choosing between design options?", "Different designs score well on different criteria, so not all values can be satisfied at once.", ["All designs score exactly the same on every criterion, so there is nothing left to choose between.", "Designers are not allowed to consider ethical values in their decisions.", "Customers always demand the most unethical design available.", "Ethical values never conflict with each other in real projects."], "Resolving these dilemmas often requires a trade-off or balance between competing values."),
+Q("vcd", "Which of these is NOT in the chapter’s list of ethical values that may be relevant in design?", "Profitability", ["Accessibility", "Sustainability", "Privacy", "Loyalty"], "Listed: safety, accessibility, usability, sustainability, privacy, security, honesty, fairness and loyalty."),
+Q("vcd", "What does figure 4.4 show to illustrate balancing ethical values?", "Balancing an ethical life against a feather in Egyptian religion.", ["A design comparison chart scoring privacy against accessibility.","A diagram of the stages in value centred design.","A risk matrix comparing the likelihood and impact of harm.","A lifecycle diagram showing ethical review checkpoints."], "Fig. 4.4: balancing an ethical life against a feather in Egyptian religion."),
+Q("vcd", "Besides the technical criteria, what should the evaluation of each design option rate?", "How well the relevant ethical values are addressed by that option.", ["How many lines of code the option will need in total to be implemented.", "How popular the option is on social media platforms.", "How much the option will raise the company’s share price.", "How quickly competitors could copy the option."], "Each option should be rated on the relevant ethical values as well as the technical criteria."),
+
+/* ---------- des: data, bias, addiction & security (s11) ---------- */
+Q("des", "In data management, which rights does the chapter say must be considered and protected?", "Personal data ownership, data rights, access rights, privacy and security rights.", ["Only the copyright and trade secrets of the company that collects and stores the data.", "Only the rights of advertisers who buy the data.", "Only the rights of the government to inspect all data.", "Only the right of developers to reuse data freely."], "Designers must follow legal requirements and best practice in collecting, processing and protecting data."),
+Q("des", "According to the chapter, what should an accessible system’s design consider?", "Users with visual or hearing impairments and different language or education levels.", ["Only users who have the newest and fastest devices and the latest operating system versions.", "Only users who speak English as their first language and live in English-speaking countries.", "Only users who have completed a technical education.", "Only the administrators who will maintain the system."], "An ethical system needs to be accessible to different categories of users."),
+Q("des", "What should the ethical design of a software system give, according to the chapter?", "An open and accurate account of the system, meeting all legal and regulatory requirements.", ["A secret account of the system, shared only with the company’s management and its lawyers.", "A marketing account of the system that highlights only its strengths and hides its weaknesses.", "A minimal account of the system so competitors cannot copy it.", "A legal disclaimer that removes the need for any regulations."], "The VW defeat device is the counter-example: a deceptive design that cheated regulators."),
+Q("des", "Which biased algorithm does the chapter mention as discriminating against women?", "Amazon’s hiring algorithm", ["Amazon’s product recommendation algorithm","Google’s recruitment screening algorithm","LinkedIn’s job recommendation algorithm","Facebook’s employment advertising algorithm"], "The infamous Amazon hiring algorithm discriminated against females."),
+Q("des", "What problem does the chapter link to a predictive policing algorithm?", "Racial profiling and discrimination against racial groups.", ["Excessive energy use in the police department’s data centres.", "Leaking officers’ personal phone numbers.", "Slower response times to emergency calls.", "Discrimination against older police officers."], "A predictive policing algorithm led to racial profiling; bias is covered further in chapter 6."),
+Q("des", "Why does the chapter say bias is especially important in AI algorithms?", "Pattern-matching algorithms can lead to discrimination against individuals and groups.", ["Pattern matching removes the need to evaluate fairness once predictive accuracy is high.","Bias can be assessed through overall accuracy without examining outcomes for different groups.","Using historical records makes an algorithm neutral with respect to past discrimination.","Removing explicit group labels prevents discrimination through correlated input data."], "Designers must ensure algorithms are unbiased and do not discriminate against minority groups."),
+Q("des", "What ethical issue does the chapter raise about social media apps?", "They are deliberately designed to be addictive for the company’s financial gain.", ["They are deliberately designed to be slow so that users take regular breaks from them.", "They are deliberately designed to be inaccessible to young people.", "They are designed without any profit motive at all.", "They are designed to protect users from addiction."], "The software captures attention at a primal level; people check their phones hundreds of times a day."),
+Q("des", "What example does the chapter give of a software company possibly failing environmental responsibility?", "Cloud companies using AI and machine learning to help Big Oil find where to drill.", ["Cloud companies switching all of their data centres over to renewable sources of energy.", "Software companies printing their user manuals on recycled paper.", "Car companies building electric vehicles to reduce emissions.", "Hospitals replacing old radiotherapy machines with new ones."], "Some companies turn a blind eye to how their products are used; a sustainability-committed company must behave responsibly."),
+Q("des", "Why does the chapter say a system must be designed for security from the start?", "It is difficult to add security after the system has been implemented.", ["Security requirements are best defined after users report the first operational incidents.","A penetration test at release provides a substitute for security requirements in the design.","Infrastructure security removes the need to consider security within the application design.","The deployment team can add the required protections without changing the application design."], "Security engineering develops systems that prevent malicious attacks and recover from them."),
+Q("des", "What should be done early in the software development process, leading to security requirements?", "A risk assessment of the security threats facing the system.", ["A penetration test of the finished system once it is in production.", "A marketing survey of what users think about security.", "A final audit of the code by an outside company.", "A performance benchmark of the database server."], "The early risk assessment produces security and privacy requirements that design and development must implement."),
+Q("des", "Which security properties does security testing verify, according to the chapter?", "Confidentiality, availability and integrity.", ["Speed, scalability and portability.", "Usability, readability, simplicity and elegance.", "Profitability, popularity and growth.", "Accessibility, sustainability and loyalty."], "Security testing, including penetration testing, checks confidentiality, availability, integrity, etc."),
+Q("des", "What does the successful completion of security testing guarantee, according to the chapter?", "It does not guarantee that there are no vulnerabilities.", ["It guarantees that the system can never be hacked by anyone.", "It guarantees full compliance with every law.", "It guarantees that no user data is ever stored.", "It guarantees the system is safety critical."], "Passing security testing does not guarantee there are no security vulnerabilities; hackers will still try."),
+
+/* ---------- vw: Volkswagen (s12) ---------- */
+Q("vw", "What did Volkswagen program its TDI diesel engines to do?", "Activate their emission controls only during laboratory emission tests.", ["Activate the same emission controls in laboratory tests and normal road driving.","Reduce engine output during road driving whenever laboratory emission limits were exceeded.","Record laboratory emissions and use those readings to control emissions on the road.","Warn drivers when road emissions exceeded the values measured during laboratory testing."], "The cars passed US NOx limits in the lab but emitted far more in real-world driving."),
+Q("vw", "How much higher were the real-world emissions of the affected Volkswagen cars than in the lab?", "Over 40 times higher", ["About 2 times higher", "About 10% higher", "Exactly the same", "Over 400 times higher"], "Actual NOx emissions were over 40 times higher in real-world driving."),
+Q("vw", "Which pollutant’s US regulatory limits did the Volkswagen cars pass only in the lab?", "NOx", ["CO₂", "Lead", "Ozone", "Methane"], "The vehicles’ NOx emissions passed US federal requirements only during laboratory tests."),
+Q("vw", "What was the cheating software in the Volkswagen scandal called?", "A “defeat device”", ["A “safety interlock”", "A “kill switch”", "A “black box”", "A “limp mode”"], "Volkswagen admitted to developing a “defeat device” and deliberately concealing its use."),
+Q("vw", "How many vehicles worldwide had the Volkswagen cheating software?", "Over 11 million", ["About 500", "About 50,000", "Exactly 1 million", "Over 100 million"], "Over 11 million vehicles worldwide, including roughly half a million in the US."),
+Q("vw", "Over which years was the Volkswagen cheating software deployed?", "2009 to 2015", ["1985 to 1987", "1999 to 2001", "2015 to 2020", "2018 to 2023"], "The software was deployed from 2009 to 2015."),
+Q("vw", "In which year did Volkswagen plead guilty to criminal charges?", "2017", ["2009", "2014", "2015", "2020"], "Volkswagen pleaded guilty in 2017 and admitted developing and concealing the defeat device."),
+Q("vw", "How much was Volkswagen fined for rigging the vehicles to cheat on emission tests?", "$2.8 billion", ["$28 million", "$280 million", "$33 billion", "$2.8 trillion"], "The fine was $2.8 billion; total costs reached about $33 billion by mid-2020."),
+Q("vw", "Roughly what did the scandal cost Volkswagen in total by mid-2020?", "$33 billion", ["$2.8 billion", "$3.3 million", "$330 billion", "$11 billion"], "About $33 billion in fines, penalties, financial settlements and buyback costs."),
+Q("vw", "What happened to Volkswagen CEO Martin Winterkorn?", "He resigned in 2015 and was charged with fraud and conspiracy in the US in 2018.", ["He became the new CEO in 2018 and led the company’s transition to electric vehicles.", "He blew the whistle on the defeat device to US regulators and was promoted for it.", "He was never connected to the scandal in any way.", "He was fined $2.8 billion personally by the US government."], "Winterkorn resigned in 2015 and was charged in the US in 2018."),
+Q("vw", "Who became Volkswagen CEO in 2018 and helped restore its reputation?", "Herbert Diess", ["Martin Winterkorn","Matthias Müller","Ferdinand Piëch","Rupert Stadler"], "Herbert Diess helped restore the reputation and oversaw the transition to electric vehicles."),
+Q("vw", "What debate did the Volkswagen scandal open about software?", "Whether software used to meet regulatory requirements should be independently verified or certified.", ["Whether cars should be allowed to contain any software at all, given how easily it can be changed.", "Whether diesel engines should be banned and replaced by electric engines in every country of Europe.", "Whether programmers should be paid more for regulatory work.", "Whether emission tests should be stopped to save money."], "Should such code be published for scrutiny by independent regulators and/or independently certified?"),
+Q("vw", "What does the chapter say the scandal shows about software-controlled machinery?", "It is prone to cheating.", ["It can never be fully tested.", "It cannot be regulated.", "It is always safe.", "It is never profitable."], "The scandal highlighted how software-controlled machinery is prone to cheating."),
+Q("vw", "How does the chapter describe an organisation’s code of ethics that is not embraced in daily work?", "As window dressing for the public.", ["As a legally binding contract.", "As a safety critical document.", "As a source of competitive advantage.", "As a replacement for testing."], "Sometimes codes of ethics are just window dressing rather than being engrained in daily corporate life."),
+Q("vw", "Which reason does the chapter give for why engineers may not speak out in a corporate environment?", "Speaking out may not be seen as a career-advancing move.", ["Engineers may believe formal legal compliance fully settles questions of professional ethics.","Engineers may assume a published ethics code removes the need to raise individual concerns.","Engineers may regard ethical review as necessary only when a customer requests it.","Engineers may treat successful laboratory certification as sufficient evidence of ethical conduct."], "Engineers are busy building careers; hierarchy and fear of consequences discourage speaking out."),
+Q("vw", "How does the chapter describe the typical corporate enterprise that discourages speaking out?", "Hierarchical and command-driven, where subordinates may fear the consequences.", ["Flat and democratic, where every engineer votes on every single product decision.", "Fully open, where all ethical concerns are published online for the public.", "Small and informal, where the CEO personally reviews every line of code.", "Run by regulators, who make all of the company’s technical decisions."], "Power sits in the hierarchy, so subordinates may fear speaking out on issues outside product development."),
+Q("vw", "Why might engineers fail to consider the wider societal impact of their technology, according to the chapter?", "They focus on getting the software to meet its specification.", ["They regard regulatory certification as a complete assessment of the technology’s social impact.","They assume customers alone are responsible for evaluating the social impact of the product.","They treat publication of a corporate ethics code as sufficient review of the technology.","They consider social impact only after a product has completed its commercial lifecycle."], "Engineers often focus on correctness against the spec rather than broad societal impacts."),
+Q("vw", "What does the chapter say corporations and employees risk if they do not consider ethical issues in design?", "Significant reputational damage and financial loss later.", ["A small delay in the planned release of their next product.", "Slightly higher costs for their software licences.", "A need to rewrite their code in another language.", "A drop in the number of applicants for jobs."], "It is in both corporations’ and employees’ interest to consider the bigger picture, or they pay the price later."),
+Q("vw", "Which of these questions does the chapter raise about the engineers in the Volkswagen case?", "Why were there no whistleblowers to speak out?", ["Why were independent regulators responsible for implementing the engine control software?","Why were vehicle owners expected to approve changes to the emissions testing software?","Why did laboratory certification make further ethical review of the device unnecessary?","Why did meeting the engine specification remove the engineers’ professional accountability?"], "The chapter asks why engineers failed to question the device and why nobody blew the whistle."),
+Q("vw", "When did discrepancies between European and US Volkswagen models become evident, leading to investigations?", "2014", ["2009", "2017", "2018", "2020"], "In 2014 discrepancies became evident and regulators in several countries investigated."),
+
+/* ---------- test: ethical testing (s13) ---------- */
+Q("test", "The ISTQB Code of Ethics for test professionals is based on which codes?", "The IEEE and ACM codes of ethics.", ["The PMI and BCS codes of ethics.","The ACM and PMI codes of ethics.","The IEEE and BCS codes of ethics.","The BCS and PMI codes of professional conduct."], "The ISTQB code is based on the IEEE and ACM code of ethics."),
+Q("test", "According to the ISTQB code, in whose interest shall certified software testers act consistently?", "The public interest", ["The tester’s own interest", "The competitor’s interest", "The shareholders’ interest only", "The regulator’s interest only"], "First point of the ISTQB code: act consistently in the public interest."),
+Q("test", "Which statement is part of the ISTQB code of ethics?", "Testers maintain independence and integrity in their professional judgments.", ["Testers always approve a release whenever the project manager asks them to do so.", "Testers never cooperate with developers, to stay fully independent.", "Testers keep defects secret from the customer to protect the company.", "Testers stop learning once they have passed their certification."], "The code includes independence and integrity, cooperation with developers and lifelong learning."),
+Q("test", "What does the ISTQB code say about testers and software developers?", "Testers shall be supportive of colleagues and cooperate with developers.", ["Testers shall compete with developers to see who finds the most bugs first.", "Testers shall report developers to management for every defect.", "Testers shall avoid all contact with developers during testing.", "Testers shall rewrite developers’ code when they find a bug."], "Testers shall be supportive of colleagues and cooperate with software developers."),
+Q("test", "Why must testers focus on the areas of greatest risk?", "It is impossible to test everything because of time constraints.", ["Low-risk areas of a system never contain any defects worth finding.", "Customers only use the high-risk parts of software.", "The ISTQB code forbids testing low-risk areas.", "High-risk areas are always the easiest to test."], "Comprehensive testing reduces risk, but everything cannot be tested, so focus on greatest risk and most-used parts."),
+Q("test", "When do ethical issues typically arise during testing, according to the chapter?", "When the project is behind schedule and testers are pressured to keep the delivery date.", ["When the project is ahead of schedule and the testers have far too much time on their hands.", "When the customer asks for a detailed final test report.", "When testers cooperate closely with the developers.", "When the test environment has been set up correctly."], "Limited time can mean serious defects are missed and quality is compromised."),
+Q("test", "What should a test manager do when pressure threatens the quality of the software?", "Resist the pressure and raise concerns at senior level where appropriate.", ["Accept the pressure and quietly reduce the number of tests that are run.", "Approve the release and fix defects in the next version.", "Hide the open defects from the final test report.", "Let the project manager write the test report instead."], "The test manager must resist pressure that poses risks to quality and escalate where appropriate."),
+Q("test", "What must the customer be told about the software’s quality?", "All quality problems, so they can manage the associated risks.", ["Only the problems that have already been found and fixed by developers.", "Nothing, since the contract has a disclaimer.", "Only the problems found by the customer’s own staff.", "Only problems that the project manager approves."], "It is essential that the customer is informed of all quality problems with the software."),
+Q("test", "Which item is listed as part of the final test report?", "The problem arrival rate", ["The projected revenue from the next product release","The staffing forecast for the next development phase","The supplier ranking from the procurement review","The feature priorities for the next marketing campaign"], "The report summarises testing done, results, open problems, the problem arrival rate and known risks."),
+Q("test", "What should the test manager’s release recommendation in the final test report be based on?", "The key facts, with a clear statement that all risks can be managed.", ["The release date that was promised to the customer in the signed contract.", "The opinion of the most senior developer on the team.", "The number of features completed by the deadline.", "The amount of budget still left for the project."], "The recommendation should rest on the facts with a clear statement that all risks can be managed."),
+Q("test", "The project manager wants to release on schedule, but the test manager believes it is unsafe. How should the decision be made?", "Based on the facts and risks, supported by objective data.", ["By whoever is more senior in the company’s management hierarchy.", "By the customer, without seeing any test results.", "By releasing anyway and fixing problems in a patch.", "By a vote of all developers on the team."], "In such conflicts the decision must be based on the facts and risks and supported by objective data."),
+Q("test", "Which of these does the chapter say testers need to have in place?", "The right test environment, test plans and specifications, and tools.", ["A written guarantee from the developers that there are no defects left.", "Permission to delay the project for as long as they want.", "A licence from the BCS for every product they test.", "Access to the company’s financial accounts."], "Testers need the appropriate expertise, test environment, test plans and specification, and tools."),
+Q("test", "Which item of the ISTQB code concerns the tester’s own development?", "Participating in lifelong learning and promoting ethics in the profession.", ["Acting at all times in the best interests of their client and of their employer.", "Promoting an ethical approach to managing software testing.", "Ensuring deliverables meet the highest professional standards.", "Acting consistently in the public interest."], "The last point of the code: participate in lifelong learning and promote ethics in the profession.")
+];
+
+QUESTIONS.forEach((q,i) => { q.id = i; q.all = [q.a, ...q.w]; });
+document.getElementById("qcount-hero").textContent = QUESTIONS.length;
+
+/* ---------------- quiz logic ---------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = s => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
+const shuffle = a => { a=[...a]; for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const BEST_KEY = "ibu-it2003-r05-best-v1";
+const RUN_KEY = "ibu-it2003-r05-run-v1";
+const MODE_KEY = "ibu-it2003-r05-mode";
+const MISTAKES_KEY = "ibu-it2003-r05-mistakes-v1";
+const canSaveMistakes = store.set(`${MISTAKES_KEY}-check`, "1");
+store.remove(`${MISTAKES_KEY}-check`);
+const questionRevision = q => JSON.stringify([q.q, q.a, q.w]);
+function readMistakes(){
+  try {
+    const saved = JSON.parse(store.get(MISTAKES_KEY));
+    if (!Array.isArray(saved)) return new Set();
+    return new Set(saved.filter(x => x && Number.isInteger(x.id) && QUESTIONS[x.id] &&
+      x.revision === questionRevision(QUESTIONS[x.id])).map(x => x.id));
+  } catch(e){ return new Set(); }
+}
+function updateMistake(it){
+  const saved = readMistakes();
+  if (judge(it)) saved.delete(it.q.id); else saved.add(it.q.id);
+  store.set(MISTAKES_KEY, JSON.stringify([...saved].map(id => ({id, revision:questionRevision(QUESTIONS[id])}))));
+}
+function savedMistakeQuestions(){
+  const saved = readMistakes();
+  return QUESTIONS.filter(q => saved.has(q.id) && chosenTopics.has(q.t));
+}
+// Any change to the bank invalidates saved progress and best scores.
+const BANK_VERSION = JSON.stringify(QUESTIONS.map(q => [q.q, q.a, q.w]));
+function readingLink(q){ return `<a href="#${READING_SECTIONS[q.t]}" data-reading="${READING_SECTIONS[q.t]}">Read this topic →</a>`; }
+document.addEventListener("click", e => {
+  const link = e.target.closest("[data-reading]");
+  if (!link) return;
+  e.preventDefault();
+  const section = $(link.dataset.reading);
+  show("read", false);
+  history.replaceState(null, "", link.getAttribute("href"));
+  section.scrollIntoView({behavior: reduce ? "auto" : "smooth", block:"start"});
+  section.setAttribute("tabindex", "-1");
+  section.focus({preventScroll:true});
+});
+
+let count = 25, chosenTopics = new Set(Object.keys(T));
+let mode = store.get(MODE_KEY) === "exam" ? "exam" : "practice";
+const COUNTS = [10, 25, 50, "All"];
+const bestKey = (topics, size) => `${BEST_KEY}:${mode}:${[...topics].sort().join(",")}:${size}`;
+function readBest(topics, size){
+  try {
+    const best = JSON.parse(store.get(bestKey(topics, size)));
+    return best && best.bank === BANK_VERSION && best.total === size &&
+      Number.isInteger(best.good) && best.good >= 0 && best.good <= size ? best : null;
+  } catch(e) { return null; }
+}
+function renderSetup(){
+  const pool = QUESTIONS.filter(q => chosenTopics.has(q.t)).length;
+  $("count-seg").innerHTML = COUNTS.map(c => `<button class="chip" data-c="${c}" aria-pressed="${c===count}">${c==="All" ? `All <small>(${pool})</small>` : c}</button>`).join("");
+  $("topic-seg").innerHTML = Object.entries(T).map(([k,v]) => `<button class="chip" data-t="${k}" aria-pressed="${chosenTopics.has(k)}">${esc(v)} <small>${QUESTIONS.filter(q=>q.t===k).length}</small></button>`).join("");
+  $("all-topics").setAttribute("aria-pressed", chosenTopics.size === Object.keys(T).length);
+  $("start").disabled = pool === 0;
+  const mistakes = readMistakes(), available = savedMistakeQuestions();
+  $("mistakes-status").textContent = !canSaveMistakes ? "Browser storage is unavailable; mistakes cannot be saved here." : `${mistakes.size} saved mistake${mistakes.size === 1 ? "" : "s"} · ${available.length} in selected topics`;
+  $("review-mistakes").disabled = available.length === 0;
+  $("mode-seg").querySelectorAll("[data-m]").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === mode));
+  const size = count === "All" ? pool : Math.min(count, pool);
+  const best = readBest(chosenTopics, size);
+  $("best").textContent = best ? `Your best (${mode === "exam" ? "Exam" : "Practice"}) for these topics · ${size} questions: ${Math.round(best.good / best.total * 100)}% (${best.good}/${best.total})` :
+    `${QUESTIONS.length} questions in the bank`;
+}
+$("mode-seg").onclick = e => { const b=e.target.closest("[data-m]"); if(!b) return; mode = b.dataset.m; store.set(MODE_KEY, mode); renderSetup(); };
+$("count-seg").onclick = e => { const b=e.target.closest("[data-c]"); if(!b) return; count = b.dataset.c==="All" ? "All" : +b.dataset.c; renderSetup(); };
+$("topic-seg").onclick = e => { const b=e.target.closest("[data-t]"); if(!b) return; const k=b.dataset.t; chosenTopics.has(k) ? chosenTopics.delete(k) : chosenTopics.add(k); renderSetup(); };
+$("all-topics").onclick = () => { chosenTopics = chosenTopics.size === Object.keys(T).length ? new Set() : new Set(Object.keys(T)); renderSetup(); };
+renderSetup();
+
+/* run.list items: {q, order:[indexes into q.all], sel: displayed position or -1, done}. q.all[0] is the correct answer. */
+let run = null;
+const isOk = (it, pos) => it.order[pos] === 0;
+const judge = it => it.sel >= 0 && isOk(it, it.sel);
+function saveRun(){
+  store.set(RUN_KEY, JSON.stringify({bank:BANK_VERSION, count, topics:[...chosenTopics], recordEligible:run.recordEligible, mode:run.mode, i:run.i,
+    list:run.list.map(it => ({id:it.q.id, order:it.order, sel:it.sel, done:!!it.done}))}));
+}
+function restoreRun(){
+  try {
+    const saved = JSON.parse(store.get(RUN_KEY));
+    if (!saved) return;
+    if (saved.bank !== BANK_VERSION || !Array.isArray(saved.list) || !saved.list.length ||
+        !Number.isInteger(saved.i) || saved.i < 0 || saved.i >= saved.list.length ||
+        !COUNTS.includes(saved.count) || !Array.isArray(saved.topics) || saved.topics.some(t => !Object.hasOwn(T,t))) throw Error("Invalid progress");
+    const list = saved.list.map((it,index) => {
+      const q = QUESTIONS[it.id];
+      if (!q || !Array.isArray(it.order) || it.order.length !== 5 || new Set(it.order).size !== 5 ||
+          it.order.some(k => !Number.isInteger(k) || k < 0 || k > 4) || !Number.isInteger(it.sel) || it.sel < -1 || it.sel > 4 ||
+          (it.done && it.sel < 0) || (index < saved.i && !it.done) || (index > saved.i && it.done)) throw Error("Invalid question");
+      return {q, order:it.order, sel:it.sel, done:!!it.done};
+    });
+    run = {list, i:saved.i, recordEligible:saved.recordEligible === true, mode:saved.mode === "exam" ? "exam" : "practice"};
+    if (run.recordEligible) mode = run.mode;
+    count = saved.count; chosenTopics = new Set(saved.topics);
+    $("q-setup").hidden = true; $("q-result").hidden = true; $("q-play").hidden = false;
+    renderQ();
+  } catch(e) { store.remove(RUN_KEY); }
+}
+function startWith(list, recordEligible = true, m = mode){
+  run = { list: list.map(q => ({ q, order: shuffle([0,1,2,3,4]), sel:-1, done:false })), i:0, recordEligible, mode:m };
+  $("q-setup").hidden = true; $("q-result").hidden = true; $("q-play").hidden = false;
+  renderQ();
+}
+$("review-mistakes").onclick = () => {
+  const list = shuffle(savedMistakeQuestions());
+  if (list.length) startWith(list, false, "practice");
+};
+$("start").onclick = () => {
+  const pool = shuffle(QUESTIONS.filter(q => chosenTopics.has(q.t)));
+  startWith(count === "All" ? pool : pool.slice(0, count));
+};
+const answered = () => run.list.filter(it => it.done);
+function renderLive(){
+  const a = answered(), g = a.filter(judge).length;
+  if (run.mode === "exam"){ $("q-live").innerHTML = `<span>Exam · answered ${a.length} / ${run.list.length}</span>`; return; }
+  $("q-live").innerHTML = `<span class="g">✓ ${g}</span> &nbsp; <span class="r">✕ ${a.length - g}</span>`;
+}
+function renderQ(){
+  const it = run.list[run.i], n = run.list.length;
+  $("q-counter").textContent = `Question ${run.i+1} / ${n}`;
+  $("q-topic").textContent = T[it.q.t];
+  renderLive();
+  $("q-bar").style.width = (run.i / n * 100) + "%";
+  $("q-text").innerHTML = fmt(it.q.q);
+  $("q-opts").innerHTML = it.order.map((k,pos) => `<li><button class="opt${it.sel === pos ? " sel" : ""}" role="radio" aria-checked="${it.sel === pos}" data-k="${pos}"><span class="k">${"ABCDE"[pos]}</span><span>${fmt(it.q.all[k])}</span></button></li>`).join("");
+  $("q-explain").hidden = true;
+  if (it.done && run.mode !== "exam") paintAnswer(); else setAction();
+  saveRun();
+}
+function setAction(){
+  const it = run.list[run.i], last = run.i === run.list.length-1, btn = $("q-next");
+  if (!it.done && run.mode === "exam"){ btn.textContent = last ? "Finish →" : "Next →"; btn.disabled = it.sel < 0; }
+  else if (!it.done){ btn.textContent = "Check"; btn.disabled = it.sel < 0; }
+  else { btn.textContent = last ? "See results →" : "Next →"; btn.disabled = false; }
+}
+function choose(pos){
+  const it = run.list[run.i]; if (it.done) return;
+  it.sel = pos;
+  [...$("q-opts").querySelectorAll(".opt")].forEach((b,j) => { b.classList.toggle("sel", j === pos); b.setAttribute("aria-checked", j === pos); });
+  setAction(); saveRun();
+}
+function check(){
+  const it = run.list[run.i]; if (it.done || it.sel < 0) return;
+  it.done = true;
+  updateMistake(it);
+  if (run.mode === "exam"){
+    if (run.i < run.list.length-1){ run.i++; renderQ(); $("q-play").scrollIntoView({block:"nearest"}); } else results();
+    return;
+  }
+  paintAnswer(true); saveRun();
+  $("q-next").focus({preventScroll:true});
+}
+function paintAnswer(fresh){
+  const it = run.list[run.i], ok = judge(it);
+  [...$("q-opts").querySelectorAll(".opt")].forEach((b,j) => { b.disabled = true; b.classList.remove("sel");
+    const good = isOk(it, j), picked = it.sel === j;
+    if (good && picked) b.classList.add("correct");
+    else if (good) b.classList.add("answer");
+    else if (picked) b.classList.add("wrong", ...(fresh && !reduce ? ["shake"] : []));
+    else b.classList.add("dim"); });
+  const ex = $("q-explain");
+  ex.className = "explain " + (ok ? "ok" : "no");
+  ex.innerHTML = `<b>${ok ? "Correct." : "Not quite."}</b> ${fmt(it.q.e)} <p>${readingLink(it.q)}</p>`;
+  ex.hidden = false;
+  renderLive(); setAction();
+}
+$("q-opts").onclick = e => { const b = e.target.closest(".opt"); if (b) choose(+b.dataset.k); };
+$("q-next").onclick = () => {
+  const it = run.list[run.i];
+  if (!it.done) return check();
+  if (run.i < run.list.length-1){ run.i++; renderQ(); $("q-play").scrollIntoView({block:"nearest"}); } else results();
+};
+$("q-quit").onclick = () => { if (answered().length) results(); else { store.remove(RUN_KEY); $("q-play").hidden = true; $("q-setup").hidden = false; } };
+document.addEventListener("keydown", e => {
+  if ($("q-play").hidden || views.quiz.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  // Let focused controls (End quiz, links...) handle Enter/Space natively.
+  // Answer buttons are excluded so that Enter still checks the selected answer.
+  const ctl = e.target.closest && e.target.closest("button, a, input, select, textarea, [contenteditable]");
+  if (ctl && !ctl.classList.contains("opt") && (e.key === "Enter" || e.key === " ")) return;
+  const m = "12345".indexOf(e.key) >= 0 ? "12345".indexOf(e.key) : "abcde".indexOf(e.key.toLowerCase());
+  if (m >= 0 && e.key.length === 1){ choose(m); e.preventDefault(); }
+  else if (e.key === "Enter" && !$("q-next").disabled){ $("q-next").click(); e.preventDefault(); }
+});
+function results(){
+  store.remove(RUN_KEY);
+  const done = answered(), n = done.length, g = done.filter(judge).length, pct = n ? Math.round(g/n*100) : 0;
+  $("q-play").hidden = true; $("q-result").hidden = false;
+  $("r-pct").textContent = pct + "%";
+  $("r-raw").textContent = `${g} / ${n}${n < run.list.length ? ` · ${n} of ${run.list.length} done` : ""}`;
+  const ring = $("r-ring"); let p = 0;
+  const step = () => { p = Math.min(pct, p + 2); ring.style.setProperty("--p", p); if (p < pct && !batterySaver) requestAnimationFrame(step); else ring.style.setProperty("--p", pct); };
+  (reduce || batterySaver) ? ring.style.setProperty("--p", pct) : requestAnimationFrame(step);
+  $("r-title").textContent = pct >= 90 ? "Excellent!" : pct >= 75 ? "Very good" : pct >= 55 ? "Getting there" : "Keep studying";
+  $("r-msg").textContent = pct >= 90 ? "You know ethical software engineering really well." : pct >= 75 ? "Review the topics with the lowest bars below." : "Re-read the sections for the red topics, then retry your mistakes.";
+  const by = {};
+  done.forEach(it => { by[it.q.t] ??= [0,0]; by[it.q.t][1]++; if (judge(it)) by[it.q.t][0]++; });
+  $("r-topics").innerHTML = Object.entries(by).sort((a,b) => a[1][0]/a[1][1] - b[1][0]/b[1][1]).map(([k,[x,y]]) => {
+    const r = x/y; return `<div class="trow"><span>${esc(T[k])}</span><span class="tb"><i class="${r<.5?"low":r<.8?"mid":""}" style="width:${r*100}%"></i></span><span>${x}/${y}</span></div>`; }).join("");
+  const wrong = done.filter(it => !judge(it));
+  run.wrong = wrong.map(it => it.q);
+  $("r-retry").hidden = !wrong.length; $("r-review-wrap").hidden = !wrong.length;
+  $("r-review").innerHTML = wrong.map(it =>
+    `<div class="ritem"><p class="q">${fmt(it.q.q)}</p>` +
+    `<p class="you">You chose: ${fmt(it.q.all[it.order[it.sel]])}</p>` +
+    `<p class="ans">Correct answer: ${fmt(it.q.a)}</p>` +
+    `<p class="why">${fmt(it.q.e)}</p><p>${readingLink(it.q)}</p></div>`).join("");
+  if (run.recordEligible && n >= 10 && n === run.list.length){
+    const prev = readBest(chosenTopics, n);
+    if (!prev || g > prev.good) store.set(bestKey(chosenTopics, n), JSON.stringify({bank:BANK_VERSION, good:g, total:n}));
+  }
+  scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+}
+$("r-retry").onclick = () => startWith(shuffle(run.wrong), false, "practice");
+$("r-new").onclick = () => { $("q-result").hidden = true; $("q-setup").hidden = false; renderSetup(); };
+restoreRun();
+</script>
+</body>
+</html>
