@@ -1,0 +1,1436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Elementary Sorts</title>
+<meta name="description" content="FENMS 0121 Data Structures and Algorithms, Reading 05: Elementary sorts (bubble, selection, insertion and Shell sort). Full study guide and a multiple-choice quiz.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+/* Glass theme: a STATIC colourful backdrop (gradient orbs + a soft grid) behind frosted panels.
+   Nothing moves behind the blurred panels, so the blur is only recomputed while scrolling (battery-friendly). */
+:root{
+  --bg:#e8ebf8;
+  --orb1:rgba(124,92,255,.55); --orb2:rgba(56,182,255,.50); --orb3:rgba(255,150,110,.45); --orb4:rgba(40,210,170,.40);
+  --grid:rgba(60,70,140,.13); --cell1:rgba(124,92,255,.22); --cell2:rgba(56,182,255,.22); --cell3:rgba(255,150,110,.24);
+  --glass:rgba(255,255,255,.56); --glass2:rgba(255,255,255,.34); --glass-strong:rgba(255,255,255,.80);
+  --edge:rgba(255,255,255,.75); --edge-soft:rgba(40,50,110,.10); --shine:rgba(255,255,255,.85);
+  --ink:#10162e; --muted:#4c5675; --line:rgba(40,50,110,.14);
+  --accent:#5a46f0; --accent2:#0b93a8; --accent-ink:#ffffff; --accent-soft:rgba(90,70,240,.10);
+  --amber:#a86a00; --amber-soft:rgba(240,170,40,.16);
+  --good:#147a46; --good-soft:rgba(20,150,80,.13); --bad:#b8352b; --bad-soft:rgba(200,50,40,.11);
+  --shadow:0 24px 60px -30px rgba(30,30,90,.45);
+  --code-bg:rgba(14,18,40,.88); --code-ink:#e6e9f7;
+  --f-display:"Sora", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#060914;
+  --orb1:rgba(110,80,255,.42); --orb2:rgba(30,150,255,.32); --orb3:rgba(255,110,140,.24); --orb4:rgba(20,200,170,.26);
+  --grid:rgba(160,175,255,.09); --cell1:rgba(124,92,255,.20); --cell2:rgba(56,182,255,.16); --cell3:rgba(255,120,150,.16);
+  --glass:rgba(20,25,52,.52); --glass2:rgba(20,25,52,.30); --glass-strong:rgba(28,34,70,.80);
+  --edge:rgba(255,255,255,.13); --edge-soft:rgba(255,255,255,.06); --shine:rgba(255,255,255,.16);
+  --ink:#eef1fb; --muted:#a4adca; --line:rgba(170,185,255,.15);
+  --accent:#a191ff; --accent2:#5ad8e6; --accent-ink:#0b0d1d; --accent-soft:rgba(161,145,255,.14);
+  --amber:#ffc95e; --amber-soft:rgba(255,200,90,.12);
+  --good:#62d79c; --good-soft:rgba(98,215,156,.14); --bad:#ff8a8f; --bad-soft:rgba(255,120,130,.13);
+  --shadow:0 30px 70px -30px rgba(0,0,0,.8);
+  --code-bg:rgba(6,8,20,.78); --code-ink:#e6e9f7;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#060914;
+  --orb1:rgba(110,80,255,.42); --orb2:rgba(30,150,255,.32); --orb3:rgba(255,110,140,.24); --orb4:rgba(20,200,170,.26);
+  --grid:rgba(160,175,255,.09); --cell1:rgba(124,92,255,.20); --cell2:rgba(56,182,255,.16); --cell3:rgba(255,120,150,.16);
+  --glass:rgba(20,25,52,.52); --glass2:rgba(20,25,52,.30); --glass-strong:rgba(28,34,70,.80);
+  --edge:rgba(255,255,255,.13); --edge-soft:rgba(255,255,255,.06); --shine:rgba(255,255,255,.16);
+  --ink:#eef1fb; --muted:#a4adca; --line:rgba(170,185,255,.15);
+  --accent:#a191ff; --accent2:#5ad8e6; --accent-ink:#0b0d1d; --accent-soft:rgba(161,145,255,.14);
+  --amber:#ffc95e; --amber-soft:rgba(255,200,90,.12);
+  --good:#62d79c; --good-soft:rgba(98,215,156,.14); --bad:#ff8a8f; --bad-soft:rgba(255,120,130,.13);
+  --shadow:0 30px 70px -30px rgba(0,0,0,.8);
+  --code-bg:rgba(6,8,20,.78); --code-ink:#e6e9f7;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth; scroll-padding-top:96px}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--f-body); font-size:18px; line-height:1.7;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+a{color:var(--accent)}
+code,kbd,.mono{font-family:var(--f-mono); font-size:.85em; font-variant-ligatures:none}
+p code, li code, td code{background:var(--accent-soft); padding:1px 6px; border-radius:6px}
+
+/* ---------- static backdrop ---------- */
+.backdrop{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+  background:
+    radial-gradient(42vmax 42vmax at 8% 6%, var(--orb1), transparent 70%),
+    radial-gradient(40vmax 40vmax at 96% 18%, var(--orb2), transparent 70%),
+    radial-gradient(46vmax 46vmax at 82% 96%, var(--orb3), transparent 70%),
+    radial-gradient(36vmax 36vmax at 18% 88%, var(--orb4), transparent 70%),
+    var(--bg)}
+.backdrop svg{position:absolute; inset:0; width:100%; height:100%}
+.grain{position:absolute; inset:0; opacity:.06; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>")}
+
+/* ---------- glass ---------- */
+.glass{
+  position:relative;
+  background:linear-gradient(145deg, var(--glass), var(--glass2));
+  -webkit-backdrop-filter:blur(18px) saturate(1.6); backdrop-filter:blur(18px) saturate(1.6);
+  border:1px solid var(--edge); border-radius:24px;
+  box-shadow:inset 0 1px 0 var(--shine), inset 0 0 0 1px var(--edge-soft), var(--shadow);
+}
+:root[data-battery-saver="true"] .glass{background:var(--glass-strong);backdrop-filter:none;-webkit-backdrop-filter:none}
+:root[data-battery-saver="true"] .grain{display:none}
+:root[data-battery-saver="true"] .reveal{opacity:1;transform:none;transition:none}
+.icon-btn.saver-btn{width:auto;padding:0 10px;display:flex;white-space:nowrap;gap:6px;font:600 .8rem var(--f-body)}
+.saver-btn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+@media(max-width:700px){html{scroll-padding-top:146px}.bar{flex-wrap:wrap}.brand{flex:1 1 0}.tabs{order:3;width:100%}.tab{flex:1}.saver-btn{font-size:.75rem}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .glass{background:var(--glass-strong)}
+}
+@media (prefers-reduced-transparency: reduce){ .glass{background:var(--glass-strong); backdrop-filter:none; -webkit-backdrop-filter:none} }
+
+/* ---------- top bar ---------- */
+.top{position:sticky; top:0; z-index:20; padding:12px max(16px, env(safe-area-inset-left)) 0}
+.bar{max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:10px; padding:8px 10px 8px 14px; border-radius:18px; overflow:hidden}
+.brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); min-width:0; margin-right:auto}
+.brand .logo{flex:none; width:34px; height:34px; border-radius:11px; display:grid; place-items:center;
+  background:linear-gradient(135deg, var(--accent), var(--accent2)); box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.brand b{font-family:var(--f-display); font-weight:700; font-size:.98rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block}
+.brand small{display:block; font-family:var(--f-mono); font-size:.64rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); line-height:1.2}
+.brand span{min-width:0}
+.tabs{display:flex; background:var(--accent-soft); border-radius:13px; padding:4px; gap:2px; border:1px solid var(--edge-soft)}
+.tab{appearance:none; border:0; background:transparent; color:var(--ink); font:600 .95rem var(--f-body); padding:7px 16px; border-radius:10px; cursor:pointer; transition:background .2s, color .2s}
+.tab[aria-selected="true"]{background:linear-gradient(135deg, var(--accent), var(--accent2)); color:var(--accent-ink); box-shadow:0 6px 16px -8px var(--accent)}
+.icon-btn{appearance:none; border:1px solid var(--line); background:var(--glass2); color:var(--ink); width:40px; height:40px; border-radius:12px; display:grid; place-items:center; cursor:pointer; flex:none}
+.icon-btn:hover{background:var(--accent-soft)}
+.progress{position:absolute; left:0; bottom:0; height:3px; width:0; background:linear-gradient(90deg, var(--accent), var(--accent2)); transition:width .15s linear}
+@media (max-width:560px){ .brand small{display:none} .brand b{font-size:.9rem} .tab{padding:7px 11px} .brand .logo{display:none}}
+
+/* ---------- shell ---------- */
+main{position:relative; z-index:1; padding:22px max(16px, env(safe-area-inset-left)) 80px}
+.shell{max-width:1200px; margin:0 auto}
+
+/* hero */
+.hero{padding:clamp(28px,5vw,60px); display:grid; gap:22px; margin-bottom:22px; overflow:hidden}
+.eyebrow{font-family:var(--f-mono); font-size:.74rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; flex-wrap:wrap; gap:6px 14px}
+.eyebrow span{display:inline-flex; align-items:center; gap:6px}
+.eyebrow .dot{width:7px; height:7px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2))}
+h1,h2,h3,h4{font-family:var(--f-display); letter-spacing:-.02em; text-wrap:balance; margin:0}
+h1{font-size:clamp(2.2rem, 6vw, 4.2rem); line-height:1.02; font-weight:800; max-width:15ch}
+h1 em{font-style:normal; background:linear-gradient(100deg, var(--accent), var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent}
+.lede{font-size:1.16rem; color:var(--muted); max-width:56ch; margin:0}
+.cta{display:flex; flex-wrap:wrap; gap:12px}
+.btn{appearance:none; border:1px solid var(--line); background:var(--glass-strong); color:var(--ink); font:600 1rem var(--f-body); padding:12px 20px; border-radius:14px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:8px; transition:transform .15s, background .2s, border-color .2s}
+.btn:hover{transform:translateY(-1px); border-color:var(--accent)}
+.btn.primary{background:linear-gradient(135deg, var(--accent), var(--accent2)); color:var(--accent-ink); border-color:transparent; box-shadow:0 10px 24px -12px var(--accent)}
+.btn:disabled{opacity:.45; cursor:not-allowed; transform:none; box-shadow:none}
+.stats{display:flex; flex-wrap:wrap; gap:10px}
+.stat{padding:8px 14px; border-radius:13px; background:var(--glass2); border:1px solid var(--edge-soft); font-size:.92rem; color:var(--muted)}
+.stat b{color:var(--ink); font-family:var(--f-display); font-size:1.04rem; margin-right:5px}
+.hero-art{position:absolute; right:40px; top:50%; transform:translateY(-50%); width:min(36%, 380px); pointer-events:none}
+.hero > :not(.hero-art){position:relative; z-index:1}
+@media (max-width:900px){.hero-art{display:none}}
+
+/* ---------- reading ---------- */
+.reading{display:grid; grid-template-columns:260px minmax(0,1fr); gap:22px; align-items:start}
+@media (max-width:1000px){.reading{grid-template-columns:minmax(0,1fr)}}
+.toc{position:sticky; top:90px; padding:18px 14px; max-height:calc(100vh - 112px); overflow:auto; font-size:.92rem}
+.toc h4{font-size:.72rem; font-family:var(--f-mono); letter-spacing:.12em; text-transform:uppercase; color:var(--muted); padding:0 8px 8px}
+.toc ol{list-style:none; margin:0; padding:0; counter-reset:t}
+.toc a{display:flex; gap:8px; padding:6px 8px; border-radius:10px; color:var(--muted); text-decoration:none; line-height:1.3}
+.toc a::before{counter-increment:t; content:counter(t, decimal-leading-zero); font-family:var(--f-mono); font-size:.74em; color:var(--accent); min-width:1.7em; padding-top:.2em}
+.toc a:hover{background:var(--accent-soft); color:var(--ink)}
+.toc a.on{background:var(--accent-soft); color:var(--ink); font-weight:600}
+.toc .quiz-link{margin-top:12px; width:100%; justify-content:center}
+@media (max-width:1000px){.toc{position:static; max-height:none} .toc ol{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}}
+
+article{display:flex; flex-direction:column; gap:22px; min-width:0}
+.sec{padding:clamp(22px,4vw,46px)}
+.sec > * + *{margin-top:16px}
+.sec h2{font-size:clamp(1.5rem,3.2vw,2.1rem); line-height:1.12; display:flex; align-items:baseline; gap:14px}
+.sec h2 .n{font-family:var(--f-mono); font-size:.48em; color:var(--accent); background:var(--accent-soft); padding:4px 9px; border-radius:9px; letter-spacing:0; flex:none}
+.sec h3{font-size:1.22rem; margin-top:30px}
+.sec p, .sec li{max-width:74ch}
+.sec ul, .sec ol{padding-left:1.3em}
+.sec li + li{margin-top:6px}
+.sec li::marker{color:var(--accent)}
+.steps{list-style:none; padding:0!important; counter-reset:s; display:grid; gap:10px}
+.steps li{counter-increment:s; position:relative; padding:12px 14px 12px 54px; background:var(--glass2); border:1px solid var(--edge-soft); border-radius:14px; max-width:none}
+.steps li::before{content:counter(s); position:absolute; left:14px; top:12px; width:28px; height:28px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--accent-ink); display:grid; place-items:center; font:700 .85rem var(--f-display)}
+.callout{border-radius:16px; padding:14px 18px; border:1px solid var(--edge-soft); border-left:4px solid var(--accent); background:var(--accent-soft)}
+.callout.key{border-left-color:var(--amber); background:var(--amber-soft)}
+.callout.warn{border-left-color:var(--bad); background:var(--bad-soft)}
+.callout.story{border-left-color:var(--good); background:var(--good-soft)}
+.callout .lbl{font-style:normal; font-family:var(--f-mono); font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; display:block; margin-bottom:4px; color:var(--muted)}
+.callout p{margin:6px 0 0}
+.callout ol, .callout ul{margin:6px 0 0}
+.defs{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px}
+.def{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:14px 16px; line-height:1.5}
+.def b{display:block; font-family:var(--f-display); font-size:1rem; margin-bottom:4px}
+.def b .sym{color:var(--accent); font-family:var(--f-mono); margin-right:6px}
+.def span{color:var(--muted); font-size:.95rem}
+.tbl{overflow-x:auto; border-radius:16px; border:1px solid var(--line)}
+table{border-collapse:collapse; width:100%; font-size:.95rem; line-height:1.45; background:var(--glass-strong)}
+th,td{padding:10px 14px; text-align:left; vertical-align:top; border-bottom:1px solid var(--line)}
+th{font-family:var(--f-display); font-weight:600; background:var(--accent-soft); font-size:.88rem}
+tr:last-child td{border-bottom:0}
+td.num{font-family:var(--f-mono); font-size:.86rem; white-space:nowrap}
+td.y{color:var(--good); font-weight:700} td.no{color:var(--bad); font-weight:700}
+.tblcap{font-family:var(--f-mono); font-size:.74rem; color:var(--muted); margin-bottom:-8px; letter-spacing:.04em}
+pre.code{margin:0; background:var(--code-bg); color:var(--code-ink); border-radius:16px; padding:16px 18px; overflow-x:auto; font:500 .84rem/1.6 var(--f-mono); border:1px solid rgba(255,255,255,.08); box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+pre.code .c{color:#8b95b8; font-style:italic}
+pre.code .k{color:#c4b5ff}
+pre.code .s{color:#7fe3c8}
+.codecap{font-family:var(--f-mono); font-size:.74rem; color:var(--muted); margin-bottom:-8px}
+figure{margin:0}
+.fig button{appearance:none; border:0; padding:clamp(8px,2vw,16px); background:#fff; border-radius:16px; width:100%; cursor:zoom-in; display:block; box-shadow:0 0 0 1px var(--line), 0 12px 30px -20px rgba(0,0,0,.4); transition:transform .2s}
+.fig button:hover{transform:scale(1.006)}
+.fig img{width:100%; height:auto; display:block; margin:0 auto}
+.fig.narrow button{max-width:520px; margin:0 auto}
+.fig.mid button{max-width:720px; margin:0 auto}
+.fig figcaption{font-size:.9rem; color:var(--muted); margin-top:8px; text-align:center; max-width:none}
+.fig figcaption b{color:var(--ink); font-family:var(--f-display); font-weight:600}
+.pair{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; align-items:start}
+.scan{display:grid; gap:8px; font-family:var(--f-mono); font-size:.9rem; overflow-x:auto}
+.scan .row{display:flex; gap:6px; align-items:center; flex-wrap:nowrap}
+.scan .lab{width:110px; flex:none; color:var(--muted); font-size:.76rem}
+.scan i{font-style:normal; flex:none; width:44px; height:38px; display:grid; place-items:center; border-radius:10px; background:var(--glass-strong); border:1px solid var(--line)}
+.scan .ex i{background:var(--accent-soft); border-color:transparent; color:var(--accent); font-weight:600}
+.scan .in i{background:rgba(11,147,168,.12); border-color:transparent; color:var(--accent2); font-weight:600}
+.takeaways{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px; list-style:none; padding:0!important}
+.takeaways li{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:14px 16px; max-width:none; margin:0!important}
+details.ex{background:var(--glass2); border:1px solid var(--edge-soft); border-radius:16px; padding:12px 16px}
+details.ex + details.ex{margin-top:10px}
+details.ex summary{cursor:pointer; font-weight:600}
+details.ex p{margin:8px 0 0}
+.end-cta{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px; padding:24px clamp(22px,4vw,46px)}
+.end-cta h3{font-size:1.35rem}
+
+.reveal{opacity:0; transform:translateY(16px); transition:opacity .55s ease, transform .55s ease}
+.reveal.in{opacity:1; transform:none}
+
+/* ---------- quiz ---------- */
+.quiz{max-width:840px; margin:0 auto; display:flex; flex-direction:column; gap:18px}
+.qcard{padding:clamp(20px,4vw,38px); display:flex; flex-direction:column; gap:18px}
+.qcard h2{font-size:clamp(1.45rem,3.2vw,1.95rem)}
+.muted{color:var(--muted)}
+.label{font-family:var(--f-mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block}
+.seg{display:flex; flex-wrap:wrap; gap:8px}
+.chip{appearance:none; border:1px solid var(--line); background:var(--glass-strong); color:var(--ink); font:600 .9rem var(--f-body); padding:8px 14px; border-radius:999px; cursor:pointer; transition:background .15s, border-color .15s}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--accent-ink); border-color:transparent}
+.chip small{opacity:.75; font-weight:400; margin-left:4px}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+.row.between{justify-content:space-between}
+.qhead{display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; font-size:.92rem}
+.counter{font-family:var(--f-mono); color:var(--muted)}
+.tag{font-family:var(--f-mono); font-size:.72rem; letter-spacing:.05em; padding:4px 10px; border-radius:999px; background:var(--accent-soft); color:var(--accent)}
+.live{font-family:var(--f-mono); font-size:.86rem}
+.live .g{color:var(--good)} .live .r{color:var(--bad)}
+.qbar{height:6px; border-radius:6px; background:var(--accent-soft); overflow:hidden}
+.qbar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .35s ease}
+.question{font-family:var(--f-display); font-size:clamp(1.12rem,2.4vw,1.38rem); line-height:1.38; font-weight:600; margin:0}
+.mode{margin:-6px 0 0; font-size:.9rem; color:var(--muted); font-style:italic}
+.opts{display:grid; gap:10px; list-style:none; padding:0; margin:0}
+.opt{appearance:none; width:100%; text-align:left; border:1.5px solid var(--line); background:var(--glass-strong); color:var(--ink); font:400 1.02rem/1.45 var(--f-body); padding:13px 16px; border-radius:16px; cursor:pointer; display:flex; gap:14px; align-items:flex-start; transition:border-color .15s, background .15s, transform .15s}
+.opt:hover:not(:disabled){border-color:var(--accent); transform:translateX(3px)}
+.opt .k{flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center; background:var(--accent-soft); font:700 .82rem var(--f-mono); color:var(--accent)}
+.opt:disabled{cursor:default}
+.opt.sel{border-color:var(--accent); background:var(--accent-soft)}
+.opt.sel .k{background:var(--accent); color:var(--accent-ink)}
+.opt.correct{border-color:var(--good); background:var(--good-soft)}
+.opt.correct .k{background:var(--good); color:#fff}
+.opt.answer{border-color:var(--good); border-style:dashed}
+.opt.answer .k{background:var(--good-soft); color:var(--good)}
+.opt.answer::after{content:"correct answer"; margin-left:auto; align-self:center; font:600 .68rem var(--f-mono); color:var(--good); text-transform:uppercase; letter-spacing:.08em; white-space:nowrap; padding-left:8px}
+.opt.wrong{border-color:var(--bad); background:var(--bad-soft)}
+.opt.wrong .k{background:var(--bad); color:#fff}
+.opt.dim{opacity:.55}
+.opt.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.explain{border-radius:16px; padding:14px 18px; background:var(--accent-soft); border:1px solid var(--edge-soft); border-left:4px solid var(--accent); animation:pop .3s ease}
+.explain.ok{border-left-color:var(--good); background:var(--good-soft)}
+.explain.no{border-left-color:var(--bad); background:var(--bad-soft)}
+.explain b{font-family:var(--f-display)}
+.explain p{margin:6px 0 0}
+@keyframes pop{from{opacity:0; transform:translateY(6px)}}
+.hint{font-size:.82rem; color:var(--muted); margin:0}
+kbd{border:1px solid var(--line); border-bottom-width:2px; border-radius:6px; padding:1px 6px; background:var(--glass-strong)}
+.result-top{display:flex; gap:24px; align-items:center; flex-wrap:wrap}
+.ring{--p:0; width:140px; height:140px; border-radius:50%; flex:none; display:grid; place-items:center;
+  background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--accent-soft) 0)}
+.ring div{width:112px; height:112px; border-radius:50%; background:var(--glass-strong); display:grid; place-items:center; text-align:center; line-height:1.1}
+.ring b{font:800 1.9rem var(--f-display)} .ring small{color:var(--muted); font-size:.78rem}
+.topics{display:grid; gap:8px}
+.trow{display:grid; grid-template-columns:minmax(0,1fr) 120px 52px; gap:10px; align-items:center; font-size:.92rem}
+.trow .tb{height:8px; border-radius:8px; background:var(--accent-soft); overflow:hidden}
+.trow .tb i{display:block; height:100%; background:var(--good)}
+.trow .tb i.mid{background:var(--amber)} .trow .tb i.low{background:var(--bad)}
+.trow span:last-child{font-family:var(--f-mono); text-align:right; color:var(--muted)}
+.review{display:grid; gap:12px}
+.ritem{border:1px solid var(--line); border-radius:16px; padding:14px 16px; background:var(--glass-strong)}
+.ritem p{margin:4px 0}
+.ritem .q{font-weight:700}
+.ritem .you{color:var(--bad)} .ritem .ans{color:var(--good)}
+.ritem .why{color:var(--muted); font-size:.94rem}
+.best{font-size:.9rem}
+
+/* lightbox */
+dialog.lb{border:0; padding:0; background:transparent; max-width:min(1200px,96vw); width:100%}
+dialog.lb::backdrop{background:rgba(5,8,20,.86)}
+dialog.lb img{width:100%; height:auto; background:#fff; border-radius:14px; display:block; padding:12px}
+dialog.lb p{color:#e7ebf7; text-align:center; font-size:.95rem; margin:10px 0 0}
+dialog.lb button{position:absolute; top:8px; right:8px; background:rgba(0,0,0,.6); color:#fff; border:0; width:38px; height:38px; border-radius:10px; font-size:1.2rem; cursor:pointer}
+
+footer{position:relative; z-index:1; text-align:center; color:var(--muted); font-size:.85rem; padding:0 16px 40px}
+footer a{color:var(--muted)}
+
+@media (prefers-reduced-motion: reduce){
+  .reveal{opacity:1; transform:none; transition:none} html{scroll-behavior:auto}
+  .opt, .btn, .fig button{transition:none} .opt.shake{animation:none}
+}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+/* ---------- additions for Reading 05 (Data Structures and Algorithms) ---------- */
+pre.code .c{color:#8b95b8; font-style:italic}
+.box{margin-left:0; margin-right:0; border-radius:18px; border:1px solid var(--edge-soft); background:var(--glass2); padding:clamp(12px,2.4vw,18px); overflow-x:auto}
+.box figcaption{font-size:.9rem; color:var(--muted); margin-top:10px}
+figure.box{margin-bottom:0}
+.passes{display:flex; flex-direction:column; gap:8px; min-width:max-content}
+.pass{display:grid; grid-template-columns:9.5rem auto; gap:12px; align-items:center}
+.pass .lbl{font-family:var(--f-mono); font-size:.76rem; color:var(--muted)}
+.arr, .idx{display:flex; gap:5px; flex-wrap:nowrap}
+.cell{min-width:40px; height:40px; display:grid; place-items:center; border:1px solid var(--line); border-radius:10px; font:600 .9rem var(--f-mono); background:var(--glass-strong); color:var(--ink)}
+.cell.sorted{background:var(--good-soft); border-color:var(--good); color:var(--good)}
+.cell.swap{background:var(--amber-soft); border-color:var(--amber)}
+.cell.mid{background:var(--accent-soft); border:2px solid var(--accent)}
+.cell.prefix, .cell.prefixc{background:var(--accent-soft); border-color:var(--accent)}
+.cell.prefix.swap, .cell.prefixc.swap{background:var(--amber-soft); border-color:var(--amber)}
+.cell.out{opacity:.35}
+.idx span{min-width:40px; text-align:center; font:.68rem var(--f-mono); color:var(--muted)}
+.stepper{display:flex; flex-direction:column; gap:12px}
+.stepper .controls{display:flex; flex-wrap:wrap; gap:8px 10px; align-items:center}
+.stepper input{font:600 .95rem var(--f-mono); width:8rem; padding:9px 12px; border:1px solid var(--line); border-radius:12px; background:var(--glass-strong); color:var(--ink)}
+.stepper input.wide{width:13rem; max-width:100%}
+.stepper input[aria-invalid="true"]{border-color:var(--bad)}
+.stepper .msg{font:.86rem/1.5 var(--f-mono); min-height:1.5em}
+.btn.sm{padding:8px 14px; font-size:.92rem; border-radius:12px}
+.small{font-size:.85rem}
+.seg{display:inline-flex; flex-wrap:wrap; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--glass-strong)}
+.seg button{font:600 .92rem var(--f-body); border:0; background:transparent; color:var(--ink); padding:8px 14px; cursor:pointer}
+.seg button + button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:linear-gradient(135deg,var(--accent),var(--accent2)); color:var(--accent-ink)}
+.counters{display:flex; flex-wrap:wrap; gap:6px 18px; font:.84rem var(--f-mono); color:var(--muted)}
+.counters b{color:var(--ink); font-variant-numeric:tabular-nums}
+.stab{display:flex; flex-direction:column; gap:10px}
+.stab-row{display:grid; grid-template-columns:5.5rem auto 1fr; gap:12px; align-items:center}
+.stab-row .lbl{font:.76rem var(--f-mono); color:var(--muted)}
+.stab-row .note{font-size:.88rem; color:var(--muted)}
+.rec{min-width:56px; border:1px solid var(--line); border-radius:10px; padding:4px 8px; display:flex; flex-direction:column; align-items:center; background:var(--glass-strong); line-height:1.2}
+.rec b{font-size:.9rem} .rec span{font:600 .74rem var(--f-mono)}
+.rec.gA span{color:var(--good)} .rec.gB span{color:var(--accent)}
+.stab .arr{gap:5px}
+.inv-row{display:grid; grid-template-columns:42px 1fr 2.5rem; gap:12px; align-items:center; padding:5px 0; border-bottom:1px dashed var(--line); font:.85rem var(--f-mono)}
+.inv-row b{text-align:right; color:var(--accent)} .inv-row.total{border-bottom:0; font-weight:600}
+.inv-row .cell{height:34px}
+.formula{font:600 1rem var(--f-mono); background:var(--accent-soft); border:1px solid var(--edge-soft); border-radius:16px; padding:12px 16px; text-align:center; overflow-x:auto}
+#raceChart{display:block; width:100%; height:auto; min-width:420px}
+#raceChart text{font-family:var(--f-mono); fill:var(--muted)}
+.legend{display:flex; flex-wrap:wrap; gap:6px 16px; font:.8rem var(--f-mono); margin-top:8px}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.legend i{width:16px; height:4px; border-radius:2px; display:inline-block}
+th.r, td.r{text-align:right; font-variant-numeric:tabular-nums}
+td.yes{color:var(--good); font-weight:700}
+.qcode{margin-top:12px}
+.whyw{color:var(--bad); margin:6px 0 0}
+@media (max-width:560px){
+  .pass{grid-template-columns:1fr; gap:4px}
+  .cell, .idx span{min-width:32px} .cell{height:34px; font-size:.8rem} .arr, .idx{gap:3px}
+  .stab-row{grid-template-columns:1fr; gap:4px} .rec{min-width:48px}
+}
+</style>
+<body>
+<div class="backdrop" aria-hidden="true">
+  <svg id="bg-grid" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1600 1000"></svg>
+  <div class="grain"></div>
+</div>
+
+<header class="top">
+  <div class="bar glass">
+    <a class="brand" href="../../index.html" title="All courses">
+      <span class="logo"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M5 20v-4M10 20v-8M15 20v-12M20 20V4"/></svg></span>
+      <span><small>FENMS 0121 · Week 05</small><b>Elementary Sorts</b></span>
+    </a>
+    <div class="tabs" role="tablist" aria-label="View">
+      <button class="tab" role="tab" id="tab-read" aria-selected="true" aria-controls="view-read">Reading</button>
+      <button class="tab" role="tab" id="tab-quiz" aria-selected="false" aria-controls="view-quiz">Quiz</button>
+    </div>
+    <button class="icon-btn saver-btn" id="battery-saver" aria-pressed="false" title="Reduce visual effects while keeping the page readable">Battery saver: off</button>
+    <button class="icon-btn" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+    <div class="progress" id="progress"></div>
+  </div>
+</header>
+
+<main>
+<div class="shell">
+
+<!-- ======================= READING ======================= -->
+<section id="view-read" role="tabpanel" aria-labelledby="tab-read">
+  <div class="hero glass">
+    <div class="eyebrow"><span><i class="dot"></i>FENMS 0121 · Data Structures &amp; Algorithms</span><span>Reading 05 · Chapter 7</span><span>2026/2027</span></div>
+    <h1>Elementary <em>sorts</em></h1>
+    <p class="lede">Two words that describe any sort, stability and adaptivity, and three algorithms that beat bubble sort: selection sort, insertion sort and Shell sort. The last one will surprise you.</p>
+    <div class="cta">
+      <a class="btn primary" href="#s1">Start reading ↓</a>
+      <button class="btn" data-go="quiz">Take the quiz →</button>
+    </div>
+    <div class="stats">
+      <span class="stat"><b>15</b>chapters</span>
+      <span class="stat"><b>4</b>algorithms</span>
+      <span class="stat"><b id="qcount-hero">—</b>quiz questions</span>
+      <span class="stat"><b>~35</b>min read</span>
+    </div>
+    <svg class="hero-art" viewBox="0 0 380 300" aria-hidden="true" fill="none">
+      <defs>
+        <linearGradient id="hg" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="var(--accent)"/><stop offset="1" stop-color="var(--accent2)"/></linearGradient>
+      </defs>
+      <g>
+        <rect x="40"  y="200" width="30" height="60"  rx="7" fill="url(#hg)" opacity=".55"/>
+        <rect x="80"  y="180" width="30" height="80"  rx="7" fill="url(#hg)" opacity=".62"/>
+        <rect x="120" y="160" width="30" height="100" rx="7" fill="url(#hg)" opacity=".69"/>
+        <rect x="160" y="135" width="30" height="125" rx="7" fill="url(#hg)" opacity=".76"/>
+        <rect x="200" y="110" width="30" height="150" rx="7" fill="url(#hg)" opacity=".83"/>
+        <rect x="240" y="85"  width="30" height="175" rx="7" fill="url(#hg)" opacity=".9"/>
+        <rect x="280" y="60"  width="30" height="200" rx="7" fill="url(#hg)"/>
+        <path d="M60 180 C 120 40, 230 40, 292 40" stroke="var(--accent)" stroke-width="2.5" stroke-dasharray="6 7" stroke-linecap="round"/>
+        <path d="M282 32l12 8-12 8" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M24 270h332" stroke="var(--muted)" stroke-width="1.5" opacity=".6"/>
+      </g>
+    </svg>
+  </div>
+
+  <div class="reading">
+    <nav class="toc glass" aria-label="Contents">
+      <h4>Contents</h4>
+      <ol id="toc">
+        <li><a href="#s1">Isn't bubble sort enough?</a></li>
+        <li><a href="#s2">What sorting is &amp; what we count</a></li>
+        <li><a href="#s3">Stability</a></li>
+        <li><a href="#s4">Adaptivity</a></li>
+        <li><a href="#s5">Bubble sort, again</a></li>
+        <li><a href="#s6">Selection sort</a></li>
+        <li><a href="#s7">Insertion sort</a></li>
+        <li><a href="#s8">Inversions</a></li>
+        <li><a href="#s9">Shell sort</a></li>
+        <li><a href="#s10">Choosing the increments</a></li>
+        <li><a href="#s11">What Shell sort costs</a></li>
+        <li><a href="#s12">Step through them</a></li>
+        <li><a href="#s13">The race</a></li>
+        <li><a href="#s14">The summary table</a></li>
+        <li><a href="#s15">Key takeaways</a></li>
+      </ol>
+      <button class="btn primary quiz-link" data-go="quiz">Take the quiz →</button>
+    </nav>
+
+    <article>
+      <!-- 01 -->
+      <section class="sec glass reveal" id="s1">
+        <h2><span class="n">01</span>Isn't bubble sort enough?</h2>
+        <p>Last week we met bubble sort. In the lecture's measurements it needed 14 μs for 100 elements, 113 ms for 10,000 and 14 seconds for 100,000. It is quadratic, so ten times the elements take about a hundred times as long: a million elements would take around <b>23 minutes</b>.</p>
+        <p>This week adds three more simple sorts: <b>selection sort</b>, <b>insertion sort</b> and <b>Shell sort</b>. Together with bubble sort they are the <b>elementary sorts</b>: short, easy to write, and all of them sort the array <b>in place</b> with Θ(1) extra memory.</p>
+        <div class="callout story"><span class="lbl">Where this fits</span>Binary search from last week only works on a sorted array, so the natural next question is how we get one. The book spends four chapters on sorting: sorted data is useful (searching, grouping duplicates, ranking, merging), and sorting is a clean way to compare many algorithms on one exactly stated problem.</div>
+      </section>
+
+      <!-- 02 -->
+      <section class="sec glass reveal" id="s2">
+        <h2><span class="n">02</span>What sorting is &amp; what we count</h2>
+        <p><b>Sorting</b> rearranges N items into order. The order is decided by a <b>key</b> that belongs to each item and a rule for comparing two keys. When you sort integers, the key is the integer. When you sort students by grade, only the grade is compared; the name and everything else travel along without ever being looked at.</p>
+        <p>Every algorithm in the chapter compares whole elements with <code>&lt;</code>. To sort a type of your own you define <code>operator&lt;</code>: it takes two values and returns whether the first belongs before the second.</p>
+<pre class="code"><span class="k">template</span>&lt;<span class="k">typename</span> Data&gt;
+<span class="k">void</span> bubble_sort(Data* arr, <span class="k">int</span> len);   <span class="c">// all four sorts share this shape</span></pre>
+        <div class="defs">
+          <div class="def"><b><span class="sym">void</span>In place</b><span>The function sorts the caller's array instead of producing a new one. That is why all four use <b>Θ(1)</b> extra space.</span></div>
+          <div class="def"><b><span class="sym">len</span>Separate length</b><span>An array <b>decays to a pointer</b>, and a pointer carries no length.</span></div>
+          <div class="def"><b><span class="sym">&lt;T&gt;</span>Template</b><span>One implementation sorts ints, strings and Student records.</span></div>
+        </div>
+        <h3>Two costs: comparisons and exchanges</h3>
+        <p>We count two operations: the <b>comparison</b> of two elements (is this one smaller?) and the <b>exchange</b> of two elements (swap them). They are not interchangeable. Comparing two integers is nearly free, while exchanging two large records means copying a lot of bytes. Every exchange goes through the same <code>swap</code> helper, so the counts are comparable between algorithms.</p>
+        <div class="callout key"><span class="lbl">Remember</span>An algorithm can be good at one count and bad at the other. Selection sort is quadratic in comparisons but linear in exchanges.</div>
+      </section>
+
+      <!-- 03 -->
+      <section class="sec glass reveal" id="s3">
+        <h2><span class="n">03</span>Stability</h2>
+        <p>A sorting algorithm is <b>stable</b> if elements whose keys compare equal keep their original relative order: if an array has two 8s, the 8 that came first still comes first. An <b>unstable</b> algorithm makes <b>no promise</b> either way. It may keep the ties in order, reverse them or mix them up. Unstable does not mean "always reverses".</p>
+        <p><b>When does it matter?</b> Not at all when the key is the whole element: every 8 is the same 8, so nobody can tell if two of them swapped. It matters when elements carry more than the key, and most of all when you sort the same data twice.</p>
+        <figure class="box">
+          <div class="stab" id="stabFig"></div>
+          <figcaption>Four students start in alphabetical order and are sorted again by grade. Both results are sorted by grade, but only the stable one keeps Bo before Dan and Ana before Cvi.</figcaption>
+        </figure>
+        <h3>Sorting by several keys</h3>
+        <p>Stability lets you sort by several keys with a simple single-key sort: sort by the <b>least important key first</b>, then by the next one, and so on. Each stable pass keeps the work of the passes before it.</p>
+        <div class="callout story"><span class="lbl">The lecture's word count</span>Count the words in <i>"how much wood would woodchuck chuck if woodchuck could chuck wood"</i>. We want them by decreasing count, alphabetical when two counts are equal. So: sort by word first, then by count. A stable second sort keeps the alphabetical order inside each count. With selection sort (unstable) as the second sort, "if" and "much" ended up before "could" and "how".</div>
+        <div class="callout warn"><span class="lbl">Exam traps</span>
+          <ul>
+            <li>Bubble and insertion sort are stable because they only swap <b>neighbours</b> on a <b>strict</b> <code>&lt;</code>, so equal keys never cross. Change the comparison to <code>&lt;=</code> and the output is still sorted but no longer stable.</li>
+            <li>Selection and Shell sort exchange <b>distant</b> elements. A long jump can carry an element past an equal key it was never compared with. That is the general shape of instability.</li>
+            <li>To test stability, sorting integers proves nothing. The book's tests sort 400 records that share 20 keys and check the ties.</li>
+          </ul></div>
+      </section>
+
+      <!-- 04 -->
+      <section class="sec glass reveal" id="s4">
+        <h2><span class="n">04</span>Adaptivity</h2>
+        <p>A sort is <b>adaptive</b> if it takes less time on input that is already partly in order. A <b>non-adaptive</b> sort does the same work on shuffled, sorted and reversed input.</p>
+        <p>Adaptivity pays off because real data is often partly sorted: log files arrive in time order, exported tables come sorted by key, and a list sorted last week with a dozen new items is nearly sorted now. A non-adaptive sort has one advantage of its own: its running time is <b>predictable</b>.</p>
+        <div class="callout"><span class="lbl">Notation reminder</span>The lecture tables label the worst case with O, the average with Θ and the best with Ω. But the symbols and the cases are separate things: O is an upper bound, Ω a lower bound and Θ both, and each can describe any case. The book gives each case its tight Θ.</div>
+      </section>
+
+      <!-- 05 -->
+      <section class="sec glass reveal" id="s5">
+        <h2><span class="n">05</span>Bubble sort, again</h2>
+        <p>Walk along the array comparing each element with the one before it, and swap when they are out of order. The largest element gets carried along, so after one pass it sits at the end. Each pass leaves one more element in its final place.</p>
+<pre class="code"><span class="k">for</span> (<span class="k">int</span> i = 0; i &lt; len; i++) {
+    <span class="k">bool</span> swapped = <span class="k">false</span>;
+    <span class="k">for</span> (<span class="k">int</span> j = 1; j &lt; len - i; j++) {   <span class="c">// last i are already home</span>
+        <span class="k">if</span> (arr[j] &lt; arr[j - 1]) { swap(arr, j, j - 1); swapped = <span class="k">true</span>; }
+    }
+    <span class="k">if</span> (!swapped) <span class="k">break</span>;                     <span class="c">// a clean pass: sorted</span>
+}</pre>
+        <figure class="box">
+          <div class="passes" id="bubblePasses"></div>
+          <figcaption>Bubble sort on [7, 3, 9, 1, 5, 8, 2, 6]. Green cells are final; amber cells moved in that pass. Pass 6 finds nothing to swap, which is how the algorithm knows to stop: 27 comparisons, 15 exchanges.</figcaption>
+        </figure>
+        <div class="tbl"><table>
+          <tr><th>Case</th><th>What happens</th><th>Cost</th></tr>
+          <tr><td>Worst: reversed</td><td>every pass swaps every pair: N(N−1)/2 comparisons and exchanges (124,750 at N = 500)</td><td class="mono">Θ(N²)</td></tr>
+          <tr><td>Average: shuffled</td><td>about N(N−1)/4 inversions, half the worst case</td><td class="mono">Θ(N²)</td></tr>
+          <tr><td>Best: sorted</td><td>one pass, N − 1 comparisons, 0 exchanges (499 at N = 500)</td><td class="mono">Θ(N)</td></tr>
+          <tr><td>Best without the flag</td><td>still does every pass</td><td class="mono">Θ(N²)</td></tr>
+        </table></div>
+        <p>Across all inputs bubble sort is <b>O(N²)</b> and <b>Ω(N)</b>, but it is <b>not Θ of anything</b>: a single Θ would have to bound every input from both sides, and the best and worst cases are in different classes. It is <b>stable</b> (strict comparison of neighbours) and <b>adaptive</b> (that one boolean flag is its whole adaptivity).</p>
+        <div class="callout warn"><span class="lbl">So what is wrong with it?</span>It moves elements <b>one position per exchange</b>, so an element that belongs k places away costs k exchanges. A large element flies to the end in one pass, but a small element at the end crawls left one place per pass: [2, 3, 4, 5, 6, 1] needs every pass. It also keeps re-scanning ordered regions, so it makes about <b>twice as many comparisons as insertion sort</b> for exactly the same exchanges.</div>
+      </section>
+
+      <!-- 06 -->
+      <section class="sec glass reveal" id="s6">
+        <h2><span class="n">06</span>Selection sort</h2>
+        <p>Selection sort works from the other end. In iteration i, assume the minimum is at position i, scan everything to its right, and remember the index <code>min</code> of the smallest element seen. Only after the scan, make <b>one exchange</b>: <code>arr[i]</code> with <code>arr[min]</code>. The minimum is "selected", hence the name. Position i is now final and never changes again.</p>
+<pre class="code"><span class="k">for</span> (<span class="k">int</span> i = 0; i &lt; len; i++) {
+    <span class="k">int</span> min = i;
+    <span class="k">for</span> (<span class="k">int</span> j = i + 1; j &lt; len; j++)
+        <span class="k">if</span> (arr[j] &lt; arr[min]) min = j;   <span class="c">// only remembers, moves nothing</span>
+    swap(arr, min, i);                      <span class="c">// one exchange per i</span>
+}</pre>
+        <figure class="box">
+          <div class="passes" id="selectionPasses"></div>
+          <figcaption>Selection sort on the same array. Each row fills one more position (green) with the smallest element left; the amber cell is the one it was exchanged with.</figcaption>
+        </figure>
+        <h3>What it costs</h3>
+        <p>The comparison count does not depend on the data at all: <span class="mono">(N−1) + (N−2) + … + 1 + 0 = N(N−1)/2</span>. That is 28 for our eight elements and 19,900 for 200 elements, on sorted, reversed and shuffled input alike. There is no early exit, so best, average and worst are all <b>Θ(N²)</b>, and they even agree on the exact count.</p>
+        <p>That makes selection sort the one algorithm in the chapter with a <b>single unqualified Θ(N²)</b>. It is <b>non-adaptive</b>, and this is what non-adaptive looks like on paper.</p>
+        <p>The exchanges grow much more slowly: <b>exactly N</b>, one per value of i (the book's code swaps even when <code>min == i</code>). Bubble sort makes about 64 million exchanges on 16,000 shuffled elements; selection sort makes 16,000.</p>
+        <div class="callout story"><span class="lbl">When few exchanges matter</span>Sorting large structs by value: a comparison reads one field, an exchange copies the whole record three times. Selection sort touches each record only about twice. Its running time is also very predictable. But those cases are narrow: on ordinary data it finished <b>last</b> of the four in the book's race.</div>
+        <div class="callout warn"><span class="lbl">Unstable: [3, 8, 3, 1]</span>The first pass finds 1 at the end and exchanges it with position 0, which throws the first 3 over the second one. Output [1, 3, 3, 8] is sorted, but the two 3s have swapped order. Making it stable is possible (shift instead of exchange), but then the moves are no longer linear.</div>
+      </section>
+
+      <!-- 07 -->
+      <section class="sec glass reveal" id="s7">
+        <h2><span class="n">07</span>Insertion sort</h2>
+        <p>Insertion sort is how you sort a hand of <b>playing cards</b>: take the next card and push it left past every larger card until it fits. In the array, pushing left is a run of exchanges with the left neighbour. Stop at the first neighbour that is not larger, because everything further left is smaller still.</p>
+<pre class="code"><span class="k">for</span> (<span class="k">int</span> i = 1; i &lt; len; i++)
+    <span class="k">for</span> (<span class="k">int</span> j = i; j &gt; 0; j--) {
+        <span class="k">if</span> (arr[j] &lt; arr[j - 1]) swap(arr, j, j - 1);
+        <span class="k">else</span> <span class="k">break</span>;                      <span class="c">// landed: stop right now</span>
+    }</pre>
+        <figure class="box">
+          <div class="passes" id="insertionPasses"></div>
+          <figcaption>Insertion sort on the same array. The violet prefix is sorted <b>but not final</b>: 1 and 2 later push into the middle of it. 3 moves back 1 place, 9 stays, 1 moves 3, 5 moves 2, 8 moves 1, 2 moves 5, 6 moves 3.</figcaption>
+        </figure>
+        <div class="callout key"><span class="lbl">Two prefixes, two meanings</span>Both selection and insertion sort grow a sorted prefix from the left. Selection sort's prefix holds the <b>smallest elements of the whole array, each final</b>. Insertion sort's prefix holds the <b>first elements of the array, in order among themselves</b>, and any of them can still be pushed right.</div>
+        <p>The <code>break</code> does the job of bubble sort's flag, and does it better: bubble sort has to finish a whole pass before it learns that the pass was unnecessary, while insertion sort stops the moment the element lands.</p>
+        <div class="tbl"><table>
+          <tr><th>Case</th><th>What happens</th><th>Cost</th></tr>
+          <tr><td>Worst: reversed</td><td>every element travels to the front: N(N−1)/2 comparisons and exchanges</td><td class="mono">Θ(N²)</td></tr>
+          <tr><td>Average: shuffled</td><td>each element moves about half as far: ≈ N²/4 exchanges</td><td class="mono">Θ(N²)</td></tr>
+          <tr><td>Best: sorted</td><td>break fires on the first comparison every time: N − 1 comparisons, 0 exchanges</td><td class="mono">Θ(N)</td></tr>
+        </table></div>
+        <p>Like bubble sort, it is O(N²) and Ω(N) with no single Θ. It is <b>stable</b> and <b>strongly adaptive</b>.</p>
+        <h3>Two common improvements</h3>
+        <div class="defs">
+          <div class="def"><b>Shift instead of swap</b><span>Save the element, move the larger ones one place right, write it into the gap once. An exchange writes two elements, so this roughly <b>halves the writes</b>.</span></div>
+          <div class="def"><b>Binary insertion sort</b><span>The prefix is sorted, so binary search finds the spot in about lg N comparisons. Comparisons drop to about N log N, but on an array the elements still have to move, so it stays <b>Θ(N²)</b>.</span></div>
+        </div>
+        <div class="callout story"><span class="lbl">Book vs lecture</span>In the lecture's measurements insertion sort (7 s for 100,000) landed between selection (4 s) and bubble sort (14 s). In the book's experiment it was the fastest of the three quadratic sorts, about four times faster than selection sort. Results depend on the data, the language and the implementation.</div>
+      </section>
+
+      <!-- 08 -->
+      <section class="sec glass reveal" id="s8">
+        <h2><span class="n">08</span>Inversions</h2>
+        <p>An <b>inversion</b> is a pair of positions i &lt; j whose elements are in the wrong order: <code>arr[j] &lt; arr[i]</code>. A sorted array has 0. A reversed array has <span class="mono">N(N−1)/2</span>, the maximum. A shuffled array has about half of that.</p>
+        <figure class="box">
+          <div id="invFig"></div>
+          <figcaption>Every inversion in [7, 3, 9, 1, 5, 8, 2, 6]. For each element, count the smaller elements to its right: 5 + 2 + 5 + 0 + 1 + 2 + 0 = 15.</figcaption>
+        </figure>
+        <div class="formula">insertion sort: exchanges = I &nbsp;·&nbsp; I ≤ comparisons ≤ I + N − 1</div>
+        <p><b>Why exactly one per exchange?</b> An adjacent exchange fixes the order of the two swapped elements and changes nothing else: every other element is left of both or right of both, so its relation to each of them stays the same. The array starts with I inversions and ends with none. For comparisons, each pass makes one per exchange plus at most one more when the <code>break</code> fires, and there are N − 1 passes.</p>
+        <ul>
+          <li>An array with a <b>linear number of inversions</b> is sorted in linear time. That is what "partly sorted" means precisely.</li>
+          <li>Bubble sort also exchanges only neighbours, so <b>bubble and insertion sort make identical exchange counts on every input</b>. At 16,000 elements: 64,389,560 each. Bubble sort makes about twice as many comparisons.</li>
+          <li>An array of N <b>equal</b> elements has 0 inversions: insertion sort makes N − 1 comparisons and no exchanges.</li>
+        </ul>
+        <div class="callout story"><span class="lbl">Insertion sort inside bigger algorithms</span>Its short inner loop makes it great for small subarrays, and its inversion-based cost makes it great for extending short sorted runs. Real libraries use it to finish small or nearly sorted pieces inside faster sorts (next chapter, and Timsort).</div>
+      </section>
+
+      <!-- 09 -->
+      <section class="sec glass reveal" id="s9">
+        <h2><span class="n">09</span>Shell sort</h2>
+        <p>Bubble and insertion sort move an element <b>one position per exchange</b>, so they have to remove a quadratic number of inversions one at a time. <b>Donald Shell</b> (1959) asked: can we use distant exchanges without repeating selection sort's minimum searches?</p>
+        <div class="callout key"><span class="lbl">h-sorting</span>An array is <b>h-sorted</b> when every h-th element, taken from any starting position, is in order. <b>h-sorting</b> is insertion sort over elements h apart instead of 1 apart.</div>
+        <p>A large h moves an element a long way with one exchange. It does not finish the job, but it cannot make things worse, and it leaves the array much closer to sorted. Shell sort h-sorts for a <b>decreasing sequence of h ending at 1</b>. The last pass is plain insertion sort, so the result is always sorted, and by then the array is nearly in order, exactly where insertion sort is fastest.</p>
+<pre class="code"><span class="k">int</span> h = 1;
+<span class="k">while</span> (h &lt; len / 3) h = 3 * h + 1;         <span class="c">// 1, 4, 13, 40, 121, ...</span>
+<span class="k">while</span> (h &gt;= 1) {
+    <span class="k">for</span> (<span class="k">int</span> i = h; i &lt; len; i++)
+        <span class="k">for</span> (<span class="k">int</span> j = i; j &gt;= h; j -= h) {
+            <span class="k">if</span> (arr[j] &lt; arr[j - h]) swap(arr, j, j - h);
+            <span class="k">else</span> <span class="k">break</span>;
+        }
+    h = h / 3;
+}</pre>
+        <p>Hold the inner loops next to insertion sort: <b>the same loops with every 1 replaced by h</b>. Insertion sort is Shell sort with the single increment 1.</p>
+        <figure class="box">
+          <div class="passes" id="shellPasses"></div>
+          <figcaption>Shell sort on the same array, h = 4 then h = 1. The 4-sort compares the pairs (7,5), (3,8), (9,2), (1,6) and exchanges two of them. Those two exchanges take the array from 15 inversions to 9, so the final insertion sort has much less to fix.</figcaption>
+        </figure>
+      </section>
+
+      <!-- 10 -->
+      <section class="sec glass reveal" id="s10">
+        <h2><span class="n">10</span>Choosing the increments</h2>
+        <p>The increment sequence matters more than anything else in the algorithm.</p>
+        <div class="defs">
+          <div class="def"><b>Shell's halving</b><span>N/2, N/4, …, 1. It works, but not very well: the increments <b>share factors</b>, so passes keep re-sorting the same subsequences.</span></div>
+          <div class="def"><b>Knuth's 3h + 1</b><span>1, 4, 13, 40, 121, 364, … The code climbs it while <code>h &lt; len / 3</code>, then divides by 3 after each pass.</span></div>
+        </div>
+        <div class="box stepper">
+          <div class="controls">
+            <label for="hLen"><b>N =</b></label>
+            <input id="hLen" type="number" value="100000" min="1" max="100000000" inputmode="numeric">
+          </div>
+          <div class="msg" id="hMsg" role="status"></div>
+        </div>
+        <p>Try 8 (h = 4, 1), 1,000 (364 … 1, six passes) and 100,000 (eleven passes, from 88,573 down to 1). Watch the boundary: 14 elements start at h = 4, but 15 start at h = 13, because <code>len / 3</code> is integer division.</p>
+        <div class="callout"><span class="lbl">Why eleven passes are cheap</span>Every pass is cheap for a different reason. Early passes: a large h leaves few elements in each subsequence. Middle passes: the array is already partly ordered. Last pass: insertion sort is linear on nearly sorted data.</div>
+      </section>
+
+      <!-- 11 -->
+      <section class="sec glass reveal" id="s11">
+        <h2><span class="n">11</span>What Shell sort costs</h2>
+        <p>Shell sort is hard to analyse, because each pass changes the input of the next one.</p>
+        <div class="tbl"><table>
+          <tr><th>Case</th><th>With 3h + 1</th><th>Why</th></tr>
+          <tr><td>Worst</td><td class="mono">Θ(N<sup>3/2</sup>) = O(N√N)</td><td>upper bound proved; Vaughan Pratt (1971 thesis) showed some inputs really take that long. A reversed array is <b>not</b> the worst case: long early passes fix most of it.</td></tr>
+          <tr><td>Best: sorted</td><td class="mono">Θ(N log N)</td><td>nothing moves, but each of the ≈ log N passes still scans the array</td></tr>
+          <tr><td>Average</td><td><b>not known</b></td><td>an open problem for more than sixty years</td></tr>
+          <tr><td>Space</td><td class="mono">Θ(1)</td><td>in place</td></tr>
+        </table></div>
+        <p>Across all inputs: <b>O(N<sup>3/2</sup>)</b> and <b>Ω(N log N)</b>, so like bubble and insertion sort it has no single Θ. Unlike them, its average case is unknown.</p>
+        <div class="callout story"><span class="lbl">An open problem you can hold in your hand</span>Shell sort is fifteen lines long, has no randomness, and its behaviour on any given input is completely determined. Yet nobody can say how many comparisons it makes on average. After an h-sort, the input to the next pass is no longer random; it inherits a structure nobody has described precisely enough to count. The best increment sequences were found by experiment, not derived.</div>
+        <div class="callout warn"><span class="lbl">Adaptive but unstable</span>Shell sort is <b>adaptive</b> (later passes work on partly ordered data). It is <b>unstable</b> for the same reason selection sort is: with [1, 0, 0, 0, 0, 0] the code uses h = 4, exchanges positions 4 and 0, and that 0 jumps over three other 0s it was never compared with.</div>
+      </section>
+
+      <!-- 12 -->
+      <section class="sec glass reveal" id="s12">
+        <h2><span class="n">12</span>Step through them</h2>
+        <p>Pick an algorithm and an input, then step through it one comparison at a time. Watch the counters: bubble and insertion sort always end with the same number of exchanges.</p>
+        <div class="box stepper" id="sortDemo">
+          <div class="controls">
+            <div class="seg" role="group" aria-label="Algorithm" id="algSeg">
+              <button type="button" data-alg="bubble" aria-pressed="true">Bubble</button>
+              <button type="button" data-alg="selection" aria-pressed="false">Selection</button>
+              <button type="button" data-alg="insertion" aria-pressed="false">Insertion</button>
+              <button type="button" data-alg="shell" aria-pressed="false">Shell</button>
+            </div>
+          </div>
+          <div class="controls">
+            <label for="sdInput"><b>Array</b></label>
+            <input id="sdInput" type="text" value="7 3 9 1 5 8 2 6" class="wide" aria-describedby="sdHint">
+            <button class="btn sm" type="button" data-preset="7 3 9 1 5 8 2 6">Book's</button>
+            <button class="btn sm" type="button" data-preset="1 2 3 4 5 6 7 8">Sorted</button>
+            <button class="btn sm" type="button" data-preset="8 7 6 5 4 3 2 1">Reversed</button>
+          </div>
+          <span class="muted small" id="sdHint">2 to 12 integers, separated by spaces or commas.</span>
+          <div class="idx" id="sdIdx"></div>
+          <div class="arr" id="sdArr"></div>
+          <div class="counters"><span>comparisons <b id="sdCmp">0</b></span><span>exchanges <b id="sdExc">0</b></span><span>inversions left <b id="sdInv">0</b></span></div>
+          <div class="controls">
+            <button class="btn primary sm" id="sdStep" type="button">Next step</button>
+            <button class="btn sm" id="sdRun" type="button">Run to end</button>
+            <button class="btn sm" id="sdReset" type="button">Reset</button>
+          </div>
+          <div class="msg" id="sdMsg" role="status"></div>
+        </div>
+      </section>
+
+      <!-- 13 -->
+      <section class="sec glass reveal" id="s13">
+        <h2><span class="n">13</span>The race</h2>
+        <p>The book sorted the same shuffled arrays with all four algorithms on one laptop. Times in brackets are projected from the quadratic growth, not measured.</p>
+        <div class="tbl"><table>
+          <tr><th class="r">N</th><th class="r">bubble</th><th class="r">selection</th><th class="r">insertion</th><th class="r">Shell</th></tr>
+          <tr><td class="r">2,000</td><td class="r">0.0015 s</td><td class="r">0.0030 s</td><td class="r">0.0005 s</td><td class="r">0.00002 s</td></tr>
+          <tr><td class="r">16,000</td><td class="r">0.0793 s</td><td class="r">0.1830 s</td><td class="r">0.0286 s</td><td class="r">0.00077 s</td></tr>
+          <tr><td class="r">64,000</td><td class="r">1.3838 s</td><td class="r">2.1924 s</td><td class="r">0.4657 s</td><td class="r">0.0041 s</td></tr>
+          <tr><td class="r">100,000</td><td class="r">3.99 s</td><td class="r">4.68 s</td><td class="r">1.16 s</td><td class="r">0.0071 s</td></tr>
+          <tr><td class="r">1,000,000</td><td class="r">(399 s)</td><td class="r">(468 s)</td><td class="r">(116 s)</td><td class="r">0.115 s</td></tr>
+          <tr><td class="r">10,000,000</td><td class="r">(11.1 h)</td><td class="r">(13.0 h)</td><td class="r">(3.2 h)</td><td class="r"><b>1.798 s</b></td></tr>
+        </table></div>
+        <figure class="box">
+          <svg id="raceChart" viewBox="0 0 560 320" role="img" aria-label="Log-log chart of sorting time against array size for the four sorts"></svg>
+          <div class="legend" id="raceLegend"></div>
+          <figcaption>Log-log axes turn a power law into a straight line whose slope is the exponent. Three lines climb at the same steep angle; Shell sort's does not. At 64,000 elements Shell sort is 113× faster than insertion sort and 532× faster than selection sort.</figcaption>
+        </figure>
+        <h3>Doubling ratios</h3>
+        <p>Over the last doubling: bubble ×4.30, insertion ×4.11, selection ×3.34. Noisy, but clustered around 2² = 4, as quadratic growth predicts. Shell sort: ×2.28 = 2<sup>1.19</sup>, an exponent of 1.19, comfortably below the 3/2 its worst case allows.</p>
+        <h3>Counting instead of timing (16,000 shuffled elements)</h3>
+        <div class="tbl"><table>
+          <tr><th>Algorithm</th><th class="r">comparisons</th><th class="r">exchanges</th></tr>
+          <tr><td>bubble</td><td class="r">127,990,674</td><td class="r">64,389,560</td></tr>
+          <tr><td>selection</td><td class="r">127,992,000</td><td class="r"><b>16,000</b></td></tr>
+          <tr><td>insertion</td><td class="r">64,405,550</td><td class="r">64,389,560</td></tr>
+          <tr><td>Shell</td><td class="r"><b>439,827</b></td><td class="r">317,814</td></tr>
+        </table></div>
+        <ul>
+          <li>Bubble and insertion: <b>identical exchanges</b> (one per inversion); bubble makes twice the comparisons.</li>
+          <li>Selection makes 4,000× fewer exchanges than bubble and <b>still loses</b>: it makes as many comparisons, and here comparisons dominate.</li>
+          <li>Shell sort does two orders of magnitude less of both.</li>
+        </ul>
+        <div class="callout warn"><span class="lbl">The selection sort puzzle</span>On an already sorted array of 64,000 elements, bubble, insertion and Shell sort finish in under 0.2 ms. Selection sort takes 0.69 s, under a third of its shuffled time. That does <b>not</b> make it adaptive: it makes exactly the same N(N−1)/2 comparisons and N exchanges. On sorted input <code>arr[j] &lt; arr[min]</code> is never true, so the processor predicts the branch every time. The saving comes from the machine, not the algorithm.</div>
+        <h3>The lecture's measurements</h3>
+        <div class="tbl"><table>
+          <tr><th>N</th><th class="r">bubble</th><th class="r">selection</th><th class="r">insertion</th><th class="r">Shell</th></tr>
+          <tr><td>100</td><td class="r">14 μs</td><td class="r">7 μs</td><td class="r">7 μs</td><td class="r">4 μs</td></tr>
+          <tr><td>10,000</td><td class="r">113 ms</td><td class="r">46 ms</td><td class="r">75 ms</td><td class="r">1 ms</td></tr>
+          <tr><td>100,000</td><td class="r">14 s</td><td class="r">4 s</td><td class="r">7 s</td><td class="r">17 ms</td></tr>
+          <tr><td>1,000,000</td><td class="r">who knows?</td><td class="r">who knows?</td><td class="r">who knows?</td><td class="r">270 ms</td></tr>
+        </table></div>
+        <p>Different machine and code, so a different order among the quadratic three, but the same lesson: Shell sort sorts ten million elements in about 4 seconds.</p>
+      </section>
+
+      <!-- 14 -->
+      <section class="sec glass reveal" id="s14">
+        <h2><span class="n">14</span>The summary table</h2>
+        <div class="tbl"><table>
+          <tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Stable</th><th>Adaptive</th><th>Exchanges</th></tr>
+          <tr><td>Bubble</td><td class="mono">Θ(N)</td><td class="mono">Θ(N²)</td><td class="mono">Θ(N²)</td><td class="yes">yes</td><td class="yes">yes</td><td>= inversions</td></tr>
+          <tr><td>Selection</td><td class="mono">Θ(N²)</td><td class="mono">Θ(N²)</td><td class="mono">Θ(N²)</td><td class="no">no</td><td class="no">no</td><td>exactly N</td></tr>
+          <tr><td>Insertion</td><td class="mono">Θ(N)</td><td class="mono">Θ(N²)</td><td class="mono">Θ(N²)</td><td class="yes">yes</td><td class="yes">yes</td><td>= inversions</td></tr>
+          <tr><td>Shell (3h+1)</td><td class="mono">Θ(N log N)</td><td><b>not known</b></td><td class="mono">Θ(N<sup>3/2</sup>)</td><td class="no">no</td><td class="yes">yes</td><td>far fewer</td></tr>
+        </table></div>
+        <p>All four use Θ(1) extra space. For large unordered arrays the algorithms of the coming weeks do better still, but insertion sort keeps its role on small or nearly sorted ranges.</p>
+      </section>
+
+      <!-- 15 -->
+      <section class="sec glass reveal" id="s15">
+        <h2><span class="n">15</span>Key takeaways</h2>
+        <ul class="takeaways">
+          <li>A <b>stable</b> sort keeps equal keys in their original order; an unstable one makes <b>no promise</b>. For several keys, sort by the least important key first.</li>
+          <li>An <b>adaptive</b> sort is faster on partly ordered input, which real data often is.</li>
+          <li>Comparisons <b>read</b>, exchanges <b>write</b>; an algorithm can be cheap in one and expensive in the other.</li>
+          <li><b>Bubble</b>: largest to the end each pass; the swapped flag is its whole adaptivity; Θ(N) best, Θ(N²) average and worst.</li>
+          <li><b>Selection</b>: exactly N(N−1)/2 comparisons and exactly N exchanges on every input; the only single Θ(N²); unstable and non-adaptive.</li>
+          <li><b>Insertion</b>: one exchange per <b>inversion</b>, comparisons between I and I + N − 1; stable and adaptive; used inside faster sorts.</li>
+          <li><b>Bubble = insertion</b> in exchanges on every input; bubble makes about twice the comparisons.</li>
+          <li><b>Shell</b> (Shell, 1959): h-sort for decreasing h ending at 1. With Knuth's 3h + 1 (1, 4, 13, 40, …): best Θ(N log N), worst Θ(N<sup>3/2</sup>), average <b>unknown</b>. Adaptive, unstable.</li>
+          <li>All four sort <b>in place</b> with Θ(1) extra space. At ten million elements Shell sort takes under two seconds; the others would take hours.</li>
+        </ul>
+        <p>Next time you sort a hand of cards, you will know you are running insertion sort.</p>
+      </section>
+
+      <div class="glass end-cta reveal">
+        <h3>Ready to test yourself?</h3>
+        <button class="btn primary" data-go="quiz">Take the quiz →</button>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ======================= QUIZ ======================= -->
+<section id="view-quiz" role="tabpanel" aria-labelledby="tab-quiz" hidden>
+  <div class="quiz">
+    <!-- setup -->
+    <div class="qcard glass" id="q-setup">
+      <div class="eyebrow"><span><i class="dot"></i>Reading 05 · Quiz</span></div>
+      <h2>Elementary Sorts</h2>
+      <p class="muted" style="margin:0">Five options per question and <b>exactly one correct answer</b> each time. Options are shuffled on every run, so learn the idea, not the letter.</p>
+      <div>
+        <span class="label">How many questions?</span>
+        <div class="seg" id="count-seg"></div>
+      </div>
+      <div>
+        <span class="label">Mode</span>
+        <div class="seg" id="mode-seg">
+          <button class="chip" data-m="practice">Practice <small>· feedback after every question</small></button>
+          <button class="chip" data-m="exam">Exam <small>· answers and explanations only at the end</small></button>
+        </div>
+      </div>
+      <div>
+        <div class="row between"><span class="label">Topics</span><button class="chip" id="all-topics" aria-pressed="true">All topics</button></div>
+        <div class="seg" id="topic-seg"></div>
+      </div>
+      <div class="row between">
+        <span class="best muted" id="best"></span>
+        <button class="btn primary" id="start">Start quiz →</button>
+      </div>
+      <div class="row between">
+        <span id="mistakes-status" class="muted" role="status" aria-live="polite"></span>
+        <button class="btn" id="review-mistakes" disabled>Review saved mistakes →</button>
+      </div>
+      <p class="hint">Saved on this browser. A later correct answer removes a question from the list. Review uses the topics selected above and Practice feedback. Private browsing or clearing browser data may remove saved progress.</p>
+      <p class="hint">Keyboard: <kbd>1</kbd>–<kbd>5</kbd> or <kbd>A</kbd>–<kbd>E</kbd> to choose, <kbd>Enter</kbd> to check (Practice) or go to the next question (Exam).</p>
+    </div>
+
+    <!-- question -->
+    <div class="qcard glass" id="q-play" hidden>
+      <div class="qhead">
+        <span class="counter" id="q-counter"></span>
+        <span class="tag" id="q-topic"></span>
+        <span class="live" id="q-live"></span>
+      </div>
+      <div class="qbar"><i id="q-bar"></i></div>
+      <p class="question" id="q-text"></p>
+      <p class="mode">Select one:</p>
+      <ul class="opts" id="q-opts" role="radiogroup" aria-labelledby="q-text"></ul>
+      <div id="q-explain" hidden></div>
+      <div class="row between">
+        <button class="btn" id="q-quit">✕ End quiz</button>
+        <button class="btn primary" id="q-next" disabled>Check</button>
+      </div>
+    </div>
+
+    <!-- results -->
+    <div class="qcard glass" id="q-result" hidden>
+      <div class="result-top">
+        <div class="ring" id="r-ring"><div><span><b id="r-pct">0%</b><br><small id="r-raw"></small></span></div></div>
+        <div style="flex:1; min-width:220px">
+          <h2 id="r-title"></h2>
+          <p class="muted" id="r-msg" style="margin:6px 0 0"></p>
+        </div>
+      </div>
+      <div><span class="label">By topic</span><div class="topics" id="r-topics"></div></div>
+      <div class="row">
+        <button class="btn primary" id="r-retry">Retry mistakes</button>
+        <button class="btn" id="r-new">New quiz</button>
+        <button class="btn" data-go="read">Back to reading</button>
+      </div>
+      <div id="r-review-wrap"><span class="label">Your mistakes</span><div class="review" id="r-review"></div></div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<footer>FENMS 0121 · Data Structures and Algorithms · International Burch University · 2026/2027 · <a href="../../index.html">All courses</a></footer>
+
+<dialog class="lb" id="lb"><button aria-label="Close" id="lb-close">✕</button><img id="lb-img" alt=""><p id="lb-cap"></p></dialog>
+
+<script>
+/* ---------------- theme ---------------- */
+const root = document.documentElement;
+const store = {
+  get(k){ try{ return localStorage.getItem(k) }catch(e){ return null } },
+  set(k,v){ try{ localStorage.setItem(k,v); return true }catch(e){ return false } },
+  remove(k){ try{ localStorage.removeItem(k) }catch(e){} }
+};
+const SAVER_KEY = "ibu-dsa-r05-battery-saver";
+const savedSaver = store.get(SAVER_KEY);
+let batterySaver = savedSaver === null ? matchMedia("(prefers-reduced-transparency: reduce)").matches : savedSaver === "true";
+function renderSaver(){
+  root.dataset.batterySaver = String(batterySaver);
+  const button = document.getElementById("battery-saver");
+  button.setAttribute("aria-pressed", String(batterySaver));
+  button.textContent = `Battery saver: ${batterySaver ? "on" : "off"}`;
+}
+renderSaver();
+document.getElementById("battery-saver").onclick = () => {
+  batterySaver = !batterySaver; store.set(SAVER_KEY, String(batterySaver)); renderSaver();
+};
+const savedTheme = store.get("ibu-theme");
+if (savedTheme) root.dataset.theme = savedTheme;
+document.getElementById("theme").onclick = () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  store.set("ibu-theme", root.dataset.theme);
+};
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------------- static backdrop: a soft grid with a few tinted cells ----------------
+   Drawn once. Nothing animates behind the frosted panels. */
+(function drawGrid(){
+  const svg = document.getElementById("bg-grid"), NS = "http://www.w3.org/2000/svg", S = 56, W = 1600, H = 1000;
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let d = "";
+  for (let x = 0; x <= W; x += S) d += `M${x} 0V${H}`;
+  for (let y = 0; y <= H; y += S) d += `M0 ${y}H${W}`;
+  const g = document.createElementNS(NS, "g");
+  const p = document.createElementNS(NS, "path");
+  p.setAttribute("d", d); p.setAttribute("stroke", "var(--grid)"); p.setAttribute("stroke-width", "1"); p.setAttribute("fill", "none");
+  g.appendChild(p);
+  const fills = ["var(--cell1)", "var(--cell2)", "var(--cell3)"];
+  for (let k = 0; k < 46; k++){
+    const r = document.createElementNS(NS, "rect");
+    r.setAttribute("x", Math.floor(rnd() * W / S) * S + 4); r.setAttribute("y", Math.floor(rnd() * H / S) * S + 4);
+    r.setAttribute("width", S - 8); r.setAttribute("height", S - 8); r.setAttribute("rx", 10);
+    r.setAttribute("fill", fills[k % 3]);
+    g.appendChild(r);
+  }
+  svg.appendChild(g);
+})();
+
+/* ---------------- views ---------------- */
+const views = { read:document.getElementById("view-read"), quiz:document.getElementById("view-quiz") };
+const tabs = { read:document.getElementById("tab-read"), quiz:document.getElementById("tab-quiz") };
+function show(v, push=true){
+  for (const k in views){ views[k].hidden = k!==v; tabs[k].setAttribute("aria-selected", k===v); }
+  if (push) history.replaceState(null, "", v==="quiz" ? "#quiz" : location.pathname + location.search);
+  scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+  updateProgress();
+}
+tabs.read.onclick = () => show("read"); tabs.quiz.onclick = () => show("quiz");
+document.addEventListener("click", e => { const g = e.target.closest("[data-go]"); if (g){ e.preventDefault(); show(g.dataset.go); } });
+
+/* reading progress + toc highlight */
+const bar = document.getElementById("progress");
+function updateProgress(){
+  const h = document.documentElement.scrollHeight - innerHeight;
+  bar.style.width = (views.read.hidden ? 0 : Math.min(100, Math.max(0, scrollY / (h||1) * 100))) + "%";
+}
+if (location.hash === "#quiz") show("quiz", false);
+addEventListener("scroll", updateProgress, {passive:true});
+const tocLinks = [...document.querySelectorAll("#toc a")];
+const secObs = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting){ tocLinks.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#"+e.target.id)); }
+}), {rootMargin:"-40% 0px -55% 0px"});
+document.querySelectorAll(".sec").forEach(s => secObs.observe(s));
+const revObs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting){ e.target.classList.add("in"); revObs.unobserve(e.target); } }), {rootMargin:"0px 0px -8% 0px"});
+document.querySelectorAll(".reveal").forEach(s => revObs.observe(s));
+
+/* lightbox */
+const lb = document.getElementById("lb");
+document.querySelectorAll("[data-zoom]").forEach(b => b.onclick = () => {
+  const img = b.querySelector("img"), cap = b.closest("figure").querySelector("figcaption");
+  document.getElementById("lb-img").src = img.src; document.getElementById("lb-img").alt = img.alt;
+  document.getElementById("lb-cap").textContent = cap ? cap.textContent : "";
+  lb.showModal();
+});
+document.getElementById("lb-close").onclick = () => lb.close();
+lb.addEventListener("click", e => { if (e.target === lb) lb.close(); });
+
+/* ---------------- quiz data ---------------- */
+// Each question: {t: topic, q: question, code?: snippet, a: correct answer, w: [4 wrong answers], e: explanation, why: [why each wrong answer is wrong]}. Exactly one correct answer; options are shuffled at run time.
+function Q(t,q,a,w,e){ return {t,q,a,w,e}; }
+const T = {
+ "basics":    "Sorting, keys and costs",
+ "props":     "Stability & adaptivity",
+ "bubble":    "Bubble sort",
+ "selection": "Selection sort",
+ "insertion": "Insertion sort & inversions",
+ "shell":     "Shell sort",
+ "race":      "Measurements & comparison"
+};
+const READING_SECTIONS = {basics:"s2", props:"s3", bubble:"s5", selection:"s6", insertion:"s7", shell:"s9", race:"s13"};
+const QUESTIONS = [
+{"t": "basics", "q": "According to the book's definition, what decides the order of the items when we sort them?", "a": "A key belonging to each item and a rule for comparing two keys", "w": ["The position each item had when it was inserted into the array", "The memory address of each item, compared from lowest to highest", "The size of each item in bytes, so that small records come first", "Whatever order the algorithm finds fastest for the given input"], "e": "Definition 7.1: sorting rearranges N items into order, and the order is decided by a key belonging to each item and a rule for comparing two keys. When you sort students by grade, only the grade is compared; the name travels along without being looked at.", "why": ["Original position only matters for stability, and only between equal keys.", "Addresses have nothing to do with the requested order.", "Record size is not the key unless you choose it to be.", "The order is fixed by the key and the comparison rule, not chosen by the algorithm."]},
+{"t": "basics", "q": "You want to sort an array of your own Student type with the chapter's templates. What do you have to provide?", "a": "A function operator< that says whether one Student belongs before another", "w": ["A function operator== so the algorithm can detect duplicates", "A copy constructor that also prints the record being moved", "A hash function that maps every Student to a unique integer", "Nothing, because the templates compare the raw bytes of the objects"], "e": "Every algorithm in the chapter compares whole elements with <. For a type of your own you define operator<, which takes two values and returns whether the first belongs before the second.", "why": ["The algorithms never use ==; they only use <.", "Copying is needed for swaps, but no printing and no special constructor is required for ordering.", "Hashing is for hash tables, not for comparison sorts.", "C++ templates do not compare raw bytes; without operator< the code does not compile."]},
+{"t": "basics", "q": "Why does bubble_sort(Data* arr, int len) return void?", "a": "It sorts the caller's array in place instead of producing a new array", "w": ["Templates in C++ are not allowed to return a value", "It returns the sorted array through the len parameter", "The result is printed directly, so nothing needs to be returned", "Returning a pointer would make the algorithm unstable"], "e": "The signature settles three things. void means in place: the array the caller already has is rearranged. len is separate because an array decays to a pointer that carries no length. The template lets one implementation sort ints, strings and Student records.", "why": ["Templates can return values of any type.", "len is an int passed by value; it cannot carry an array back.", "The functions do not print anything.", "Stability depends on which elements get exchanged, not on the return type."]},
+{"t": "basics", "q": "Why is the array length passed as a separate parameter?", "a": "An array decays to a pointer, and a pointer carries no length", "w": ["So that the function can sort only the first half of the array", "Because the last element of every array stores its own length", "To let the function allocate a second array of the same size", "Because templates cannot accept arrays larger than 256 elements"], "e": "When an array is passed to a function it decays to a pointer to its first element, and the pointer knows nothing about how many elements follow. The caller has to supply len.", "why": ["Sorting a prefix is possible with len, but that is not why the parameter exists.", "C++ arrays do not store their length anywhere.", "None of the four algorithms allocates a second array; they all use Θ(1) extra space.", "There is no such limit on templates."]},
+{"t": "basics", "q": "Which two operations does the chapter count to describe the cost of a sort?", "a": "Comparisons and exchanges", "w": ["Comparisons and function calls", "Exchanges and memory allocations", "Loop iterations and return statements", "Reads of the length and writes to the length"], "e": "Two operations account for the cost of all four algorithms: comparing two elements and exchanging two elements. They are counted separately because they do not cost the same.", "why": ["Function calls are not what the chapter counts.", "None of the four algorithms allocates memory.", "Loop iterations are not a separate cost measure, and a return runs once.", "The length is never written by the sorting functions."]},
+{"t": "basics", "q": "Why does the chapter count comparisons and exchanges separately instead of adding them together?", "a": "Comparing two integers is nearly free, while exchanging large records copies many bytes", "w": ["Comparisons are always slower than exchanges, so they need their own weight", "An exchange is just three comparisons, so they are easy to convert", "Only comparisons can be measured; exchanges have to be estimated", "They are always equal in number, so one of them would be redundant"], "e": "The two are not interchangeable. A comparison only reads elements, while an exchange writes them, and for big structs that means copying a lot. An algorithm can be good at one and bad at the other: selection sort is quadratic in comparisons but linear in exchanges.", "why": ["It is the other way around for large records: moving is the expensive part.", "An exchange is three assignments, not comparisons.", "code/ch07/tests.cpp counts exchanges exactly.", "They are often very different, for example 127,992,000 comparisons versus 16,000 exchanges for selection sort."]},
+{"t": "basics", "q": "Why does every exchange in the chapter go through the same swap helper?", "a": "So the exchange counts give a fair comparison between the four algorithms", "w": ["Because std::swap does not work on arrays of templates", "So that each exchange can also check whether the array is sorted", "Because the helper makes every exchange stable", "So that the helper can skip exchanges of equal elements"], "e": "All four algorithms exchange elements through ElementarySort::swap, so each exchange is counted and costs the same everywhere, which makes the counts comparable.", "why": ["std::swap works fine on template types; that is not the reason.", "The helper only swaps; it does not check sortedness.", "Stability depends on which positions are exchanged, not on the helper.", "The helper swaps whatever it is told; skipping is decided by the caller's comparison."]},
+{"t": "basics", "q": "What extra space do all four elementary sorts use?", "a": "Θ(1)", "w": ["Θ(log N)", "Θ(N)", "Θ(N log N)", "Θ(N²) in the worst case"], "e": "All four sort in place. Apart from a few loop variables and the temporary inside swap, they need no extra memory, so the extra space is Θ(1).", "why": ["There is no recursion, so there is no Θ(log N) stack.", "They never copy the array.", "Nothing in these algorithms grows like N log N.", "Space does not grow with the number of comparisons."]},
+{"t": "basics", "q": "Why does a data structures book spend four chapters on sorting? Which reason does the chapter give?", "a": "Sorted data is useful, and sorting lets us compare many algorithms on one exact problem", "w": ["Sorting is the only problem whose cost can be measured exactly, even for Shell sort", "Every other data structure in the book is implemented on top of bubble sort", "Sorting is the fastest way to remove all duplicates from a hash table in place", "The C++ standard library has no sorting function, so we must always write our own"], "e": "Sorted data supports binary search, places duplicates next to each other, and supports ranking and merging. Sorting also lets us compare several algorithms that solve one exactly stated problem: how much time and space they need, how they react to inputs, and which properties they keep.", "why": ["Shell sort's average cost is not even known, so this is false.", "Data structures are not built on bubble sort.", "Hash tables do not need sorting to handle duplicates; this is not the reason given.", "std::sort exists; the tests even compare against it."]},
+{"t": "basics", "q": "Which statement about all four algorithms in this chapter is FALSE?", "a": "They are all adaptive", "w": ["They all sort in place", "They all use Θ(1) extra space", "They all compare elements with <", "They all return void"], "e": "Selection sort is not adaptive: it makes N(N − 1)/2 comparisons on every input. The other four statements hold for all four algorithms.", "why": ["All four sort in place, so this one is true.", "All four use Θ(1) extra space, so this one is true.", "All four compare with <, so this one is true.", "All four share the void signature, so this one is true."]},
+{"t": "props", "q": "What does it mean for a sorting algorithm to be stable?", "a": "Elements whose keys compare equal keep their original relative order", "w": ["It always takes the same time on any two inputs of the same size", "It never crashes, even on empty arrays or arrays with one element", "It uses no memory at all beyond the input array it is given", "Its output does not depend on the order in which the input arrives"], "e": "Definition 7.2: a sort is stable if elements whose keys compare equal keep their original relative order. Same running time on every input is closer to non-adaptive; no extra memory is in-place.", "why": ["That describes predictable, non-adaptive running time.", "Not crashing is correctness, not stability.", "That is in-place sorting.", "A sorted output is always the same for any input order if keys are distinct; that is not stability."]},
+{"t": "props", "q": "What does an UNSTABLE sorting algorithm promise about equal elements?", "a": "Nothing: it may keep, reverse or mix up their order", "w": ["It always reverses the order of equal elements", "It always moves equal elements to the end of the array", "It keeps equal elements in order only when N is even", "It removes all but one copy of each equal element"], "e": "The second sentence of the definition matters as much as the first: an unstable sort makes no promise either way. It may leave ties in order, reverse them or mix them up, so you cannot reason about where they end up.", "why": ["Unstable does not mean reversed; it means no guarantee.", "Equal elements end up next to each other at their sorted position, not at the end.", "There is no such rule tied to N.", "Sorting never removes elements."]},
+{"t": "props", "q": "In which situation does stability NOT matter at all?", "a": "Sorting plain integers, where the key is the whole element", "w": ["Sorting student records by grade after they were sorted by name", "Sorting a table by one column when the user clicks its header", "Sorting words by count after they were sorted alphabetically", "Sorting orders by date when each order also has a customer name"], "e": "If the key is the whole element, equal elements are indistinguishable: every 8 is the same 8, so nobody can tell if two of them changed places. Stability matters when elements carry more than the key, and most when you sort the same data twice.", "why": ["The second sort must keep the name order inside each grade, so stability matters.", "Rows carry other columns, so the previous order of equal values is visible.", "The alphabetical order inside each count must survive.", "The records carry names, so the order of equal dates is visible."]},
+{"t": "props", "q": "A table of students is sorted by name. It is then sorted by grade with a STABLE sort. What is the result?", "a": "Sorted by grade, with names alphabetical inside each grade", "w": ["Sorted by name only, because the second sort keeps the first order", "Sorted by grade, with names in no particular order inside a grade", "Sorted by grade and then by name, but only if all names differ", "Sorted by grade, with names in reverse alphabetical order inside a grade"], "e": "A stable sort never reorders records whose keys are equal, so within each grade the students stay in the order they had, which was alphabetical. This is Quick Check question 18 and Figure 7.1.", "why": ["The second sort does reorder by grade.", "That is what an unstable sort may give.", "Duplicate names do not break the result; equal names just stay in their order.", "Stability keeps the order; it does not reverse it."]},
+{"t": "props", "q": "You want records ordered by department, and alphabetically by name inside each department, using only a stable single-key sort. In which order do you sort?", "a": "First by name, then by department", "w": ["First by department, then by name", "By department twice, so the second pass fixes the first", "By name only, since stability handles the department", "The order does not matter as long as the sort is stable"], "e": "Sort by the least important key first and the most important last. Each stable pass preserves the work of the passes before it, so the final sort by department keeps the name order inside each department.", "why": ["The last sort decides the main order, so this ends sorted by name.", "Sorting by department twice never looks at names.", "Names alone never group the departments.", "The order matters: the last key sorted becomes the primary key."]},
+{"t": "props", "q": "The lecture counts the words in \"how much wood would woodchuck chuck if woodchuck could chuck wood\". They should end in decreasing order of count, alphabetical inside each count. Which two sorts achieve that?", "a": "Sort by word, then sort by count with a stable sort", "w": ["Sort by count, then sort by word with a stable sort", "Sort by count with any sort, then by word with any sort", "Sort by word with a stable sort, then by count with selection sort", "Sort by count with a stable sort only; the words are already grouped"], "e": "First sort by word, then by count. The second sort must be stable to keep the alphabetical order inside each count. The lecture used selection sort as the unstable second sort, which put \"if\" and \"much\" before \"could\" and \"how\".", "why": ["Sorting by word last would destroy the count order.", "Without stability in the last sort, the alphabetical order can be lost.", "Selection sort is unstable, which is exactly what broke the lecture's example.", "The input sentence is not alphabetical, so one sort by count cannot give alphabetical ties."]},
+{"t": "props", "q": "What does it mean for a sorting algorithm to be adaptive?", "a": "It takes less time on input that is already partly in order", "w": ["It chooses a different algorithm depending on the data type", "It uses less memory when the array is small", "It keeps equal elements in their original order", "It changes its increment sequence while it runs"], "e": "Definition 7.3: an adaptive sort takes less time on partly ordered input. A non-adaptive sort does not systematically reduce its work in response to existing order.", "why": ["Switching algorithms is a different idea (hybrid sorts).", "Memory use is not what adaptivity is about.", "That is stability.", "Shell sort's increments are fixed by a formula; that is not adaptivity."]},
+{"t": "props", "q": "Why does adaptivity matter in practice, according to the reading?", "a": "Real data is often partly sorted already, such as logs in time order or a list with a few new items", "w": ["Real data is almost always random, so adaptive sorts are rarely used", "Adaptive sorts are always stable, and stability is required by the standard library", "Adaptive sorts use less memory on large inputs", "Only adaptive sorts can sort strings and records"], "e": "Log files arrive in time order, exported tables come sorted by key, and a list sorted last week with a dozen new items is nearly sorted now. An adaptive algorithm handles those cheaply. A non-adaptive one has an advantage of its own: predictable running time.", "why": ["The reading says the opposite: real data is often partly sorted.", "Shell sort is adaptive but not stable, so the two properties are independent.", "All four elementary sorts use Θ(1) extra space.", "Any of the four can sort any type with operator<."]},
+{"t": "props", "q": "What advantage does a NON-adaptive sorting algorithm have?", "a": "Its running time is predictable", "w": ["It is always stable", "It is always faster on random input", "It needs no comparisons on sorted input", "It can sort without exchanging anything"], "e": "A non-adaptive algorithm does the same amount of work whatever the order of the input, so its running time is predictable. That matters in systems that care more about the worst case than the average.", "why": ["Selection sort is non-adaptive and unstable.", "Selection sort is non-adaptive and still the slowest of the four in the book's race.", "A non-adaptive sort makes just as many comparisons on sorted input.", "Selection sort still makes N exchanges."]},
+{"t": "props", "q": "Which pair of algorithms from this chapter is BOTH stable and adaptive?", "a": "Bubble sort and insertion sort", "w": ["Selection sort and Shell sort", "Bubble sort and selection sort", "Insertion sort and Shell sort", "Selection sort and insertion sort"], "e": "Bubble and insertion sort only exchange adjacent elements that are strictly out of order, so they are stable, and both stop early on ordered input, so they are adaptive. Shell sort is adaptive but unstable; selection sort is neither.", "why": ["Selection sort is neither stable nor adaptive, and Shell sort is unstable.", "Selection sort is neither.", "Shell sort is unstable.", "Selection sort is neither."]},
+{"t": "props", "q": "Why are bubble sort and insertion sort stable?", "a": "They only swap neighbours when the right one is strictly smaller, so equal keys never cross", "w": ["They compare every element with every other element before making any exchange", "They copy the array first and read equal elements from the copy, in their old order", "They use <= in the comparison, so equal elements are always handled first", "They exchange elements that are h positions apart, so ties are never compared"], "e": "An adjacent exchange on a strict < can never carry an element past an equal one. If the code swapped on <= instead, equal keys could cross, and stability would be lost even though the output would still be sorted.", "why": ["They do not compare all pairs; insertion sort stops early.", "Neither makes a copy of the array.", "Using <= is exactly what would break stability.", "Distant exchanges are what make Shell sort unstable."]},
+{"t": "props", "q": "A bubble sort uses this comparison. What happens to stability?", "code": "if (arr[j] <= arr[j - 1])\n    swap(arr, j, j - 1);", "a": "Still sorted, but equal keys get swapped, so it is no longer stable", "w": ["The output is no longer sorted whenever the array contains duplicates", "Nothing changes at all, because equal elements always look the same", "The sort stays stable, but only on arrays with an even length", "The algorithm loops forever on any array that has duplicates in it"], "e": "With <=, two equal neighbours are swapped, so equal keys cross each other. The result is still sorted, but the original order of ties is lost. (With the swapped flag, a pass that only swaps equal neighbours keeps setting the flag, so it also does extra passes.)", "why": ["Swapping equal elements does not unsort anything.", "Equal keys can belong to different records, and their order becomes visible.", "Array length has nothing to do with it.", "Because the inner loop shrinks by one element each pass, the outer loop still ends after at most N passes."]},
+{"t": "props", "q": "Why do selection sort and Shell sort lose stability?", "a": "Distant exchanges can carry an element past an equal key it never met", "w": ["They use random numbers to choose which pairs of elements to compare next", "They never compare equal elements, so ties end up in an arbitrary order", "They sort the array several times, and every extra pass reverses the ties", "They use > instead of < in their comparisons, which reverses equal keys"], "e": "A distant exchange can make an element jump over elements it was never compared with, including equal ones. That is the general shape of instability. When you need stability, you have to read the implementation to know whether you have it.", "why": ["Neither algorithm uses randomness.", "Equal elements are compared in some steps; the problem is the long jump.", "Selection sort makes only one pass per position; the issue is the distant exchange.", "Both use <."]},
+{"t": "props", "q": "How does code/ch07/tests.cpp test stability directly?", "a": "It sorts 400 records sharing 20 keys and checks that ties keep their input order", "w": ["It sorts an already sorted array and checks that no element has moved", "It sorts plain integers and checks that duplicates end up next to each other", "It counts the exchanges and checks that the count is never larger than N", "It runs each sort twice on the same input and checks both results are identical"], "e": "Plain integers would hide instability, since equal integers are indistinguishable. The tests use records with repeated keys and check the order of the ties.", "why": ["A sorted array has no exchanges for bubble or insertion sort, so it cannot reveal anything.", "Duplicates are always adjacent after sorting; that says nothing about their order.", "An exchange count does not show the order of ties.", "A deterministic algorithm gives the same result twice even if it is unstable."]},
+{"t": "bubble", "q": "What does one pass of bubble sort guarantee?", "a": "The largest remaining element ends up at the end", "w": ["The smallest remaining element ends up at the front", "Every element moves at least one position to the left", "Exactly half of the remaining inversions are removed", "The array is sorted if it had fewer than N inversions"], "e": "Bubble sort compares neighbours and swaps when they are out of order. The largest element gets carried along at every step, so after the pass it sits at the end and never moves again. Each pass leaves one more element in its final place.", "why": ["That is what selection sort does, from the other end.", "Elements that are already in order do not move.", "A pass can remove anything from zero inversions to many; there is no fixed half.", "The number of inversions does not tell you when one pass suffices."]},
+{"t": "bubble", "q": "Why does the inner loop of the book's bubble sort stop at len - i rather than len?", "code": "for (int i = 0; i < len; i++) {\n    bool swapped = false;\n    for (int j = 1; j < len - i; j++) { ... }\n    if (!swapped) break;\n}", "a": "After i passes the last i elements are already in their final places", "w": ["To avoid reading past the end of the array when j reaches len", "Because the first i elements are already sorted after i passes", "Because each pass removes exactly i inversions from the array", "To make the algorithm stable when the array contains duplicates"], "e": "Each pass carries the largest remaining element to the end. After i passes the last i elements are final, so comparing them again would be wasted work.", "why": ["j < len would already be safe since the code reads arr[j - 1]; that is not the reason.", "The finished part is at the end, not at the start.", "The number of inversions removed per pass is not i.", "Stability comes from the strict comparison, not from the loop bound."]},
+{"t": "bubble", "q": "What does the swapped flag do in bubble sort?", "a": "It stops the sort when a pass makes no exchanges, because then the array is sorted", "w": ["It records whether the two last elements were swapped, to skip them next time", "It prevents equal elements from being swapped, which keeps the sort stable", "It counts the exchanges so that the cost can be reported", "It switches the direction of the next pass"], "e": "If a pass swaps nothing, every adjacent pair is in order, and an array whose adjacent pairs are all in order is sorted. That single boolean is the whole of bubble sort's adaptivity.", "why": ["The flag is about the whole pass, not the last pair.", "Stability comes from using a strict <.", "The flag is a bool, not a counter.", "Alternating direction is cocktail shaker sort, a different algorithm."]},
+{"t": "bubble", "q": "What is the best case of bubble sort WITHOUT the swapped flag?", "a": "Θ(N²), because it still does every pass", "w": ["Θ(N), because a sorted array needs no exchanges", "Θ(1), because nothing has to move", "Θ(N log N), because each pass is shorter", "Θ(N), because the inner loop exits on the first comparison"], "e": "Without the flag, the algorithm goes through all passes even on an already sorted array, making N(N − 1)/2 comparisons. With the flag, one pass and N − 1 comparisons are enough, which is Θ(N).", "why": ["No exchanges, but the comparisons are still quadratic without the flag.", "It still has to compare elements.", "The passes shrink by one each, which still sums to N(N − 1)/2.", "Bubble sort's inner loop has no early exit; that is insertion sort's break."]},
+{"t": "bubble", "q": "With the swapped flag, how many comparisons and exchanges does bubble sort make on an already sorted array of N elements?", "a": "N − 1 comparisons and 0 exchanges", "w": ["N comparisons and 0 exchanges", "N − 1 comparisons and N − 1 exchanges", "N(N − 1)/2 comparisons and 0 exchanges", "0 comparisons and 0 exchanges"], "e": "The first pass compares N − 1 neighbouring pairs, finds nothing to swap, the flag stays false, and the algorithm stops. The tests measure 499 comparisons at N = 500.", "why": ["There are only N − 1 adjacent pairs.", "Nothing is out of order, so nothing is exchanged.", "That would be the cost without the flag.", "It has to look at the pairs to know they are in order."]},
+{"t": "bubble", "q": "code/ch07/tests.cpp runs bubble sort on a REVERSED array of 500 elements. How many exchanges does it measure?", "a": "124,750", "w": ["250,000", "249,500", "499", "62,375"], "e": "In a reversed array every pair is an inversion, so bubble sort makes N(N − 1)/2 = 500 · 499 / 2 = 124,750 exchanges.", "why": ["That is N², which counts every pair twice and includes the diagonal.", "That is N(N − 1), every pair counted twice.", "That is the comparison count on a SORTED array.", "That is N(N − 1)/4, the average for a shuffled array."]},
+{"t": "bubble", "q": "Which bound statement about bubble sort across ALL inputs is correct?", "a": "It is O(N²) and Ω(N), and it has no single Θ", "w": ["It is Θ(N²), because the worst case is quadratic", "It is Θ(N), because the best case is linear", "It is O(N) and Ω(N²)", "It is Θ(N log N) on average, so that is its Θ"], "e": "Each case is tight: worst Θ(N²), best Θ(N), average Θ(N²). Across all inputs it is O(N²), a guarantee no input breaks, and Ω(N), a floor no input goes under. A single Θ would have to bound every input from both sides, but the best and worst cases are in different classes.", "why": ["Θ(N²) for all inputs would forbid the linear best case.", "Θ(N) for all inputs would forbid the quadratic worst case.", "The upper and lower bounds are swapped.", "The average case of bubble sort is Θ(N²), not N log N."]},
+{"t": "bubble", "q": "On a shuffled array, about how many exchanges does bubble sort make?", "a": "About N(N − 1)/4, half of the worst case", "w": ["About N, one per element", "About N log N", "Exactly N(N − 1)/2, the same as the worst case", "About N²/8, an eighth of the pairs"], "e": "A random array has about N(N − 1)/4 inversions, half the maximum, and bubble sort removes one inversion per exchange. Half of a quadratic is still quadratic, so the average case is Θ(N²).", "why": ["That is selection sort's exchange count.", "Bubble sort's exchanges are quadratic, not N log N.", "That is the reversed-array worst case.", "Half of the pairs, not an eighth, are inverted on average."]},
+{"t": "bubble", "q": "What is the main problem with bubble sort, according to the book?", "a": "It moves elements one position per exchange, so k places cost k exchanges", "w": ["It is not stable, so it cannot be used to sort records by a key", "It uses Θ(N) extra memory, one swapped flag for every position", "It cannot detect that the array is already sorted, even with the flag", "It only works correctly on arrays whose length is a power of two"], "e": "Every exchange moves an element by one position and removes exactly one inversion, so a shuffled array needs a quadratic number of exchanges. Bubble sort also keeps re-scanning regions that are already in order, so it makes about twice as many comparisons as insertion sort.", "why": ["Bubble sort is stable.", "The flag is one bool, Θ(1).", "The swapped flag detects exactly that.", "It works for any length."]},
+{"t": "bubble", "q": "Bubble sort runs on [7, 3, 9, 1, 5, 8, 2, 6]. Which element is in its final place after the FIRST pass?", "a": "9, at the last position", "w": ["1, at the first position", "8, at the last position", "7, at the last position", "9 and 8, at the last two positions"], "e": "Pass 1 gives [3, 7, 1, 5, 8, 2, 6, 9]: the largest element, 9, is carried to the end. 8 reaches its place only in pass 2.", "why": ["Bubble sort fills the end, not the front; 1 is still at index 2 after pass 1.", "8 is the second largest; it finishes in pass 2.", "7 is stopped by 9 at the first comparison where it meets a larger element.", "Only one element is guaranteed per pass, and here 8 ends at index 4."]},
+{"t": "bubble", "q": "On [7, 3, 9, 1, 5, 8, 2, 6], how many passes does the book's bubble sort make, counting the final pass with no swaps?", "a": "6", "w": ["5", "7", "8", "4"], "e": "After pass 5 the array is [1, 2, 3, 5, 6, 7, 8, 9]. Pass 6 finds nothing to swap and stops the algorithm (Figure 7.2). That is 7 + 6 + 5 + 4 + 3 + 2 = 27 comparisons.", "why": ["Pass 5 still made a swap (3 and 2), so a sixth pass is needed to confirm.", "The flag stops the sort before a seventh pass.", "Without the flag it would run all 8 outer iterations.", "After four passes the array is still [1, 3, 2, 5, ...]."]},
+{"t": "bubble", "q": "Bubble sort with the swapped flag runs on [2, 3, 4, 5, 6, 1] and on [6, 1, 2, 3, 4, 5]. Which is true?", "a": "[6, 1, 2, 3, 4, 5] needs two passes; the 1 at the end of the other moves one place per pass", "w": ["Both take the same number of passes, since both arrays have exactly 5 inversions", "[2, 3, 4, 5, 6, 1] needs one pass, because the 1 bubbles to the front immediately", "Both need only two passes, because the swapped flag stops each of them early", "[6, 1, 2, 3, 4, 5] needs five passes, because the 6 moves one place per pass"], "e": "A large element is carried all the way to the end in one pass, so [6, 1, 2, 3, 4, 5] is sorted after one pass and confirmed by a second (9 comparisons). A small element at the end moves left only one position per pass, so [2, 3, 4, 5, 6, 1] needs all passes (15 comparisons). Cocktail shaker sort targets exactly this case.", "why": ["Same number of exchanges (5), but very different numbers of passes.", "Small elements move left only one place per pass.", "Only the array with the large element in front finishes early.", "A large element travels the whole way in a single pass."]},
+{"t": "bubble", "q": "Cocktail shaker sort alternates the direction of bubble sort's passes. What does it NOT fix?", "a": "It stays quadratic on shuffled input, since it still moves one position per exchange", "w": ["It is no longer stable, because the backward passes swap equal neighbours", "It can no longer stop early on a sorted array, since the flag is lost", "It needs Θ(N) extra memory to remember the elements of the backward pass", "It no longer works correctly on arrays with an odd number of elements"], "e": "Going back and forth helps when a small element is stuck near the end, but every exchange still swaps neighbours and removes one inversion. A shuffled array has about N²/4 inversions, so the order of growth stays Θ(N²).", "why": ["Adjacent strict exchanges in either direction keep it stable.", "It can keep the swapped flag.", "It still sorts in place.", "Length parity does not matter."]},
+{"t": "selection", "q": "What does iteration i of selection sort do?", "a": "Finds the smallest of positions i to N − 1 and swaps it into position i", "w": ["Inserts element i into the sorted part on its left, shifting larger ones", "Swaps every adjacent pair from position i to the end that is out of order", "Compares element i with element i + h and swaps them if they are out of order", "Finds the largest of positions i to N − 1 and swaps it into position i"], "e": "Selection sort scans the unsorted part, remembers the index min of the smallest element, and after the scan makes a single exchange of arr[i] with arr[min]. Position i is then final.", "why": ["That is insertion sort.", "That is a bubble sort pass.", "That is an h-sort step in Shell sort.", "The book's version selects the minimum and fills from the left."]},
+{"t": "selection", "q": "In the book's selection sort, where does the exchange happen?", "code": "for (int i = 0; i < len; i++) {\n    int min = i;\n    for (int j = i + 1; j < len; j++)\n        if (arr[j] < arr[min]) min = j;\n    swap(arr, min, i);\n}", "a": "Once per outer iteration, after the inner loop has finished", "w": ["Every time arr[j] < arr[min] is true", "Only when min differs from i, so sorted input makes no exchanges", "Once per inner iteration, whether or not anything is smaller", "Only on the last outer iteration"], "e": "The inner loop moves nothing; it only remembers in min where the smallest element is. The swap sits outside the inner loop, so there is exactly one per value of i, even if min == i and the element swaps with itself.", "why": ["That line only updates min.", "This code has no such check, so it swaps even when min == i.", "The swap is not inside the inner loop.", "It runs for every value of i."]},
+{"t": "selection", "q": "How many exchanges does the book's selection sort make on an array of N elements?", "a": "Exactly N, whatever the input", "w": ["N(N − 1)/2, whatever the input", "0 on sorted input and N − 1 on reversed input", "As many as there are inversions", "About N log N"], "e": "The loop body swaps once per value of i, so there are exactly N exchanges on every input. For 200 elements the tests report 200 exchanges every time.", "why": ["That is its comparison count.", "The book's code swaps even when min == i, so sorted input still gets N.", "One exchange per inversion is insertion sort.", "The count is linear, not N log N."]},
+{"t": "selection", "q": "How many comparisons does selection sort make on an array of 200 elements?", "a": "19,900, on every input", "w": ["40,000 on every input", "19,900 on shuffled input and 199 on sorted input", "20,100 on every input", "9,950 on every input"], "e": "N(N − 1)/2 = 200 · 199 / 2 = 19,900. There is no early exit, so sorted, reversed and shuffled arrays all give the same number.", "why": ["That is N², which counts too much.", "Selection sort does not notice sorted input.", "That is N(N + 1)/2.", "That would be N(N − 1)/4."]},
+{"t": "selection", "q": "Why is selection sort's best case Θ(N²)?", "a": "It must scan the whole unsorted part for each minimum, whatever the order", "w": ["It always exchanges every pair of elements, even on sorted input", "It uses recursion that goes N levels deep, one level per position", "It compares each element with itself before scanning the rest", "It has to undo the exchanges it made in its earlier passes"], "e": "Even on a sorted array, each iteration can only confirm that one element is in place, and only by scanning the rest. That gives N(N − 1)/2 comparisons on every input. This is Quick Check question 7.", "why": ["It makes only N exchanges.", "It is iterative.", "The inner loop starts at i + 1.", "It never undoes exchanges."]},
+{"t": "selection", "q": "Which of the four algorithms can be given a single Θ that covers EVERY input?", "a": "Selection sort, Θ(N²)", "w": ["Bubble sort, Θ(N²)", "Insertion sort, Θ(N)", "Shell sort, Θ(N^(3/2))", "None of them"], "e": "Selection sort's best, average and worst cases agree not just on the order of growth but on the exact comparison count. So Θ(N²) describes the algorithm itself, and the O(N²) and Ω(N²) that follow are both tight.", "why": ["Bubble sort's best case is Θ(N), so no single Θ fits.", "Insertion sort's worst case is Θ(N²).", "Shell sort's best case is Θ(N log N).", "Selection sort is the one exception."]},
+{"t": "selection", "q": "Selection sort runs on [7, 3, 9, 1, 5, 8, 2, 6]. What does the array look like after the first TWO iterations?", "a": "[1, 2, 9, 7, 5, 8, 3, 6]", "w": ["[1, 2, 3, 7, 5, 8, 9, 6]", "[3, 7, 9, 1, 5, 8, 2, 6]", "[1, 3, 9, 7, 5, 8, 2, 6]", "[1, 2, 7, 9, 5, 8, 3, 6]"], "e": "Iteration 0 finds 1 and exchanges it with 7: [1, 3, 9, 7, 5, 8, 2, 6]. Iteration 1 finds 2 and exchanges it with 3: [1, 2, 9, 7, 5, 8, 3, 6].", "why": ["That is after three iterations.", "That is insertion sort after its first step.", "That is after only one iteration.", "The exchange does not reorder 9 and 7; only positions i and min change."]},
+{"t": "selection", "q": "Selection sort runs on [3, 8, 3, 1]. What happens to the two 3s?", "a": "The first 3 is swapped with 1 and jumps over the second 3, reversing them", "w": ["They keep their order, because equal elements are never exchanged with each other", "They keep their order, because each 3 is compared with the other before moving", "The second 3 is moved to the front in the first iteration of the outer loop", "They are both moved to the end of the array, behind the 8, in the last iteration"], "e": "The first pass finds 1 at the end and exchanges it with position 0, throwing the first 3 over the second one. The output is sorted, but the 3s are in the opposite order. The tests check exactly this.", "why": ["The first 3 is exchanged with 1, not with the other 3.", "The jump happens without the two 3s being compared to decide it.", "1 goes to the front, not a 3.", "The result is [1, 3, 3, 8]."]},
+{"t": "selection", "q": "When is selection sort's low exchange count useful?", "a": "When comparing is cheap and moving is expensive, like large structs", "w": ["When the array is almost sorted, since it then makes no comparisons", "When stability is required, since few exchanges mean few crossings", "When the array has many duplicate keys that compare as equal", "When the array is too large to fit in memory and comparisons are slow"], "e": "A comparison reads one field, while an exchange copies the whole record three times. Selection sort touches each record only about twice in the whole sort. Its running time is also very predictable.", "why": ["Selection sort makes N(N − 1)/2 comparisons even on sorted input.", "Selection sort is unstable, however few exchanges it makes.", "Duplicates do not change its counts.", "If comparisons are slow, its quadratic comparison count hurts most."]},
+{"t": "selection", "q": "In the book's race, selection sort makes 16,000 exchanges on 16,000 elements while bubble sort makes about 64 million. Why does selection sort still lose?", "a": "It makes as many comparisons as bubble sort, about 128 million, and those dominate", "w": ["Its exchanges move elements further, so each one is about 4,000 times slower", "It is unstable, and unstable sorts are slower because they move ties around", "It allocates a little memory for every comparison, which costs a lot of time", "The race measured it on a reversed array, which is its own worst case input"], "e": "Table 7.2: bubble 127,990,674 comparisons, selection 127,992,000. For integers, comparisons and their branches cost the time, so cutting exchanges does not help enough.", "why": ["An exchange costs the same three assignments regardless of distance.", "Stability has nothing to do with speed.", "None of the sorts allocates memory.", "All four sorted the same shuffled array."]},
+{"t": "selection", "q": "On a SORTED array of 64,000 elements, selection sort took 0.69 s, under a third of its time on shuffled input. What explains this?", "a": "Branch prediction: min is never reassigned, so the branch is always predicted", "w": ["Selection sort is adaptive and skips the scan once the prefix is sorted", "On sorted input it makes no exchanges at all, which saves most of the time", "On sorted input it makes only N − 1 comparisons instead of N(N − 1)/2", "The sorted array fits in the cache, while the shuffled array does not fit"], "e": "The comparison and exchange counts are exactly the same on both arrays. What changes is the work inside a comparison: on sorted input arr[j] < arr[min] is never true, so the branch is predictable. The saving comes from the machine, not the algorithm, so selection sort is still non-adaptive.", "why": ["Its comparison count does not change; it is not adaptive.", "The book's code still makes exactly N exchanges.", "It still makes N(N − 1)/2 comparisons.", "Both arrays have the same size and fit in memory the same way."]},
+{"t": "selection", "q": "Selection sort is made stable by shifting the elements between i and min one place right and dropping the minimum into the gap. What does this cost?", "a": "The element moves are no longer linear: they can grow to quadratic", "w": ["The comparisons drop from quadratic to linear on every input", "Nothing changes in either the comparison or the move count", "It needs a second array of N elements to hold the shifted part", "It becomes adaptive, but the worst case grows to Θ(N³)"], "e": "Shifting never lets an element jump over an equal one, so the sort becomes stable. But one shift can move many elements, so the cheap \"about N exchanges\" property is lost; the comparisons stay at N(N − 1)/2.", "why": ["The minimum search still scans the whole unsorted part.", "The moves increase.", "Shifting is done in place.", "The comparison count stays the same and the worst case stays quadratic."]},
+{"t": "insertion", "q": "Insertion sort is often compared to what everyday activity?", "a": "Sorting a hand of playing cards", "w": ["Looking up a word in a dictionary", "Lining people up by height, tallest first", "Shuffling a deck by splitting it in half", "Picking the smallest coin from a pile"], "e": "You hold the sorted cards in your left hand, take the next card and push it left past every larger card. In an array, pushing left becomes a run of exchanges with the left neighbour.", "why": ["That is binary search.", "That does not describe the insertion step.", "That is shuffling, not sorting.", "Picking the smallest each time is selection sort."]},
+{"t": "insertion", "q": "What does the break in insertion sort's inner loop do?", "code": "for (int i = 1; i < len; i++)\n    for (int j = i; j > 0; j--) {\n        if (arr[j] < arr[j - 1]) swap(arr, j, j - 1);\n        else break;\n    }", "a": "Stops once the left neighbour is not larger, as all further left are smaller", "w": ["Stops the whole sort when one complete pass makes no exchanges at all", "Skips over equal elements so that the sort stays stable on duplicates", "Exits when j reaches i / 2, which halves the work of every single pass", "Stops when the element reaches its final position in the whole array"], "e": "The prefix to the left is sorted, so once the neighbour is not larger, the element has landed. On nearly sorted data this happens immediately, so the break does the job of bubble sort's flag, and does it better.", "why": ["That describes bubble sort's flag; the break ends only the current inner loop.", "Stability comes from the strict <; the break is about stopping early.", "There is no halving in insertion sort.", "The position is final only within the current prefix; later elements can still push it right."]},
+{"t": "insertion", "q": "How does insertion sort's sorted prefix differ from selection sort's?", "a": "Selection's prefix is final; insertion's is sorted but can still change", "w": ["They are the same: both prefixes hold the smallest elements in final places", "Insertion sort's prefix is final, while selection sort's prefix can still change", "Insertion sort grows its prefix from the right, selection sort from the left", "Only selection sort's prefix is sorted; insertion sort's is in input order"], "e": "Both grow a sorted prefix from the left. Selection sort's prefix holds the smallest elements of the whole array, each final. Insertion sort's prefix holds the first few elements of the array in order among themselves, and a later element, like 1 or 2 in the book's trace, can still push into the middle.", "why": ["Insertion sort's prefix can still change.", "It is the other way around.", "Both grow from the left.", "Both prefixes are sorted."]},
+{"t": "insertion", "q": "Insertion sort runs on [7, 3, 9, 1, 5, 8, 2, 6]. How many places does 2 move back when it is inserted?", "a": "5", "w": ["6", "4", "2", "1"], "e": "Before 2 is inserted, the prefix is [1, 3, 5, 7, 8, 9]. 2 passes 9, 8, 7, 5 and 3, five elements, and stops at 1.", "why": ["It stops at 1, so it does not reach the front.", "It also passes 3.", "It passes more than just 9 and 8.", "It passes far more than 9."]},
+{"t": "insertion", "q": "What is an inversion?", "a": "A pair of positions i < j with arr[j] < arr[i]", "w": ["A pair of neighbours with equal values", "Any element that is not in its final position", "One exchange of two adjacent elements", "A pass of the sort that makes no exchanges"], "e": "Definition 7.4: an inversion is a pair of positions whose elements are in the wrong order. A sorted array has none; a reversed array has N(N − 1)/2, the most possible.", "why": ["Equal elements are not out of order.", "An element out of place can be involved in several inversions.", "An adjacent exchange REMOVES one inversion.", "A pass with no exchanges just means there are no adjacent inversions."]},
+{"t": "insertion", "q": "How many inversions does [7, 3, 9, 1, 5, 8, 2, 6] have?", "a": "15", "w": ["9", "28", "12", "7"], "e": "Count, for each element, the smaller elements to its right: 7 → 5, 3 → 2, 9 → 5, 1 → 0, 5 → 1, 8 → 2, 2 → 0. 5 + 2 + 5 + 0 + 1 + 2 + 0 = 15, so insertion sort makes 15 exchanges.", "why": ["9 is what remains after Shell sort's 4-sort.", "28 is the maximum for 8 elements, N(N − 1)/2, a reversed array.", "Some pairs are missed.", "That is too few; 7 and 9 alone have 10."]},
+{"t": "insertion", "q": "How many inversions does [3, 1, 4, 1, 5, 9, 2, 6] have?", "a": "8", "w": ["7", "9", "10", "6"], "e": "3 → (1, 1, 2) = 3, 1 → 0, 4 → (1, 2) = 2, 1 → 0, 5 → (2) = 1, 9 → (2, 6) = 2, 2 → 0. Total 8. The two 1s are equal, so they are not an inversion.", "why": ["One pair is missed.", "Counting the two equal 1s as an inversion gives 9, but equal elements are not out of order.", "Too many; check the pairs with 4 and 5.", "Too few; 3 alone has three smaller elements on its right."]},
+{"t": "insertion", "q": "An array of N distinct elements is in reverse order. How many inversions does it have?", "a": "N(N − 1)/2", "w": ["N", "N − 1", "N²", "N(N + 1)/2"], "e": "Every pair is in the wrong order, and there are N(N − 1)/2 pairs. That is the most possible.", "why": ["Far more pairs than N are inverted.", "N − 1 counts only adjacent pairs.", "N² would count every pair twice and pair each element with itself.", "That also counts each element paired with itself."]},
+{"t": "insertion", "q": "Proposition 7.5 says insertion sort performs exactly one exchange per what?", "a": "Inversion", "w": ["Element", "Comparison", "Pass", "Out-of-place element"], "e": "Each exchange swaps two adjacent out-of-order elements, which removes exactly one inversion and changes nothing else. The array starts with I inversions and ends with none, so there are exactly I exchanges.", "why": ["An element may move many places or none.", "There can be one more comparison than exchanges per pass.", "A pass can make many exchanges.", "One out-of-place element can be part of several inversions."]},
+{"t": "insertion", "q": "An input has I inversions. How many comparisons does insertion sort make on it?", "a": "Between I and I + N − 1", "w": ["Exactly I", "Exactly N(N − 1)/2", "Between N and I + N", "Exactly I + N, always"], "e": "Each pass makes one comparison per exchange, plus one more when the break fires. The break fires at most once per pass and there are N − 1 passes.", "why": ["The break can add one comparison per pass.", "That is only the worst case.", "The bounds are I and I + N − 1.", "At most N − 1 extra comparisons, not N, and not always."]},
+{"t": "insertion", "q": "Why does a single adjacent exchange remove EXACTLY one inversion?", "a": "Only the swapped pair changes order; their order relative to all others stays", "w": ["Because the exchange always moves the element straight to its final place", "Because each exchange is preceded by exactly one comparison of the two", "Because adjacent elements can only form one inversion with the rest of the array", "Because the prefix to the left of the two elements is always sorted"], "e": "Swapping two neighbours that are out of order fixes that pair. Every other element is either left of both or right of both, so its relation to each of them is unchanged. That is why bubble and insertion sort make identical exchange counts.", "why": ["The element may need several more exchanges.", "Comparisons do not decide how many inversions an exchange removes.", "Neighbours can each be in many inversions with other elements.", "The argument does not need a sorted prefix; it also works for bubble sort."]},
+{"t": "insertion", "q": "Insertion sort runs on [5, 1, 4, 2, 8]. How many exchanges does it make?", "a": "4", "w": ["3", "5", "7", "10"], "e": "The inversions are (5,1), (5,4), (5,2) and (4,2): four, so four exchanges. It makes 7 comparisons, within the bound of 4 to 4 + 4.", "why": ["One inversion is missed; (4,2) counts too.", "Selection sort makes 5 exchanges here.", "7 is the comparison count.", "10 is N(N − 1)/2, the reversed case."]},
+{"t": "insertion", "q": "What does insertion sort cost on an array of N EQUAL elements?", "a": "N − 1 comparisons and no exchanges, because there are no inversions", "w": ["N(N − 1)/2 comparisons and exchanges, because every pair is tied", "N − 1 comparisons and N − 1 exchanges", "N(N − 1)/2 comparisons and no exchanges", "It never finishes, because equal elements keep swapping"], "e": "Equal elements are not out of order, so there are zero inversions. Each pass makes one comparison, the break fires, and nothing moves.", "why": ["Ties are not inversions.", "Nothing is exchanged with a strict <.", "The break stops each pass after one comparison.", "The strict < means equal elements are never swapped."]},
+{"t": "insertion", "q": "Which statement about bubble sort and insertion sort is true on every input?", "a": "They make exactly the same number of exchanges", "w": ["They make exactly the same number of comparisons", "Insertion sort makes about twice as many exchanges as bubble sort", "Bubble sort makes fewer comparisons, because it stops after a clean pass", "They make the same number of passes"], "e": "Both exchange only adjacent elements, so both remove one inversion per exchange, and both make exactly as many exchanges as there are inversions. At 16,000 elements both measure 64,389,560. Bubble sort makes about twice as many comparisons.", "why": ["Bubble sort makes about twice as many comparisons.", "The exchange counts are identical.", "Insertion sort makes fewer comparisons, since it stops each element as soon as it lands.", "Their pass structures are different."]},
+{"t": "insertion", "q": "Which description of insertion sort's costs is correct?", "a": "Best Θ(N), average Θ(N²), worst Θ(N²); stable and adaptive", "w": ["Θ(N²) in every case; stable and non-adaptive", "Best Θ(N), worst Θ(N log N); stable and adaptive", "Best Θ(N), average Θ(N²), worst Θ(N²); unstable and adaptive", "Best Θ(N log N), worst Θ(N²); stable and adaptive"], "e": "Sorted input: N − 1 comparisons, Θ(N). Reversed: N(N − 1)/2, Θ(N²). Shuffled: about N²/4 exchanges, still Θ(N²). It is stable (strict adjacent exchanges) and strongly adaptive.", "why": ["That describes selection sort's time, and insertion sort is adaptive.", "The worst case is quadratic.", "It is stable.", "The best case is linear; N log N is Shell sort's best case."]},
+{"t": "insertion", "q": "In terms of inversions, what does \"partly sorted\" mean for insertion sort?", "a": "It has only a linear number of inversions, so the sort runs in linear time", "w": ["At least half of the elements are already in their final places", "The first half of the array is already sorted, and only the second is not", "The array has fewer than log N elements that are out of place", "The array has no duplicate keys, so no ties need to be resolved"], "e": "Insertion sort's cost is about I + N, so an array with O(N) inversions is sorted in linear time. That is a sharper statement than the best, average and worst cases, because it describes the particular input.", "why": ["Many elements can be out of place with few inversions, or vice versa.", "A sorted first half can still leave a quadratic number of inversions with the second half.", "The book defines it by inversions, not by misplaced elements.", "Duplicates are irrelevant here."]},
+{"t": "insertion", "q": "Why do real sorting libraries still use insertion sort?", "a": "To finish small or nearly sorted pieces inside faster sorting algorithms", "w": ["Because it is the fastest sort for large random arrays in practice", "Because it is the only stable sort that needs only Θ(1) memory", "Because it makes fewer exchanges than selection sort on any input", "Because its worst case is Θ(N log N), like the fastest library sorts"], "e": "For small subarrays its overhead is tiny, and on nearly sorted runs it is close to linear. The book uses it to finish small subproblems in the next chapter and to extend runs in Timsort.", "why": ["For large random arrays it is quadratic.", "Bubble sort is also stable with Θ(1) memory.", "Selection sort makes only N exchanges; insertion sort makes as many as the inversions.", "Its worst case is Θ(N²)."]},
+{"t": "insertion", "q": "Insertion sort is changed to SHIFT instead of swap: save the element, move larger ones one place right, write it into the gap once. What improves?", "a": "The number of writes, about half as many as with exchanges", "w": ["The number of comparisons, from quadratic to N log N", "The worst case, from Θ(N²) to Θ(N log N)", "The stability, which swapping had broken", "The extra space, from Θ(N) to Θ(1)"], "e": "An exchange writes two elements, so moving an element k places with exchanges writes 2k elements. Shifting writes k shifted elements plus one final write. The comparisons and the order of growth stay the same.", "why": ["The comparisons do not change.", "The order of growth does not change.", "Swapping on a strict < was already stable.", "It was already Θ(1)."]},
+{"t": "insertion", "q": "Binary insertion sort finds each element's position with binary search. What is its running time on an array, and why?", "a": "Still Θ(N²), because the elements still have to be moved to make room", "w": ["Θ(N log N), because each insertion now costs only lg N comparisons", "Θ(N), because binary search removes the inner loop completely", "Θ(log N), because every step halves the remaining work", "Θ(N²) only for reversed input, and Θ(N log N) for any other"], "e": "The comparisons drop to about N log N, but on an array the larger elements still have to shift one place right to make a gap, which is quadratic in the worst and average case.", "why": ["Comparisons are not the only cost; the moves stay quadratic.", "Something still has to move each element into place.", "Sorting N elements needs at least linear time.", "On a shuffled array the moves are still about N²/4."]},
+{"t": "insertion", "q": "In the lecture's measurements, insertion sort took 7 s for 100,000 elements, while in the book's experiment it was the fastest of the three quadratic sorts. What explains the difference?", "a": "Results depend on the data, the language and the implementation", "w": ["The lecture used a reversed array, the book a sorted one", "Insertion sort is only fast on even-length arrays", "The book's version uses binary search, the lecture's does not", "The lecture measured comparisons, the book measured exchanges"], "e": "The study notes say so directly: the ranking of the quadratic sorts depends on the data, language and implementation. In the book's experiment, insertion sort was about four times faster than selection sort.", "why": ["Both measured shuffled arrays.", "Array length parity does not matter.", "The book's Listing 7.5 does not use binary search.", "Both measured running time."]},
+{"t": "shell", "q": "Who published Shell sort, and when?", "a": "Donald Shell, in 1959", "w": ["Donald Knuth, in 1973", "Vaughan Pratt, in 1971", "Robert Sedgewick, in 1983", "Donald Shell, in 1971"], "e": "Donald Shell published \"A high-speed sorting procedure\" in Communications of the ACM in 1959. Knuth's name is on the 3h + 1 increments, and Pratt's 1971 thesis showed the worst case is tight.", "why": ["Knuth gave the increment sequence, not the algorithm.", "Pratt proved the lower bound on the worst case.", "Sedgewick designed good increment sequences.", "1971 is Pratt's thesis, not Shell's paper."]},
+{"t": "shell", "q": "What does it mean for an array to be h-sorted?", "a": "Every h-th element, starting from any position, is in order", "w": ["The first h elements are sorted", "The array has at most h inversions", "Every element is at most h positions from its final place", "The array is divided into h equal blocks, each sorted"], "e": "Definition 7.6: an array is h-sorted when every h-th element, taken from any starting position, is in order. h-sorting is insertion sort over elements h apart instead of 1 apart.", "why": ["That is a sorted prefix.", "h-sorted arrays can have many inversions.", "An element can still be far from its final place.", "The subsequences are interleaved, not contiguous blocks."]},
+{"t": "shell", "q": "Why is the result of Shell sort always sorted, whatever increments are used?", "a": "The last increment is always 1, which is plain insertion sort", "w": ["The first increment is N / 2, which already sorts half of the array", "Every h-sort removes all remaining inversions", "The increments are chosen so that each pass sorts a different region", "After log N passes every element is checked against every other"], "e": "The sequence decreases and always ends at h = 1, and a 1-sort is an ordinary insertion sort, which sorts any array. The earlier passes only make that last pass cheap.", "why": ["The first increment depends on the sequence, and it does not sort half the array.", "An h-sort with h > 1 leaves inversions between different subsequences.", "All passes cover the whole array.", "That is not how the guarantee works; the final insertion sort is."]},
+{"t": "shell", "q": "Comparing Listing 7.6 with Listing 7.5, what relation does the book point out?", "a": "Shell sort's inner loops are insertion sort's loops with every 1 replaced by h", "w": ["Shell sort's inner loops are bubble sort's loops run in reverse", "Shell sort calls insertion_sort as a function for each h", "Shell sort's inner loops are selection sort's loops with a stride", "Shell sort replaces insertion sort's break with a swapped flag"], "e": "Hold the two listings side by side: same loops, same break, with j -= h and arr[j - h] instead of 1. Insertion sort is Shell sort with the single increment 1.", "why": ["The structure matches insertion sort, not bubble sort.", "It does not call insertion_sort; the loops are written out.", "There is no minimum search.", "Shell sort keeps the break."]},
+{"t": "shell", "q": "Shell sort with h = 4 runs on [7, 3, 9, 1, 5, 8, 2, 6]. What is the array after the 4-sort?", "a": "[5, 3, 2, 1, 7, 8, 9, 6]", "w": ["[1, 3, 2, 5, 7, 8, 9, 6]", "[5, 3, 9, 1, 7, 8, 2, 6]", "[5, 3, 2, 1, 7, 8, 9, 6] with 6 and 1 also exchanged", "[1, 2, 3, 5, 6, 7, 8, 9]"], "e": "The 4-sort compares four pairs: (7, 5), (3, 8), (9, 2) and (1, 6). It exchanges 7 with 5 and 9 with 2; the other two pairs are already in order.", "why": ["The 4-sort never compares elements that are not 4 apart.", "9 and 2 are also out of order, so they are exchanged too.", "1 < 6 is already in order, so they are not exchanged.", "That is after the final 1-sort."]},
+{"t": "shell", "q": "In the book's example, how do the two exchanges of the 4-sort change the number of inversions in [7, 3, 9, 1, 5, 8, 2, 6]?", "a": "From 15 to 9", "w": ["From 15 to 13", "From 28 to 9", "From 15 to 0", "From 9 to 2"], "e": "An insertion-sort exchange removes one inversion, but a long-distance exchange can remove several. These two exchanges remove 6, so the final insertion sort starts from much less disorder.", "why": ["Adjacent exchanges would remove only one each; distant ones remove more.", "The array starts with 15, not 28.", "The 4-sort does not finish the job.", "The array starts with 15."]},
+{"t": "shell", "q": "With the book's code, what is the first increment h for an array of 8 elements?", "code": "int h = 1;\nwhile (h < len / 3) h = 3 * h + 1;", "a": "4", "w": ["13", "1", "2", "3"], "e": "len / 3 = 2 with integer division. h = 1 < 2, so h becomes 4. 4 < 2 is false, so the loop stops at h = 4.", "why": ["13 would require 4 < len / 3.", "h starts at 1 but grows once, since 1 < 2.", "Increments come from 3h + 1: 1, 4, 13, ...; 2 is not in the sequence.", "3 is not in the sequence."]},
+{"t": "shell", "q": "With the book's code, what is the first increment h for an array of 1,000 elements?", "code": "int h = 1;\nwhile (h < len / 3) h = 3 * h + 1;", "a": "364", "w": ["333", "121", "1,093", "500"], "e": "len / 3 = 333. The sequence climbs 1, 4, 13, 40, 121, 364. At 121 < 333 it grows to 364; 364 < 333 is false, so h = 364.", "why": ["333 is the limit len / 3, not a value of the sequence.", "121 < 333, so the loop goes one more step.", "1,093 would need 364 < 333.", "500 is N / 2, Shell's halving sequence."]},
+{"t": "shell", "q": "How many passes does the book's Shell sort make on 100,000 elements?", "a": "11, from h = 88,573 down to 1", "w": ["17, about lg N", "5, from h = 50,000 halving each time", "11, from h = 100,000 down to 1", "6, from h = 364 down to 1"], "e": "The 3h + 1 sequence climbs until it passes len / 3 and walks back down, dividing by 3: 88,573, 29,524, 9,841, 3,280, 1,093, 364, 121, 40, 13, 4, 1. That is 11 passes.", "why": ["The number of passes is about log₃ N, not lg N.", "Halving is Shell's original sequence, not Knuth's.", "The first increment is 88,573, not N.", "That is the sequence for 1,000 elements."]},
+{"t": "shell", "q": "Which sequence is Knuth's increment sequence used in the chapter?", "a": "1, 4, 13, 40, 121, ... from h = 3h + 1", "w": ["1, 2, 4, 8, 16, ... the powers of two", "N/2, N/4, ..., 1, halving each time", "1, 3, 7, 15, 31, ... from h = 2h + 1", "1, 3, 9, 27, 81, ... the powers of three"], "e": "Knuth's sequence starts at 1 and applies h ↦ 3h + 1. The code climbs it until h passes len / 3, then divides by 3 after each pass.", "why": ["Powers of two share factors, which is the weakness of halving.", "That is Shell's original halving proposal.", "That is Hibbard's sequence (2ᵏ − 1), not the one in the chapter.", "Powers of three are not 3h + 1."]},
+{"t": "shell", "q": "What is wrong with Shell's original halving sequence N/2, N/4, ..., 1?", "a": "The increments share factors, so passes re-sort the same subsequences", "w": ["It does not end at 1, so the result might not be fully sorted", "It needs Θ(N) extra memory to store all of the increments", "It is too fast on small arrays, so the timings are unreliable", "It makes Shell sort stable, and stability costs extra exchanges"], "e": "It works, but not very well: when every increment shares a factor with the ones before it, a pass re-sorts subsequences that an earlier pass already ordered and does little new work.", "why": ["Halving does reach 1.", "The increments are computed on the fly.", "Speed on small arrays is not the problem.", "Shell sort is unstable with any increments."]},
+{"t": "shell", "q": "Eleven passes sound like a lot of work. Why is each pass of Shell sort cheap?", "a": "Short subsequences early, partial order in the middle, near-sorted data at the end", "w": ["Every pass only looks at h elements in total, never at the whole array", "Each pass is a binary search over the array, so it costs only log N", "Only the first pass does real work; the later ones just check the result", "Passes with a large h are skipped when the array is already partly sorted"], "e": "Every pass is cheap for a different reason, and those reasons depend on the increments not sharing factors.", "why": ["Each pass looks at all N − h positions.", "There is no binary search in Shell sort.", "Every pass can move elements.", "No pass is skipped; on sorted input every pass still scans the array."]},
+{"t": "shell", "q": "What is the worst case of Shell sort with the 3h + 1 increments?", "a": "Θ(N^(3/2)), also written O(N√N)", "w": ["Θ(N²), the same as insertion sort", "Θ(N log N)", "Θ(N log² N)", "Not known"], "e": "The worst case is Θ(N^(3/2)). The upper bound says no input takes longer than a constant times N^(3/2), and Pratt's 1971 thesis showed that some inputs really do take that long.", "why": ["Shell sort beats the quadratic barrier in the worst case.", "N log N is the best case.", "N log² N is achieved by other increment sequences, not 3h + 1.", "It is the AVERAGE case that is unknown."]},
+{"t": "shell", "q": "Is a reversed array the worst case for Shell sort?", "a": "No: it is fairly easy, because the early long passes fix most of it", "w": ["Yes, because a reversed array has the most inversions possible", "Yes, because a reversed array is also insertion sort's worst case", "No, a sorted array is the worst case, since nothing gets exchanged", "No, an array of equal elements is the worst case for every increment"], "e": "Having the most inversions does not hurt Shell sort much: long-distance exchanges remove many inversions at once. The inputs that really reach N^(3/2) are special constructions.", "why": ["Many inversions are cheap to remove with long jumps.", "Shell sort's early passes change that picture.", "Sorted input is the best case.", "Equal elements make no exchanges."]},
+{"t": "shell", "q": "What is Shell sort's best case, and why is it not linear?", "a": "Θ(N log N): nothing moves, but each of about log N passes scans the array", "w": ["Θ(N), because the final insertion sort is linear on sorted input", "Θ(1), because the very first comparison shows the array is sorted", "Θ(N²), because every pass compares all pairs of elements in the array", "Θ(log N), because there are about log N passes over the array"], "e": "On a sorted array no exchanges happen, but Shell sort still runs every pass to find that out. About log N passes of N comparisons each give Θ(N log N).", "why": ["The earlier passes still run before the last one.", "It does not know the array is sorted until it has checked every pass.", "Each pass compares each element only with the one h before it, until the break.", "Each pass costs N comparisons, not 1."]},
+{"t": "shell", "q": "What is the average case of Shell sort with the 3h + 1 increments?", "a": "Not known: it is an open problem", "w": ["Θ(N log N), proven", "Θ(N^(3/2)), proven", "Θ(N²/4), like insertion sort", "Θ(N^(7/6)), proven by Pratt"], "e": "More than sixty years after Shell published it, nobody has a formula for its behaviour on random input, and nobody has proved the 3h + 1 sequence is the best. That is why Table 7.3 has an empty cell.", "why": ["That is the best case.", "That is the worst case.", "That is insertion sort's average exchange count.", "Pratt's thesis concerns the worst case, not the average."]},
+{"t": "shell", "q": "Why is Shell sort's average case so hard to analyse?", "a": "After an h-sort, the next pass's input is no longer random", "w": ["The algorithm uses random numbers, so its cost is unpredictable", "It is far too long to analyse, with thousands of lines of code", "Its behaviour on any given input is not fully determined", "Nobody has tried, since merge sort replaced it decades ago"], "e": "Shell sort is about fifteen lines long and fully deterministic. The difficulty is that each pass inherits structure from the previous one, and nobody has described that structure precisely enough to count the comparisons.", "why": ["It uses no randomness.", "It is about fifteen lines long.", "Its behaviour on any particular input is completely determined.", "It has been studied for decades; the problem is open, not ignored."]},
+{"t": "shell", "q": "Which summary of Shell sort's bounds across all inputs is correct?", "a": "O(N^(3/2)) and Ω(N log N), with no single Θ", "w": ["Θ(N log N) for every input", "Θ(N^(3/2)) for every input", "O(N²) and Ω(N), with no single Θ", "O(N log N) and Ω(N), with no single Θ"], "e": "The worst case gives the O, the best case gives the Ω, and since they are in different classes there is no single Θ, like bubble and insertion sort. Unlike them, its average case is unknown.", "why": ["The worst case is higher than N log N.", "The best case is lower than N^(3/2).", "Those are bubble and insertion sort's bounds.", "The upper bound is N^(3/2), and the lower bound is N log N."]},
+{"t": "shell", "q": "Shell sort on [1, 0, 0, 0, 0, 0] uses h = 4 first. Why does this show Shell sort is unstable?", "a": "Positions 4 and 0 are swapped, so that 0 jumps over three other 0s", "w": ["The 1 moves to the end in a single exchange, which reverses all of the 0s", "The equal 0s are exchanged with each other during the final 1-sort", "The 4-sort compares all the 0s with each other and puts them in reverse order", "It shows nothing at all: the result is the same as for any stable sort"], "e": "The first pass compares positions 4 and 0, finds 0 < 1 and exchanges them. That 0 jumps past the 0s at positions 1, 2 and 3. Any exchange between distant positions can do the same.", "why": ["The 1 does not go to the end in one exchange, and the 0s are not simply reversed.", "The 1-sort uses strict < and never exchanges equal 0s.", "The 0s are not compared with each other in a way that reorders them.", "Integers hide it, but if the 0s were records the change would be visible."]},
+{"t": "shell", "q": "Which properties does Shell sort have?", "a": "Unstable, adaptive, Θ(1) extra space", "w": ["Stable, adaptive, Θ(1) extra space", "Unstable, non-adaptive, Θ(1) extra space", "Stable, non-adaptive, Θ(N) extra space", "Unstable, adaptive, Θ(log N) extra space"], "e": "Distant exchanges make it unstable. Every pass after the first works on partly ordered data and the break stops early, so it is adaptive. It sorts in place.", "why": ["Distant exchanges make it unstable.", "It is adaptive.", "It is unstable and in place.", "It is iterative and uses Θ(1) space."]},
+{"t": "shell", "q": "Shell sort with increments 5, 3, 1 runs on [9, 2, 7, 4, 1, 8, 3, 6, 5, 0], which has 29 inversions. How many are left after the 5-sort and the 3-sort?", "a": "26 after the 5-sort, 7 after the 3-sort", "w": ["24 after the 5-sort, 0 after the 3-sort", "26 after the 5-sort, 26 after the 3-sort", "14 after the 5-sort, 7 after the 3-sort", "29 after the 5-sort, 7 after the 3-sort"], "e": "The 5-sort exchanges 9↔8, 7↔6 and 1↔0: [8, 2, 6, 4, 0, 9, 3, 7, 5, 1], 26 inversions. The 3-sort leaves [1, 0, 5, 3, 2, 6, 4, 7, 9, 8], 7 inversions. The last pass is an insertion sort that has to fix only those 7.", "why": ["The 3-sort does not finish the job; only the 1-sort does.", "The 3-sort removes many inversions.", "Three exchanges cannot remove 15 inversions here.", "The 5-sort does exchange three pairs."]},
+{"t": "race", "q": "In the book's race (Table 7.1), which order is right for 100,000 shuffled elements, from fastest to slowest?", "a": "Shell, insertion, bubble, selection", "w": ["Shell, selection, insertion, bubble", "Insertion, Shell, bubble, selection", "Shell, bubble, insertion, selection", "Selection, insertion, bubble, Shell"], "e": "Table 7.1 at 100,000: Shell 0.0071 s, insertion 1.16 s, bubble 3.99 s, selection 4.68 s. In the book's measurements selection sort finished last of the four.", "why": ["Selection sort was last in the book's race (it was second in the lecture's).", "Shell sort was by far the fastest.", "Insertion sort beat bubble sort.", "That is roughly the reverse."]},
+{"t": "race", "q": "The book projects the quadratic sorts on 10 million elements. Roughly how long would bubble sort take, and Shell sort?", "a": "Bubble about 11 hours; Shell under 2 seconds", "w": ["Bubble about 40 seconds; Shell about 1 second", "Bubble about 11 minutes; Shell about 11 seconds", "Bubble about 11 hours; Shell about 11 minutes", "Bubble about 3 days; Shell about 1 hour"], "e": "Table 7.1: bubble (11.1 h), selection (13.0 h), insertion (3.2 h), Shell 1.798 s measured. The three quadratic sorts differ by small factors; Shell sort removes many inversions per exchange, and that turns hours into seconds.", "why": ["Quadratic growth from 4 s at 10⁵ gives 4 × 10⁴ s at 10⁷.", "Too short for a quadratic algorithm.", "Shell sort was measured at under two seconds.", "Too long for both."]},
+{"t": "race", "q": "Over the last doubling in Table 7.1, the quadratic sorts' times grew by about 4 (4.30, 4.11, 3.34) and Shell sort's by 2.28. What does 2.28 tell you?", "a": "Its time grows like N^1.19, below the N^1.5 its worst case allows", "w": ["It is quadratic too, since every ratio above 2 means quadratic growth", "Its time grows like N^2.28, faster than the quadratic sorts", "It is exactly linear, because 2.28 rounds down to 2", "It proves that Shell sort's average case is Θ(N log N)"], "e": "A doubling ratio r means time grows like N^(lg r). The quadratic sorts cluster around 2² = 4 (noisy). Shell's 2.28 = 2^1.19, an exponent of about 1.19, comfortably below the 3/2 its worst case allows.", "why": ["A ratio of 4 means quadratic; 2.28 is far below that.", "The ratio is 2^b, not N^r; 2.28 gives b ≈ 1.19.", "2.28 is noticeably above 2; it is not linear.", "A measurement cannot prove the average case, which is still unknown."]},
+{"t": "race", "q": "Table 7.2 counts work on the same 16,000 shuffled elements. Which algorithm made the fewest COMPARISONS?", "a": "Shell sort, about 440 thousand", "w": ["Selection sort, about 16 thousand", "Insertion sort, about 64 million", "Bubble sort, about 128 million", "Selection sort, about 64 million"], "e": "Shell: 439,827 comparisons and 317,814 exchanges. Insertion: 64,405,550 comparisons. Bubble and selection: about 128 million comparisons. Selection's 16,000 is its EXCHANGE count.", "why": ["16,000 is selection sort's exchange count.", "Insertion sort makes far more.", "Bubble sort makes the most.", "Selection sort made about 128 million comparisons."]},
+{"t": "race", "q": "Which algorithm makes the fewest EXCHANGES on a shuffled array?", "a": "Selection sort", "w": ["Shell sort", "Insertion sort", "Bubble sort", "Bubble and insertion sort tie for the fewest"], "e": "Selection sort makes exactly N exchanges: 16,000 on 16,000 elements. Shell sort made 317,814, and bubble and insertion sort 64,389,560 each.", "why": ["Shell sort made about 318 thousand, far more than N.", "Insertion sort makes one per inversion, about 64 million here.", "Bubble sort makes the same as insertion sort.", "They tie, but for the most, not the fewest."]},
+{"t": "race", "q": "At 64,000 shuffled elements, how much faster than insertion sort and selection sort was Shell sort?", "a": "113 times faster than insertion sort, 532 times faster than selection sort", "w": ["2 times faster than insertion, 4 times faster than selection", "11 times faster than both", "532 times faster than insertion, 113 times faster than selection", "About 1,000 times faster than all three"], "e": "Figure 7.6: three lines climb at the same steep angle and Shell sort's does not, and the gap widens with every doubling.", "why": ["The gap is far bigger than small factors.", "The two ratios are different.", "The numbers are swapped.", "Those are not the reported figures."]},
+{"t": "race", "q": "Why are Table 7.1's times plotted on log-log axes (Figure 7.6)?", "a": "A power law becomes a straight line whose slope is the exponent", "w": ["Because the times are too small to show on a normal linear axis", "Because log-log axes make Shell sort look slower than it is", "Because only logarithmic algorithms can be plotted on such a chart", "Because the measurements were taken at irregular random sizes"], "e": "On axes in doublings, T(N) = cN^b becomes a line with slope b. The three quadratic sorts climb at the same steep angle; Shell sort's line is flatter.", "why": ["Small times could be scaled; the main reason is to read the exponent.", "The plot shows Shell sort is much faster.", "Any power law can be plotted this way.", "The sizes double regularly: 2k, 4k, ..., 64k."]},
+{"t": "race", "q": "On a SORTED array of 64,000 elements, which three algorithms finished in under a fifth of a millisecond?", "a": "Bubble, insertion and Shell sort", "w": ["Bubble, selection and insertion sort", "Selection, insertion and Shell sort", "Only insertion sort", "All four algorithms"], "e": "The three adaptive algorithms notice the order and do almost nothing. Selection sort took 0.69 s because it still makes all N(N − 1)/2 comparisons.", "why": ["Selection sort took 0.69 s.", "Selection sort took 0.69 s.", "Bubble and Shell sort were also that fast.", "Selection sort was far slower."]},
+{"t": "race", "q": "In the LECTURE's measurements (study notes), how long did Shell sort take for 100,000 elements, compared with bubble sort?", "a": "About 17 ms, against 14 s for bubble sort", "w": ["About 4 s, against 14 s for bubble sort", "About 1 ms, against 113 ms for bubble sort", "About 270 ms, against 23 minutes for bubble sort", "About 7 s, against 14 s for bubble sort"], "e": "Lecture table at 100,000: bubble 14 s, selection 4 s, insertion 7 s, Shell 17 ms. Shell sort also did a million in 270 ms and ten million in about 4 s.", "why": ["4 s was selection sort.", "Those are the 10,000-element times.", "270 ms is Shell sort at a million elements.", "7 s was insertion sort."]},
+{"t": "race", "q": "Which row of the summary table (Table 7.3) is correct?", "a": "Selection: best Θ(N²), average Θ(N²), worst Θ(N²); not stable, not adaptive", "w": ["Insertion: best Θ(N²), average Θ(N²), worst Θ(N²); stable, adaptive", "Bubble: best Θ(N), average Θ(N log N), worst Θ(N²); stable, adaptive", "Shell: best Θ(N), average Θ(N log N), worst Θ(N²); unstable, adaptive", "Selection: best Θ(N), average Θ(N²), worst Θ(N²); not stable, adaptive"], "e": "Table 7.3: bubble N / N² / N², stable, adaptive. Selection N² / N² / N², neither. Insertion N / N² / N², stable, adaptive. Shell N log N / not known / N^(3/2), unstable, adaptive. All use Θ(1) extra space.", "why": ["Insertion sort's best case is Θ(N).", "Bubble sort's average is Θ(N²).", "Shell: best N log N, average not known, worst N^(3/2).", "Selection sort is quadratic even in its best case and is not adaptive."]},
+{"t": "race", "q": "Which of the four algorithms has a cell in Table 7.3 that nobody can fill in?", "a": "Shell sort, its average case", "w": ["Selection sort, its best case", "Bubble sort, its average case", "Insertion sort, its worst case", "Shell sort, its worst case"], "e": "Shell sort's average case for the 3h + 1 increments is still unknown. Its worst case is known: Θ(N^(3/2)).", "why": ["Selection sort's best case is Θ(N²).", "Bubble sort's average case is Θ(N²).", "Insertion sort's worst case is Θ(N²).", "The worst case is known; the average case is not."]},
+{"t": "race", "q": "Bubble sort took 14 s for 100,000 elements in the lecture. About how long would it take for 1,000,000?", "a": "About 23 minutes", "w": ["About 140 seconds", "About 4 hours", "About 28 seconds", "About 14 seconds"], "e": "Quadratic: ten times the elements take a hundred times as long. 14 s × 100 = 1,400 s, about 23 minutes. Shell sort did the same million in 270 ms.", "why": ["That is linear growth, ten times.", "That would be 1,000 times, cubic-ish growth.", "That is doubling, not ×10 in N.", "The time grows with N."]},
+{"t": "race", "q": "You must sort a list that was sorted last week and has had a dozen new items appended. Which elementary sort is the best choice?", "a": "Insertion sort, because its cost is about N plus the number of inversions", "w": ["Selection sort, because it makes only N exchanges", "Bubble sort, because new items at the end bubble to the front in one pass", "Shell sort, because it is always faster than insertion sort", "Any of them, because they are all Θ(N²)"], "e": "A dozen new items create at most about 12N inversions, so insertion sort runs in close to linear time. Bubble sort would need many passes for small items at the end, since they move left one place per pass.", "why": ["Selection sort still makes N(N − 1)/2 comparisons.", "Small elements at the end move left only one position per pass.", "On nearly sorted data, Shell sort still runs all its passes; insertion sort is ideal here.", "Their behaviour on nearly sorted input is very different."]},
+{"t": "race", "q": "You sort an array of very large records by a small integer field, and copying a record is very expensive. Which elementary sort minimises the copying?", "a": "Selection sort, with exactly N exchanges", "w": ["Insertion sort, because it is adaptive", "Bubble sort, because it only swaps neighbours", "Shell sort, because it makes the fewest comparisons", "Insertion sort with binary search, because it moves nothing"], "e": "Selection sort touches each record only about twice. Insertion and bubble sort exchange once per inversion, quadratic on random data. Shell sort made about 318,000 exchanges on 16,000 elements against selection's 16,000.", "why": ["Adaptivity helps only if the input is nearly sorted; random input still needs many exchanges.", "Swapping neighbours means one exchange per inversion, quadratic on random input.", "Fewest comparisons is not the same as fewest exchanges.", "Binary insertion sort still has to shift elements."]}
+];
+
+QUESTIONS.forEach((q,i) => { q.id = i; q.all = [q.a, ...q.w]; });
+document.getElementById("qcount-hero").textContent = QUESTIONS.length;
+
+/* ---------------- quiz logic ---------------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = s => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
+const shuffle = a => { a=[...a]; for (let i=a.length-1;i>0;i--){ const j=Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const BEST_KEY = "ibu-dsa-r05-best-v1";
+const RUN_KEY = "ibu-dsa-r05-run-v1";
+const MODE_KEY = "ibu-dsa-r05-mode";
+const MISTAKES_KEY = "ibu-dsa-r05-mistakes-v1";
+const canSaveMistakes = store.set(`${MISTAKES_KEY}-check`, "1");
+store.remove(`${MISTAKES_KEY}-check`);
+const questionRevision = q => JSON.stringify([q.q, q.a, q.w]);
+function readMistakes(){
+  try {
+    const saved = JSON.parse(store.get(MISTAKES_KEY));
+    if (!Array.isArray(saved)) return new Set();
+    return new Set(saved.filter(x => x && Number.isInteger(x.id) && QUESTIONS[x.id] &&
+      x.revision === questionRevision(QUESTIONS[x.id])).map(x => x.id));
+  } catch(e){ return new Set(); }
+}
+function updateMistake(it){
+  const saved = readMistakes();
+  if (judge(it)) saved.delete(it.q.id); else saved.add(it.q.id);
+  store.set(MISTAKES_KEY, JSON.stringify([...saved].map(id => ({id, revision:questionRevision(QUESTIONS[id])}))));
+}
+function savedMistakeQuestions(){
+  const saved = readMistakes();
+  return QUESTIONS.filter(q => saved.has(q.id) && chosenTopics.has(q.t));
+}
+// Any change to the bank invalidates saved progress and best scores.
+const BANK_VERSION = JSON.stringify(QUESTIONS.map(q => [q.q, q.a, q.w]));
+function whyWrong(it){ const k = it.sel >= 0 ? it.order[it.sel] : 0; return k > 0 && it.q.why && it.q.why[k-1] ? `<p class="whyw">${fmt(it.q.why[k-1])}</p>` : ""; }
+function readingLink(q){ return `<a href="#${READING_SECTIONS[q.t]}" data-reading="${READING_SECTIONS[q.t]}">Read this topic →</a>`; }
+document.addEventListener("click", e => {
+  const link = e.target.closest("[data-reading]");
+  if (!link) return;
+  e.preventDefault();
+  const section = $(link.dataset.reading);
+  show("read", false);
+  history.replaceState(null, "", link.getAttribute("href"));
+  section.scrollIntoView({behavior: reduce ? "auto" : "smooth", block:"start"});
+  section.setAttribute("tabindex", "-1");
+  section.focus({preventScroll:true});
+});
+
+let count = 25, chosenTopics = new Set(Object.keys(T));
+let mode = store.get(MODE_KEY) === "exam" ? "exam" : "practice";
+const COUNTS = [10, 25, 50, "All"];
+const bestKey = (topics, size) => `${BEST_KEY}:${mode}:${[...topics].sort().join(",")}:${size}`;
+function readBest(topics, size){
+  try {
+    const best = JSON.parse(store.get(bestKey(topics, size)));
+    return best && best.bank === BANK_VERSION && best.total === size &&
+      Number.isInteger(best.good) && best.good >= 0 && best.good <= size ? best : null;
+  } catch(e) { return null; }
+}
+function renderSetup(){
+  const pool = QUESTIONS.filter(q => chosenTopics.has(q.t)).length;
+  $("count-seg").innerHTML = COUNTS.map(c => `<button class="chip" data-c="${c}" aria-pressed="${c===count}">${c==="All" ? `All <small>(${pool})</small>` : c}</button>`).join("");
+  $("topic-seg").innerHTML = Object.entries(T).map(([k,v]) => `<button class="chip" data-t="${k}" aria-pressed="${chosenTopics.has(k)}">${esc(v)} <small>${QUESTIONS.filter(q=>q.t===k).length}</small></button>`).join("");
+  $("all-topics").setAttribute("aria-pressed", chosenTopics.size === Object.keys(T).length);
+  $("start").disabled = pool === 0;
+  const mistakes = readMistakes(), available = savedMistakeQuestions();
+  $("mistakes-status").textContent = !canSaveMistakes ? "Browser storage is unavailable; mistakes cannot be saved here." : `${mistakes.size} saved mistake${mistakes.size === 1 ? "" : "s"} · ${available.length} in selected topics`;
+  $("review-mistakes").disabled = available.length === 0;
+  $("mode-seg").querySelectorAll("[data-m]").forEach(b => b.setAttribute("aria-pressed", b.dataset.m === mode));
+  const size = count === "All" ? pool : Math.min(count, pool);
+  const best = readBest(chosenTopics, size);
+  $("best").textContent = best ? `Your best (${mode === "exam" ? "Exam" : "Practice"}) for these topics · ${size} questions: ${Math.round(best.good / best.total * 100)}% (${best.good}/${best.total})` :
+    `${QUESTIONS.length} questions in the bank`;
+}
+$("mode-seg").onclick = e => { const b=e.target.closest("[data-m]"); if(!b) return; mode = b.dataset.m; store.set(MODE_KEY, mode); renderSetup(); };
+$("count-seg").onclick = e => { const b=e.target.closest("[data-c]"); if(!b) return; count = b.dataset.c==="All" ? "All" : +b.dataset.c; renderSetup(); };
+$("topic-seg").onclick = e => { const b=e.target.closest("[data-t]"); if(!b) return; const k=b.dataset.t; chosenTopics.has(k) ? chosenTopics.delete(k) : chosenTopics.add(k); renderSetup(); };
+$("all-topics").onclick = () => { chosenTopics = chosenTopics.size === Object.keys(T).length ? new Set() : new Set(Object.keys(T)); renderSetup(); };
+renderSetup();
+
+/* run.list items: {q, order:[indexes into q.all], sel: displayed position or -1, done}. q.all[0] is the correct answer. */
+let run = null;
+const isOk = (it, pos) => it.order[pos] === 0;
+const judge = it => it.sel >= 0 && isOk(it, it.sel);
+function saveRun(){
+  store.set(RUN_KEY, JSON.stringify({bank:BANK_VERSION, count, topics:[...chosenTopics], recordEligible:run.recordEligible, mode:run.mode, i:run.i,
+    list:run.list.map(it => ({id:it.q.id, order:it.order, sel:it.sel, done:!!it.done}))}));
+}
+function restoreRun(){
+  try {
+    const saved = JSON.parse(store.get(RUN_KEY));
+    if (!saved) return;
+    if (saved.bank !== BANK_VERSION || !Array.isArray(saved.list) || !saved.list.length ||
+        !Number.isInteger(saved.i) || saved.i < 0 || saved.i >= saved.list.length ||
+        !COUNTS.includes(saved.count) || !Array.isArray(saved.topics) || saved.topics.some(t => !Object.hasOwn(T,t))) throw Error("Invalid progress");
+    const list = saved.list.map((it,index) => {
+      const q = QUESTIONS[it.id];
+      if (!q || !Array.isArray(it.order) || it.order.length !== 5 || new Set(it.order).size !== 5 ||
+          it.order.some(k => !Number.isInteger(k) || k < 0 || k > 4) || !Number.isInteger(it.sel) || it.sel < -1 || it.sel > 4 ||
+          (it.done && it.sel < 0) || (index < saved.i && !it.done) || (index > saved.i && it.done)) throw Error("Invalid question");
+      return {q, order:it.order, sel:it.sel, done:!!it.done};
+    });
+    run = {list, i:saved.i, recordEligible:saved.recordEligible === true, mode:saved.mode === "exam" ? "exam" : "practice"};
+    if (run.recordEligible) mode = run.mode;
+    count = saved.count; chosenTopics = new Set(saved.topics);
+    $("q-setup").hidden = true; $("q-result").hidden = true; $("q-play").hidden = false;
+    renderQ();
+  } catch(e) { store.remove(RUN_KEY); }
+}
+function startWith(list, recordEligible = true, m = mode){
+  run = { list: list.map(q => ({ q, order: shuffle([0,1,2,3,4]), sel:-1, done:false })), i:0, recordEligible, mode:m };
+  $("q-setup").hidden = true; $("q-result").hidden = true; $("q-play").hidden = false;
+  renderQ();
+}
+$("review-mistakes").onclick = () => {
+  const list = shuffle(savedMistakeQuestions());
+  if (list.length) startWith(list, false, "practice");
+};
+$("start").onclick = () => {
+  const pool = shuffle(QUESTIONS.filter(q => chosenTopics.has(q.t)));
+  startWith(count === "All" ? pool : pool.slice(0, count));
+};
+const answered = () => run.list.filter(it => it.done);
+function renderLive(){
+  const a = answered(), g = a.filter(judge).length;
+  if (run.mode === "exam"){ $("q-live").innerHTML = `<span>Exam · answered ${a.length} / ${run.list.length}</span>`; return; }
+  $("q-live").innerHTML = `<span class="g">✓ ${g}</span> &nbsp; <span class="r">✕ ${a.length - g}</span>`;
+}
+function renderQ(){
+  const it = run.list[run.i], n = run.list.length;
+  $("q-counter").textContent = `Question ${run.i+1} / ${n}`;
+  $("q-topic").textContent = T[it.q.t];
+  renderLive();
+  $("q-bar").style.width = (run.i / n * 100) + "%";
+  $("q-text").innerHTML = fmt(it.q.q) + (it.q.code ? `<pre class="code qcode">${esc(it.q.code)}</pre>` : "");
+  $("q-opts").innerHTML = it.order.map((k,pos) => `<li><button class="opt${it.sel === pos ? " sel" : ""}" role="radio" aria-checked="${it.sel === pos}" data-k="${pos}"><span class="k">${"ABCDE"[pos]}</span><span>${fmt(it.q.all[k])}</span></button></li>`).join("");
+  $("q-explain").hidden = true;
+  if (it.done && run.mode !== "exam") paintAnswer(); else setAction();
+  saveRun();
+}
+function setAction(){
+  const it = run.list[run.i], last = run.i === run.list.length-1, btn = $("q-next");
+  if (!it.done && run.mode === "exam"){ btn.textContent = last ? "Finish →" : "Next →"; btn.disabled = it.sel < 0; }
+  else if (!it.done){ btn.textContent = "Check"; btn.disabled = it.sel < 0; }
+  else { btn.textContent = last ? "See results →" : "Next →"; btn.disabled = false; }
+}
+function choose(pos){
+  const it = run.list[run.i]; if (it.done) return;
+  it.sel = pos;
+  [...$("q-opts").querySelectorAll(".opt")].forEach((b,j) => { b.classList.toggle("sel", j === pos); b.setAttribute("aria-checked", j === pos); });
+  setAction(); saveRun();
+}
+function check(){
+  const it = run.list[run.i]; if (it.done || it.sel < 0) return;
+  it.done = true;
+  updateMistake(it);
+  if (run.mode === "exam"){
+    if (run.i < run.list.length-1){ run.i++; renderQ(); $("q-play").scrollIntoView({block:"nearest"}); } else results();
+    return;
+  }
+  paintAnswer(true); saveRun();
+  $("q-next").focus({preventScroll:true});
+}
+function paintAnswer(fresh){
+  const it = run.list[run.i], ok = judge(it);
+  [...$("q-opts").querySelectorAll(".opt")].forEach((b,j) => { b.disabled = true; b.classList.remove("sel");
+    const good = isOk(it, j), picked = it.sel === j;
+    if (good && picked) b.classList.add("correct");
+    else if (good) b.classList.add("answer");
+    else if (picked) b.classList.add("wrong", ...(fresh && !reduce ? ["shake"] : []));
+    else b.classList.add("dim"); });
+  const ex = $("q-explain");
+  ex.className = "explain " + (ok ? "ok" : "no");
+  ex.innerHTML = `<b>${ok ? "Correct." : "Not quite."}</b> ${whyWrong(it)}${fmt(it.q.e)} <p>${readingLink(it.q)}</p>`;
+  ex.hidden = false;
+  renderLive(); setAction();
+}
+$("q-opts").onclick = e => { const b = e.target.closest(".opt"); if (b) choose(+b.dataset.k); };
+$("q-next").onclick = () => {
+  const it = run.list[run.i];
+  if (!it.done) return check();
+  if (run.i < run.list.length-1){ run.i++; renderQ(); $("q-play").scrollIntoView({block:"nearest"}); } else results();
+};
+$("q-quit").onclick = () => { if (answered().length) results(); else { store.remove(RUN_KEY); $("q-play").hidden = true; $("q-setup").hidden = false; } };
+document.addEventListener("keydown", e => {
+  if ($("q-play").hidden || views.quiz.hidden || e.ctrlKey || e.metaKey || e.altKey) return;
+  // Let focused controls (End quiz, links...) handle Enter/Space natively.
+  // Answer buttons are excluded so that Enter still checks the selected answer.
+  const ctl = e.target.closest && e.target.closest("button, a, input, select, textarea, [contenteditable]");
+  if (ctl && !ctl.classList.contains("opt") && (e.key === "Enter" || e.key === " ")) return;
+  const m = "12345".indexOf(e.key) >= 0 ? "12345".indexOf(e.key) : "abcde".indexOf(e.key.toLowerCase());
+  if (m >= 0 && e.key.length === 1){ choose(m); e.preventDefault(); }
+  else if (e.key === "Enter" && !$("q-next").disabled){ $("q-next").click(); e.preventDefault(); }
+});
+function results(){
+  store.remove(RUN_KEY);
+  const done = answered(), n = done.length, g = done.filter(judge).length, pct = n ? Math.round(g/n*100) : 0;
+  $("q-play").hidden = true; $("q-result").hidden = false;
+  $("r-pct").textContent = pct + "%";
+  $("r-raw").textContent = `${g} / ${n}${n < run.list.length ? ` · ${n} of ${run.list.length} done` : ""}`;
+  const ring = $("r-ring"); let p = 0;
+  const step = () => { p = Math.min(pct, p + 2); ring.style.setProperty("--p", p); if (p < pct && !batterySaver) requestAnimationFrame(step); else ring.style.setProperty("--p", pct); };
+  (reduce || batterySaver) ? ring.style.setProperty("--p", pct) : requestAnimationFrame(step);
+  $("r-title").textContent = pct >= 90 ? "Excellent!" : pct >= 75 ? "Very good" : pct >= 55 ? "Getting there" : "Keep studying";
+  $("r-msg").textContent = pct >= 90 ? "You know the elementary sorts really well." : pct >= 75 ? "Review the topics with the lowest bars below." : "Re-read the sections for the red topics, then retry your mistakes.";
+  const by = {};
+  done.forEach(it => { by[it.q.t] ??= [0,0]; by[it.q.t][1]++; if (judge(it)) by[it.q.t][0]++; });
+  $("r-topics").innerHTML = Object.entries(by).sort((a,b) => a[1][0]/a[1][1] - b[1][0]/b[1][1]).map(([k,[x,y]]) => {
+    const r = x/y; return `<div class="trow"><span>${esc(T[k])}</span><span class="tb"><i class="${r<.5?"low":r<.8?"mid":""}" style="width:${r*100}%"></i></span><span>${x}/${y}</span></div>`; }).join("");
+  const wrong = done.filter(it => !judge(it));
+  run.wrong = wrong.map(it => it.q);
+  $("r-retry").hidden = !wrong.length; $("r-review-wrap").hidden = !wrong.length;
+  $("r-review").innerHTML = wrong.map(it =>
+    `<div class="ritem"><p class="q">${fmt(it.q.q)}</p>` +
+    `<p class="you">You chose: ${fmt(it.q.all[it.order[it.sel]])}</p>${whyWrong(it)}` +
+    `<p class="ans">Correct answer: ${fmt(it.q.a)}</p>` +
+    `<p class="why">${fmt(it.q.e)}</p><p>${readingLink(it.q)}</p></div>`).join("");
+  if (run.recordEligible && n >= 10 && n === run.list.length){
+    const prev = readBest(chosenTopics, n);
+    if (!prev || g > prev.good) store.set(bestKey(chosenTopics, n), JSON.stringify({bank:BANK_VERSION, good:g, total:n}));
+  }
+  scrollTo({top:0, behavior: reduce ? "auto" : "smooth"});
+}
+$("r-retry").onclick = () => startWith(shuffle(run.wrong), false, "practice");
+$("r-new").onclick = () => { $("q-result").hidden = true; $("q-setup").hidden = false; renderSetup(); };
+restoreRun();
+</script>
+<script>
+/* ---------------- reading figures and demos ---------------- */
+(function(){
+
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent, text){ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(text!=null) e.textContent=text; if(parent) parent.appendChild(e); return e; }
+const BOOK=[7,3,9,1,5,8,2,6];
+const inversions=a=>{let c=0;for(let i=0;i<a.length;i++)for(let j=i+1;j<a.length;j++)if(a[j]<a[i])c++;return c;};
+const row=(label,vals,cls)=>`<div class="pass"><span class="lbl">${label}</span><div class="arr">${vals.map((v,i)=>`<div class="cell${cls(i)?" "+cls(i):""}">${v}</div>`).join("")}</div></div>`;
+
+/* 1. stability figure */
+(function(){
+  const r=(label,recs,note)=>`<div class="stab-row"><span class="lbl">${label}</span><div class="arr">${recs.map(([n,g])=>`<div class="rec g${g}"><b>${n}</b><span>${g}</span></div>`).join("")}</div><span class="note">${note}</span></div>`;
+  document.getElementById("stabFig").innerHTML=
+    r("as given",[["Ana","B"],["Bo","A"],["Cvi","B"],["Dan","A"]],"alphabetical")+
+    r("stable",[["Bo","A"],["Dan","A"],["Ana","B"],["Cvi","B"]],"still alphabetical inside each grade")+
+    r("unstable",[["Dan","A"],["Bo","A"],["Cvi","B"],["Ana","B"]],"sorted by grade, names lost");
+})();
+
+/* 2. pass traces */
+(function(){
+  // bubble
+  let a=BOOK.slice(), n=a.length, html=row("start",a,()=>"");
+  for(let i=0;i<n;i++){ const sw=new Set(); let any=false, c=0;
+    for(let j=1;j<n-i;j++){ c++; if(a[j]<a[j-1]){[a[j],a[j-1]]=[a[j-1],a[j]];sw.add(j);sw.add(j-1);any=true;} }
+    const done=any?n-i-1:-1;
+    html+=row(`pass ${i+1} · ${c} cmp`,a,k=>(!any||k>=n-i-1)?"sorted":sw.has(k)?"swap":""); if(!any) break; }
+  document.getElementById("bubblePasses").innerHTML=html;
+  // selection
+  a=BOOK.slice(); html=row("start",a,()=>"");
+  for(let i=0;i<n-1;i++){ let m=i; for(let j=i+1;j<n;j++) if(a[j]<a[m]) m=j; [a[i],a[m]]=[a[m],a[i]];
+    html+=row(`iter ${i} · min ${a[i]}`,a,k=>k<=i?"sorted":(k===m&&m!==i?"swap":"")); }
+  document.getElementById("selectionPasses").innerHTML=html;
+  // insertion
+  a=BOOK.slice(); html=row("start",a,k=>k===0?"prefix":"");
+  for(let i=1;i<n;i++){ let j=i, moved=0; while(j>0&&a[j]<a[j-1]){[a[j],a[j-1]]=[a[j-1],a[j]];j--;moved++;}
+    const land=j; html+=row(`insert ${a[land]} · ${moved} back`,a,k=>k===land?"swap":k<=i?"prefix":""); }
+  document.getElementById("insertionPasses").innerHTML=html;
+  // shell
+  a=BOOK.slice(); html=row(`start · ${inversions(a)} inv`,a,()=>"");
+  let h=1; while(h<Math.floor(n/3)) h=3*h+1;
+  while(h>=1){ const before=a.slice();
+    for(let i=h;i<n;i++) for(let j=i;j>=h&&a[j]<a[j-h];j-=h) [a[j],a[j-h]]=[a[j-h],a[j]];
+    html+=row(`h = ${h} · ${inversions(a)} inv`,a,k=>a[k]!==before[k]?"swap":(h===1?"sorted":"")); h=Math.floor(h/3); }
+  document.getElementById("shellPasses").innerHTML=html;
+})();
+
+/* 3. inversion list */
+(function(){
+  const a=BOOK, parts=[];
+  for(let i=0;i<a.length;i++){ const s=[]; for(let j=i+1;j<a.length;j++) if(a[j]<a[i]) s.push(a[j]);
+    parts.push(`<div class="inv-row"><span class="cell${s.length?"":" out"}">${a[i]}</span><span class="inv-pairs">${s.length?s.map(x=>`(${a[i]}, ${x})`).join(" "):"none"}</span><b>${s.length}</b></div>`); }
+  document.getElementById("invFig").innerHTML=parts.join("")+`<div class="inv-row total"><span></span><span>total</span><b>${inversions(a)}</b></div>`;
+})();
+
+/* 4. increment calculator */
+(function(){
+  const inp=document.getElementById("hLen"), out=document.getElementById("hMsg");
+  function upd(){ const n=Math.floor(Number(inp.value));
+    if(!Number.isFinite(n)||n<1||n>1e8){ inp.setAttribute("aria-invalid","true"); out.textContent="Enter a whole number from 1 to 100,000,000."; return; }
+    inp.removeAttribute("aria-invalid");
+    let h=1; while(h<Math.floor(n/3)) h=3*h+1; const hs=[]; while(h>=1){hs.push(h);h=Math.floor(h/3);}
+    out.textContent=`len / 3 = ${Math.floor(n/3).toLocaleString("en")} → ${hs.length} pass${hs.length>1?"es":""}: h = ${hs.map(x=>x.toLocaleString("en")).join(", ")}`; }
+  inp.addEventListener("input",upd); upd();
+})();
+
+/* 5. race chart, log-log */
+(function(){
+  const s=document.getElementById("raceChart"), W=560,H=320,L=62,R=20,T=16,B=40;
+  const Ns=[2000,4000,8000,16000,32000,64000];
+  const D={bubble:[0.0015,0.0049,0.0196,0.0793,0.3215,1.3838],selection:[0.0030,0.0119,0.0470,0.1830,0.6571,2.1924],insertion:[0.0005,0.0018,0.0070,0.0286,0.1132,0.4657],Shell:[0.00002,0.00007,0.00027,0.00077,0.0018,0.0041]};
+  const cols={bubble:"--bad",selection:"--amber",insertion:"--accent",Shell:"--good"};
+  const lx=Math.log10, xmin=lx(2000), xmax=lx(64000), ymin=-5, ymax=1;
+  const X=v=>L+(lx(v)-xmin)/(xmax-xmin)*(W-L-R), Y=v=>H-B-(lx(v)-ymin)/(ymax-ymin)*(H-T-B);
+  const labels={"-5":"10 µs","-4":"0.1 ms","-3":"1 ms","-2":"10 ms","-1":"100 ms","0":"1 s","1":"10 s"};
+  for(let e=ymin;e<=ymax;e++){ el("line",{x1:L,x2:W-R,y1:Y(10**e),y2:Y(10**e),stroke:"var(--line)"},s); el("text",{x:L-8,y:Y(10**e)+4,"text-anchor":"end","font-size":11},s,labels[e]); }
+  Ns.forEach(n=>el("text",{x:X(n),y:H-B+18,"text-anchor":"middle","font-size":11},s,(n/1000)+"k"));
+  el("text",{x:(W+L)/2,y:H-4,"text-anchor":"middle","font-size":11},s,"elements sorted (each step doubles N)");
+  const leg=document.getElementById("raceLegend");
+  for(const k in D){ const pts=D[k].map((v,i)=>[X(Ns[i]),Y(v)]);
+    el("path",{d:pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(""),fill:"none",stroke:`var(${cols[k]})`,"stroke-width":2.5,"stroke-linecap":"round","stroke-linejoin":"round"},s);
+    pts.forEach(p=>el("circle",{cx:p[0],cy:p[1],r:3.5,fill:`var(${cols[k]})`},s));
+    leg.insertAdjacentHTML("beforeend",`<span><i style="background:var(${cols[k]})"></i>${k}</span>`); }
+})();
+
+/* 6. step-through demo: each algorithm is a generator yielding one event per comparison */
+(function(){
+  function* bubble(a){ const n=a.length; for(let i=0;i<n;i++){ let sw=false;
+      for(let j=1;j<n-i;j++){ const x=a[j]<a[j-1]; yield {cmp:[j-1,j],swap:x,msg:`Compare ${a[j-1]} and ${a[j]}`+(x?": out of order, exchange.":": in order."),done:new Set(range(n-i,n))};
+        if(x){[a[j],a[j-1]]=[a[j-1],a[j]];sw=true;} }
+      if(!sw){ yield {end:true,msg:`Pass ${i+1} made no exchange, so the array is sorted.`}; return; } }
+    yield {end:true,msg:"Sorted."}; }
+  function* selection(a){ const n=a.length; for(let i=0;i<n;i++){ let m=i;
+      for(let j=i+1;j<n;j++){ const x=a[j]<a[m]; yield {cmp:[m,j],msg:`Compare ${a[j]} with current min ${a[m]}`+(x?`: new min at index ${j}.`:"."),done:new Set(range(0,i))}; if(x) m=j; }
+      yield {swapOnly:[i,m],msg:m===i?`Exchange arr[${i}] with itself (the book's code always swaps).`:`Exchange ${a[i]} and ${a[m]}: position ${i} is final.`,done:new Set(range(0,i))};
+      [a[i],a[m]]=[a[m],a[i]]; }
+    yield {end:true,msg:"Sorted."}; }
+  function* insertion(a){ const n=a.length; for(let i=1;i<n;i++) for(let j=i;j>0;j--){ const x=a[j]<a[j-1];
+      yield {cmp:[j-1,j],swap:x,msg:`Insert step: compare ${a[j-1]} and ${a[j]}`+(x?": exchange.":": not larger, break."),prefix:i};
+      if(x)[a[j],a[j-1]]=[a[j-1],a[j]]; else break; }
+    yield {end:true,msg:"Sorted."}; }
+  function* shell(a){ const n=a.length; let h=1; while(h<Math.floor(n/3)) h=3*h+1;
+    while(h>=1){ for(let i=h;i<n;i++) for(let j=i;j>=h;j-=h){ const x=a[j]<a[j-h];
+        yield {cmp:[j-h,j],swap:x,msg:`h = ${h}: compare ${a[j-h]} and ${a[j]}`+(x?": exchange.":": in order, break.")};
+        if(x)[a[j],a[j-h]]=[a[j-h],a[j]]; else break; }
+      h=Math.floor(h/3); }
+    yield {end:true,msg:"Sorted."}; }
+  function range(a,b){const r=[];for(let i=a;i<b;i++)r.push(i);return r;}
+  const algs={bubble,selection,insertion,shell};
+  const $=id=>document.getElementById(id), inp=$("sdInput");
+  let alg="bubble", arr, gen, ev, cmp, exc, finished;
+  function parse(){ const v=inp.value.split(/[\s,]+/).filter(Boolean).map(Number);
+    if(v.length<2||v.length>12||v.some(x=>!Number.isInteger(x)||Math.abs(x)>999)) return null; return v; }
+  function draw(){
+    $("sdIdx").innerHTML=arr.map((_,i)=>`<span>${i}</span>`).join("");
+    $("sdArr").innerHTML=arr.map((v,i)=>{ let c="cell";
+      if(finished) c+=" sorted";
+      else if(ev){ if(ev.done&&ev.done.has(i)) c+=" sorted"; if(ev.prefix!=null&&i<=ev.prefix) c+=" prefixc";
+        const pair=ev.cmp||ev.swapOnly; if(pair&&pair.includes(i)) c+=(ev.swap||ev.swapOnly)?" swap":" mid"; }
+      return `<div class="${c}">${v}</div>`; }).join("");
+    $("sdCmp").textContent=cmp; $("sdExc").textContent=exc; $("sdInv").textContent=inversions(arr);
+  }
+  function reset(){ const v=parse();
+    if(!v){ inp.setAttribute("aria-invalid","true"); $("sdMsg").textContent="Enter 2 to 12 integers between −999 and 999."; return; }
+    inp.removeAttribute("aria-invalid"); arr=v.slice(); gen=algs[alg](arr); ev=null; cmp=0; exc=0; finished=false;
+    $("sdMsg").textContent=`Inversions: ${inversions(arr)}. Press "Next step".`; draw(); }
+  // apply the previous event's exchange before asking for the next one, so the drawing shows the pair before it moves
+  function step(){
+    if(!gen) return; if(finished){ reset(); return; }
+    const r=gen.next(); if(r.done){ finished=true; draw(); return; }
+    ev=r.value; if(ev.end){ finished=true; $("sdMsg").textContent=`${ev.msg} ${cmp} comparisons, ${exc} exchanges.`; draw(); return; }
+    if(ev.cmp) cmp++; if(ev.swap||ev.swapOnly) exc++;
+    $("sdMsg").textContent=ev.msg; draw(); }
+  $("sdStep").addEventListener("click",step);
+  $("sdRun").addEventListener("click",()=>{ if(finished) reset(); let guard=0; while(!finished&&guard++<5000) step(); });
+  $("sdReset").addEventListener("click",reset);
+  inp.addEventListener("change",reset);
+  document.querySelectorAll("[data-preset]").forEach(b=>b.addEventListener("click",()=>{inp.value=b.dataset.preset;reset();}));
+  document.querySelectorAll("#algSeg button").forEach(b=>b.addEventListener("click",()=>{
+    document.querySelectorAll("#algSeg button").forEach(x=>x.setAttribute("aria-pressed",String(x===b))); alg=b.dataset.alg; reset(); }));
+  reset();
+})();
+
+
+})();
+</script>
+</body>
+</html>
