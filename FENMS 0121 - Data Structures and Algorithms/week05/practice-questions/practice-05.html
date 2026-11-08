@@ -1,0 +1,1225 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Practice 05 Questions</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<style>
+/* Moodle (Boost) quiz look: info box on the left, light-blue question text, Check button, feedback box. */
+:root{
+  --page:#f4f6f8; --surface:#ffffff; --ink:#1d2125; --muted:#6a737b; --line:#dee2e6; --line-strong:#c4cbd2;
+  --primary:#0f6cbf; --primary-ink:#ffffff; --primary-soft:#e7f1fa;
+  --formulation:#e7f3f5; --formulation-ink:#001a1e;
+  --outcome:#fcefdc; --outcome-ink:#5c4320;
+  --info:#f8f9fa;
+  --btn:#ced4da; --btn-ink:#1d2125; --btn-hover:#b8c1ca;
+  --good:#357a32; --good-soft:#d7e4d6; --bad:#ca3120; --bad-soft:#f4d6d2; --part:#f0ad4e;
+  --code-ink:#b02a62; --pre-bg:#fbfcfc;
+  --cell:#ffffff; --cell-locked:#eef1f4;
+  --p-low:#1f6fd1; --p-mid:#d9730d; --p-high:#8a3ffc; --p-i:#0e8a7d;
+  --f-ui:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --f-mono:ui-monospace, "SFMono-Regular", "JetBrains Mono", Menlo, Consolas, monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --page:#14181c; --surface:#1c2228; --ink:#e4e8ec; --muted:#9aa5ae; --line:#323b44; --line-strong:#47525d;
+  --primary:#4ea1ea; --primary-ink:#06131f; --primary-soft:#173049;
+  --formulation:#17323a; --formulation-ink:#e1f0f3;
+  --outcome:#3a2f1c; --outcome-ink:#f3dfbf;
+  --info:#20272e;
+  --btn:#3a444e; --btn-ink:#e4e8ec; --btn-hover:#4a5561;
+  --good:#6cc067; --good-soft:#1f3a1f; --bad:#f07a6b; --bad-soft:#45201b; --part:#f0ad4e;
+  --code-ink:#f08bb5; --pre-bg:#12171b;
+  --cell:#232a31; --cell-locked:#1a2026;
+  --p-low:#5aa2ff; --p-mid:#ff9f45; --p-high:#b98bff; --p-i:#3fd0bf;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --page:#14181c; --surface:#1c2228; --ink:#e4e8ec; --muted:#9aa5ae; --line:#323b44; --line-strong:#47525d;
+  --primary:#4ea1ea; --primary-ink:#06131f; --primary-soft:#173049;
+  --formulation:#17323a; --formulation-ink:#e1f0f3;
+  --outcome:#3a2f1c; --outcome-ink:#f3dfbf;
+  --info:#20272e;
+  --btn:#3a444e; --btn-ink:#e4e8ec; --btn-hover:#4a5561;
+  --good:#6cc067; --good-soft:#1f3a1f; --bad:#f07a6b; --bad-soft:#45201b; --part:#f0ad4e;
+  --code-ink:#f08bb5; --pre-bg:#12171b;
+  --cell:#232a31; --cell-locked:#1a2026;
+  --p-low:#5aa2ff; --p-mid:#ff9f45; --p-high:#b98bff; --p-i:#3fd0bf;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:72px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0; background:var(--page); color:var(--ink); font-family:var(--f-ui); font-size:16px; line-height:1.6}
+a{color:var(--primary)}
+code, pre, .cell, .chip{font-variant-ligatures:none}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--primary); outline-offset:2px}
+
+/* top bar */
+.navbar{position:sticky; top:0; z-index:20; background:var(--surface); border-bottom:1px solid var(--line); box-shadow:0 2px 4px rgba(0,0,0,.06)}
+.navbar-in{max-width:1280px; margin:0 auto; height:56px; display:flex; align-items:center; gap:16px; padding:0 16px}
+.brand{font-weight:800; letter-spacing:.02em; color:var(--primary); text-decoration:none; font-size:1.15rem}
+.navbar .crumb{color:var(--muted); font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0}
+.navbar .spacer{flex:1}
+.theme-btn{border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; padding:4px 10px; cursor:pointer; font-size:.85rem; white-space:nowrap; flex:none}
+
+.wrap{max-width:1280px; margin:0 auto; padding:24px 16px 80px}
+.page-head{margin-bottom:20px}
+.page-head .course{margin:0 0 4px; font-size:clamp(1.5rem, 4vw, 2rem); font-weight:700; line-height:1.2}
+.page-head .activity{margin:0; color:var(--muted); font-size:1.05rem}
+.page-head .lede{margin:12px 0 0; max-width:75ch; font-size:.95rem; color:var(--muted)}
+
+.layout{display:grid; grid-template-columns:minmax(0,1fr) 270px; gap:24px; align-items:start}
+@media (max-width: 980px){.layout{grid-template-columns:minmax(0,1fr)} .side{order:-1}}
+
+/* quiz navigation block */
+.side{position:sticky; top:76px}
+@media (max-width: 980px){.side{position:static}}
+.block{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px}
+.block h2{margin:0 0 12px; font-size:1.05rem}
+.qnav{display:flex; flex-wrap:wrap; gap:6px}
+.qnav a{width:38px; height:46px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; border:1px solid var(--line-strong); border-radius:4px; text-decoration:none; color:var(--ink); background:var(--surface); font-size:.9rem; overflow:hidden}
+.qnav a .n{flex:1; display:flex; align-items:center}
+.qnav a .bar{width:100%; height:12px; background:var(--cell-locked); border-top:1px solid var(--line)}
+.qnav a.answered .bar{background:var(--muted)}
+.qnav a.correct .bar{background:var(--good)}
+.qnav a.incorrect .bar{background:var(--bad)}
+.qnav a.partial .bar{background:var(--part)}
+.qnav a:hover{border-color:var(--primary)}
+.score{margin-top:14px; font-size:.95rem; display:flex; justify-content:space-between; gap:8px; border-top:1px solid var(--line); padding-top:12px}
+.score b{font-variant-numeric:tabular-nums}
+.side .reset-all{margin-top:12px; width:100%}
+.side .hint{margin:10px 0 0; font-size:.8rem; color:var(--muted)}
+
+/* question: one card per question, header bar on top, Check at the bottom of the card */
+.que{background:var(--surface); border:1px solid var(--line-strong); border-radius:10px; margin-bottom:36px; box-shadow:0 1px 3px rgba(0,0,0,.06); overflow:hidden}
+.que .info{display:flex; flex-wrap:wrap; align-items:center; gap:6px 18px; background:var(--info); border-bottom:1px solid var(--line); padding:10px clamp(14px, 3vw, 22px); font-size:.9rem; line-height:1.4}
+.que .info h3{margin:0; font-size:1.05rem; font-weight:400; margin-right:auto}
+.que .info h3 b{font-size:1.35rem; font-weight:700}
+.que .info .state{font-weight:600; padding:2px 10px; border-radius:12px; background:var(--cell-locked)}
+.que .info .state.correct{color:var(--good); background:var(--good-soft)}
+.que .info .state.incorrect{color:var(--bad); background:var(--bad-soft)}
+.que .info .state.partial{color:#b46f07}
+.que .info .grade{color:var(--muted)}
+.flag{background:none; border:0; padding:0; color:var(--primary); cursor:pointer; font-size:.85rem; display:inline-flex; align-items:center; gap:4px}
+.flag svg{width:14px; height:14px}
+.flag[aria-pressed="true"]{color:var(--bad); font-weight:600}
+.qnav a.is-flagged{border-color:var(--bad)}
+.que .content{display:flex; flex-direction:column; gap:16px; padding:18px clamp(14px, 3vw, 22px) 20px}
+.formulation{background:var(--formulation); color:var(--formulation-ink); border-radius:8px; padding:20px clamp(14px, 3vw, 24px); display:flex; flex-direction:column; gap:12px}
+.formulation p{margin:0; max-width:80ch}
+.formulation code{font-family:var(--f-mono); font-size:.88em; color:var(--code-ink)}
+.formulation pre{margin:0; background:var(--pre-bg); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:12px 14px; overflow-x:auto; font-size:.85rem; line-height:1.5}
+.formulation pre code{color:inherit; font-size:inherit}
+.formulation .examples{font-family:var(--f-mono); font-size:.92rem; line-height:1.8}
+.prompt{display:flex; gap:10px; align-items:baseline; font-size:.95rem; margin-top:4px}
+.prompt .regime{color:var(--muted); font-size:.85rem}
+
+/* code editor */
+.editor{border:1px solid var(--line-strong); border-radius:6px; overflow:hidden; background:var(--surface)}
+.editor textarea{display:block; width:100%; min-height:260px; border:0; padding:10px; font-family:var(--f-mono); font-size:14px; line-height:1.5; resize:vertical; background:var(--surface); color:var(--ink); tab-size:4}
+.editor .CodeMirror{height:auto; min-height:260px; font-family:var(--f-mono); font-size:14px; line-height:1.5; background:var(--surface); color:var(--ink)}
+.editor .CodeMirror-scroll{min-height:260px}
+.editor .CodeMirror-gutters{background:var(--info); border-right:1px solid var(--line)}
+.editor .CodeMirror-linenumber{color:var(--muted)}
+.editor .CodeMirror-cursor{border-left-color:var(--ink)}
+.editor .CodeMirror-selected{background:var(--primary-soft) !important}
+.cm-s-default .cm-keyword{color:#0033b3} .cm-s-default .cm-type,.cm-s-default .cm-variable-3{color:#00627a}
+.cm-s-default .cm-string{color:#067d17} .cm-s-default .cm-comment{color:#8c8c8c; font-style:italic}
+.cm-s-default .cm-number{color:#1750eb} .cm-s-default .cm-meta{color:#9e880d} .cm-s-default .cm-def{color:#00627a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .cm-s-default{
+  --k:#7aa7ff}
+  :root:not([data-theme="light"]) .cm-s-default .cm-keyword{color:#cf8e6d} :root:not([data-theme="light"]) .cm-s-default .cm-type,:root:not([data-theme="light"]) .cm-s-default .cm-variable-3,:root:not([data-theme="light"]) .cm-s-default .cm-def{color:#56c1d6}
+  :root:not([data-theme="light"]) .cm-s-default .cm-string{color:#6aab73} :root:not([data-theme="light"]) .cm-s-default .cm-number{color:#2aacb8} :root:not([data-theme="light"]) .cm-s-default .cm-meta{color:#d5b778} :root:not([data-theme="light"]) .cm-s-default .cm-variable{color:#e4e8ec}
+}
+:root[data-theme="dark"] .cm-s-default .cm-keyword{color:#cf8e6d} :root[data-theme="dark"] .cm-s-default .cm-type,:root[data-theme="dark"] .cm-s-default .cm-variable-3,:root[data-theme="dark"] .cm-s-default .cm-def{color:#56c1d6}
+:root[data-theme="dark"] .cm-s-default .cm-string{color:#6aab73} :root[data-theme="dark"] .cm-s-default .cm-number{color:#2aacb8} :root[data-theme="dark"] .cm-s-default .cm-meta{color:#d5b778} :root[data-theme="dark"] .cm-s-default .cm-variable{color:#e4e8ec}
+
+/* buttons */
+.actions{display:flex; flex-wrap:wrap; gap:10px; align-items:center; border-top:1px solid var(--line); padding-top:16px}
+.actions .check{padding:9px 28px; font-weight:600; font-size:1rem}
+.btn{border:1px solid transparent; border-radius:6px; padding:7px 16px; cursor:pointer; background:var(--btn); color:var(--btn-ink); font-size:.95rem; line-height:1.4}
+.btn:hover{background:var(--btn-hover)}
+.btn.primary{background:var(--primary); color:var(--primary-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent; border-color:var(--line-strong)}
+.btn.ghost:hover{background:var(--info)}
+.btn[disabled]{opacity:.55; cursor:progress}
+.spin{display:inline-block; width:14px; height:14px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:spin .8s linear infinite; vertical-align:-2px; margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* feedback */
+.outcome{background:var(--outcome); color:var(--outcome-ink); border-radius:8px; padding:14px 18px; display:flex; flex-direction:column; gap:10px; font-size:.95rem}
+.outcome[hidden]{display:none}
+.verdict{font-weight:700; display:flex; align-items:center; gap:8px}
+.verdict.ok{color:var(--good)} .verdict.no{color:var(--bad)}
+.verdict svg{width:20px; height:20px; flex:none}
+.outcome .marks{font-size:.9rem}
+.outcome pre{margin:0; white-space:pre-wrap; word-break:break-word; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:10px 12px; font-family:var(--f-mono); font-size:.8rem; max-height:320px; overflow:auto}
+.results{overflow-x:auto}
+.results table{border-collapse:collapse; width:100%; background:var(--surface); color:var(--ink); font-size:.85rem}
+.results th,.results td{border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top}
+.results th{background:var(--info); font-weight:600}
+.results td pre{border:0; padding:0; background:none; max-height:none; font-size:.8rem}
+.results tr.pass td.mark{color:var(--good); font-weight:700}
+.results tr.fail td{background:var(--bad-soft)}
+.results tr.fail td.mark{color:var(--bad); font-weight:700}
+.results td.mark{text-align:center; width:2.5em; font-size:1rem}
+
+/* solution */
+details.sol{border:1px solid var(--line); border-radius:8px; background:var(--surface)}
+details.sol > summary{cursor:pointer; padding:9px 16px; font-weight:600; color:var(--good); list-style-position:inside}
+details.sol[open] > summary{border-bottom:1px solid var(--line)}
+details.sol > div{padding:14px 16px; display:flex; flex-direction:column; gap:10px; font-size:.95rem}
+details.sol p{margin:0}
+details.sol pre{margin:0; background:var(--pre-bg); border:1px solid var(--line); border-radius:6px; padding:12px 14px; overflow-x:auto; font-family:var(--f-mono); font-size:.84rem; line-height:1.5}
+details.sol code{font-family:var(--f-mono); font-size:.88em}
+details.sol table{border-collapse:collapse; font-size:.9rem}
+details.sol th, details.sol td{border:1px solid var(--line); padding:5px 10px; text-align:center; font-family:var(--f-mono)}
+details.sol th{background:var(--info); font-family:var(--f-ui); font-weight:600}
+details.sol td.l{text-align:left; font-family:var(--f-ui)}
+
+/* algorithm trace widget */
+.trace{border:1px solid var(--line-strong); border-radius:6px; background:var(--surface); overflow:hidden}
+.t-toolbar{display:flex; justify-content:space-between; gap:8px; padding:8px; border-bottom:1px solid var(--line); background:var(--info); flex-wrap:wrap}
+.t-group{display:flex; gap:6px; flex-wrap:wrap}
+.tool{display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink); border-radius:6px; padding:5px 10px; cursor:pointer; font-size:.85rem}
+.tool:hover:not([disabled]){border-color:var(--primary); color:var(--primary)}
+.tool[disabled]{opacity:.45; cursor:default}
+.tool svg{width:16px; height:16px}
+.t-help{margin:0; padding:10px 14px; font-size:.85rem; color:var(--muted); border-bottom:1px solid var(--line); background:var(--surface)}
+.t-help[hidden]{display:none}
+.t-body{padding:12px; display:flex; flex-direction:column; gap:10px; overflow-x:auto}
+.step{border:1px solid var(--line); border-radius:8px; padding:10px 12px; background:var(--surface); min-width:max-content}
+.step.initial{background:var(--cell-locked)}
+.step.ok{border-color:var(--good); box-shadow:inset 4px 0 0 var(--good)}
+.step.bad{border-color:var(--bad); box-shadow:inset 4px 0 0 var(--bad)}
+.stephead{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px}
+.steplabel{font-weight:600; font-size:.9rem}
+.steplabel .tag{font-weight:600; font-size:.75rem; margin-left:8px; padding:1px 7px; border-radius:10px}
+.steplabel .tag.ok{background:var(--good-soft); color:var(--good)}
+.steplabel .tag.bad{background:var(--bad-soft); color:var(--bad)}
+.stepactions{display:flex; gap:4px}
+.iconbtn{display:inline-flex; align-items:center; gap:4px; border:0; background:none; color:var(--muted); cursor:pointer; font-size:.78rem; padding:3px 6px; border-radius:4px}
+.iconbtn:hover{background:var(--info); color:var(--ink)}
+.iconbtn svg{width:14px; height:14px}
+.cols{display:flex; gap:6px}
+.col{display:flex; flex-direction:column; align-items:center; gap:4px; width:48px; flex:none; border-radius:6px; padding:2px 0}
+.col .idx{font-family:var(--f-mono); font-size:.7rem; color:var(--muted); line-height:1}
+.cell{width:46px; height:42px; display:flex; align-items:center; justify-content:center; border:1.5px solid var(--line-strong); border-radius:6px; background:var(--cell); font-family:var(--f-mono); font-size:.95rem; font-weight:600; user-select:none; touch-action:none}
+.cell.locked{background:var(--cell-locked); border-color:var(--line)}
+.cell input{width:100%; height:100%; border:0; background:transparent; text-align:center; font:inherit; color:inherit; padding:0; border-radius:5px}
+.cell input:focus{outline:2px solid var(--primary); outline-offset:-2px}
+.sortcell{cursor:grab}
+.lane{min-height:30px; width:100%; display:flex; flex-direction:column; align-items:center; gap:3px}
+.col.drop-hover{background:var(--primary-soft)}
+.cell.drop-hover{border-color:var(--primary); box-shadow:0 0 0 3px var(--primary-soft)}
+.col.target-ready{cursor:pointer}
+.col.target-ready:hover{background:var(--primary-soft)}
+.chip{display:inline-flex; align-items:center; justify-content:center; min-width:42px; height:24px; padding:0 6px; border-radius:12px; border:0; color:#fff; font-family:var(--f-mono); font-size:.75rem; font-weight:700; cursor:grab; touch-action:none; user-select:none; box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.chip.low{background:var(--p-low)} .chip.mid{background:var(--p-mid)} .chip.high{background:var(--p-high)} .chip.i{background:var(--p-i)}
+:root[data-theme="dark"] .chip{color:#0b0f13}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .chip{color:#0b0f13}}
+.chip.selected{outline:3px solid var(--ink); outline-offset:2px}
+.tray{display:flex; align-items:center; gap:8px; margin-top:6px; padding:6px 8px; border:1px dashed var(--line-strong); border-radius:6px; min-height:38px; font-size:.78rem; color:var(--muted)}
+.tray.drop-hover{background:var(--primary-soft)}
+.target{margin-top:6px; font-size:.85rem; color:var(--muted)}
+.target b{color:var(--ink); font-family:var(--f-mono)}
+.drag-ghost{position:fixed; pointer-events:none; z-index:100; opacity:.9; transform:translate(-50%,-50%) scale(1.05)}
+.t-empty{font-size:.85rem; color:var(--muted); padding:4px 2px}
+
+.note{background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--primary); border-radius:6px; padding:10px 14px; font-size:.88rem; color:var(--muted)}
+.back{font-size:.9rem}
+footer.foot{margin-top:8px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:.85rem; color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="navbar">
+  <div class="navbar-in">
+    <a class="brand" href="../../../">LMS</a>
+    <span class="crumb">FENMS 0121 · Week 05 · 05.01. PRACTICE: Practice Questions</span>
+    <span class="spacer"></span>
+    <button class="theme-btn" type="button" id="themeBtn" aria-label="Toggle dark mode">Dark / light</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1 class="course">FENMS 0121 - Data Structures and Algorithms</h1>
+    <p class="activity">05.01. PRACTICE: Practice Questions</p>
+    <p class="lede">All ten questions on one page. Answer a question and press <b>Check</b>: code questions are compiled and run against test cases, trace questions are checked step by step. Your answers stay in this browser.</p>
+  </div>
+
+  <div class="layout">
+    <main id="quiz">
+
+
+      <!-- Q1 -->
+      <section class="que" id="q1" data-q="1">
+        <div class="info">
+          <h3>Question <b>1</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 25.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Implement the <strong>reverse selection sort</strong> algorithm that can work on a <code>LinkedList</code> object.</p>
+            <p>The algorithm should sort a given linked list in <strong>descending order</strong>. For example:</p>
+            <p><code>LinkedList&lt;int&gt; l1{5, -2, 10, 7, 21, 4, 3, 12};</code><br><code>selection_sort(l1); // l1 = {21, 12, 10, 7, 5, 4, 3, -2}</code></p>
+            <p>The LinkedList implementation is <a href="https://github.com/IBU-FENMS-034/FENMS_034_2024-25/blob/master/Week_02/include/LinkedList.tpp" target="_blank" rel="noopener">the same one from lectures and labs</a>; <strong>however</strong> the <code>get()</code> method, <code>[] overloading</code> and <code>iterators</code> have been <em>purposefully removed</em> from it.</p>
+            <p>The <code>selection_sort()</code> method is set up so it can <em>access</em> <strong>private</strong> <em>members</em> of the <code>LinkedList</code> class (<code>head</code> and <code>size</code>).</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="code"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button><button class="btn ghost reset" type="button">Reset answer</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+<pre><code>template &lt;typename Data&gt;
+void selection_sort(LinkedList&lt;Data&gt;&amp; list) {
+    for (Node&lt;Data&gt;* i = list.head; i != nullptr; i = i-&gt;next) {
+        Node&lt;Data&gt;* max = i;                       // node with the largest value so far
+        for (Node&lt;Data&gt;* j = i-&gt;next; j != nullptr; j = j-&gt;next) {
+            if (j-&gt;data &gt; max-&gt;data) {
+                max = j;
+            }
+        }
+        swap(i-&gt;data, max-&gt;data);                  // put it at position i
+    }
+}</code></pre>
+            <p>This is <code>selection_sort()</code> from Lab 05 with two changes: indices become node pointers (<code>i</code> and <code>j</code> walk the list), and <code>&lt;</code> becomes <code>&gt;</code>, so each pass picks the <b>largest</b> remaining value. Only the stored values are swapped; the links between nodes stay as they are.</p>
+            <p>The list is still walked O(n²) times in total, the same as selection sort on an array.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q2 -->
+      <section class="que" id="q2" data-q="2">
+        <div class="info">
+          <h3>Question <b>2</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 20.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Implement a function that <strong>counts</strong> how many <strong>comparisons</strong> and <strong>swaps</strong> have occured during <strong>insertion sort</strong>.</p>
+            <p>The <code>insertion_sort_count()</code> function should <strong>perform</strong> <em>insertion sort</em> on the given array, and <strong>count</strong> <em>how many comparisons and swaps</em> took place during that process.</p>
+            <p>In the function, you have the <code>counts</code> array already initialized. The <strong>first element</strong> of this array should contain the <strong>number of comparisons</strong> that occured during insertion sort. The <strong>second element</strong> should contain the <strong>number of swaps</strong> that occured during insertion sort. In short:</p>
+            <p><code>counts[0] = number_of_comparisons</code><br><code>counts[1] = number_of_swaps</code></p>
+            <p>The function should return a <strong>pointer</strong> to the <code>counts</code> array (<code>int*</code>).</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="code"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button><button class="btn ghost reset" type="button">Reset answer</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+<pre><code>template &lt;typename Data&gt;
+int* insertion_sort_count(Data *arr, const int len) {
+    int* counts = new int[2]{};
+
+    for (int i = 1; i &lt; len; i++) {
+        for (int j = i; j &gt; 0; j--) {
+            counts[0]++;                      // arr[j] &lt; arr[j - 1] is evaluated
+            if (arr[j] &lt; arr[j - 1]) {
+                swap(arr[j], arr[j - 1]);
+                counts[1]++;                  // a swap happened
+            } else {
+                break;
+            }
+        }
+    }
+    return counts;
+}</code></pre>
+            <p>Count a comparison every time <code>arr[j] &lt; arr[j - 1]</code> is checked, including the last check that fails and triggers <code>break</code>. Count a swap every time the <code>if</code> is true.</p>
+            <p>For <code>{5, -1, 23, 8, 17, 4, 2, 6}</code> that gives <b>21 comparisons</b> and <b>15 swaps</b>. A sorted array of n elements gives n − 1 comparisons and 0 swaps; a reversed one gives n(n − 1)/2 of each.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q3 -->
+      <section class="que" id="q3" data-q="3">
+        <div class="info">
+          <h3>Question <b>3</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 30.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>One of the gap sequences used in Shell sort looks like this:</p>
+            <ul>
+              <li>The sequence starts at <strong>1</strong>.</li>
+              <li>Every next element is the <strong>next prime number</strong> that is <strong>≥ 3 times larger</strong> than the <em>previous number</em>.</li>
+            </ul>
+            <p>Here is an example: the first element is <strong>1</strong>. The next element should be a <em>prime number</em> that is <em>at least 3 times larger</em> than 1, so it will be <strong>3</strong>. The next prime number that is at least 3 times larger than 3 is <strong>11</strong>, and so on.</p>
+            <p>Your task is to implement the <code><strong>generate_sequence(n)</strong></code> function that takes in the <strong>number of elements</strong> to be generated (e.g. if n = 7, generate <em>7 elements</em> of the sequence). The function returns a <em>pointer</em> to the sequence (<code>int*</code>).</p>
+<pre><code>int* sequence = generate_sequence(7);
+// Elements: 1, 3, 11, 37, 113, 347, 1049</code></pre>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="code"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button><button class="btn ghost reset" type="button">Reset answer</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+<pre><code>bool is_prime(int x) {
+    if (x &lt; 2) return false;
+    for (int d = 2; d * d &lt;= x; d++) {
+        if (x % d == 0) return false;
+    }
+    return true;
+}
+
+int* generate_sequence(const int n) {
+    int* sequence = new int[n]{};
+
+    if (n &gt; 0) sequence[0] = 1;
+    for (int k = 1; k &lt; n; k++) {
+        int candidate = 3 * sequence[k - 1];   // at least 3 times larger
+        while (!is_prime(candidate)) {
+            candidate++;                        // next prime from there
+        }
+        sequence[k] = candidate;
+    }
+    return sequence;
+}</code></pre>
+            <p>Start the search at exactly 3 × previous, because that value itself may be prime (3 × 1 = 3 is). A helper like <code>is_prime()</code> can go above the function in the answer box.</p>
+            <p>The first 12 elements: 1, 3, 11, 37, 113, 347, 1049, 3163, 9491, 28477, 85439, 256337.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q4 -->
+      <section class="que" id="q4" data-q="4">
+        <div class="info">
+          <h3>Question <b>4</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 3.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider <code>shell_sort()</code> from Lab 05:</p>
+<pre><code>template&lt;typename Data&gt;
+void ElementarySort::shell_sort(Data *arr, int len) {
+   int h = 1;
+   while (h &lt; len / 3) {
+       h = 3 * h + 1;
+   }
+
+   while (h &gt;= 1) {
+       for (int i = h; i &lt; len; i++) {
+           for (int j = i; j &gt;= h; j -= h) {
+               if (arr[j] &lt; arr[j - h]) {
+                   swap(arr, j, j - h);
+               } else {
+                   break;
+               }
+           }
+       }
+       h = h / 3;
+   }
+}</code></pre>
+            <p>The function is called on the array <code>{5, -1, 23, 8, 17, 4, 2, 6}</code> from <code>shell_sort_demo()</code>.</p>
+            <p>Add one iteration for each value of <code>h</code>, and show the array after that h-sort finishes. Drag a cell onto another to swap them, or type the values.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>Iteration</th><th>h</th><th>Array after the h-sort</th></tr>
+              <tr><td>1</td><td>4</td><td class="l">5 -1 2 6 17 4 23 8</td></tr>
+              <tr><td>2</td><td>1</td><td class="l">-1 2 4 5 6 8 17 23</td></tr>
+            </table>
+            <p>len = 8, so h grows 1 → 4 and stops (4 is not &lt; 8 / 3 = 2). The gaps used are 4, 1: two iterations. The last pass (h = 1) is a plain insertion sort, so the array always ends sorted.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q5 -->
+      <section class="que" id="q5" data-q="5">
+        <div class="info">
+          <h3>Question <b>5</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 3.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider <code>shell_sort()</code> from Lab 05:</p>
+<pre><code>template&lt;typename Data&gt;
+void ElementarySort::shell_sort(Data *arr, int len) {
+   int h = 1;
+   while (h &lt; len / 3) {
+       h = 3 * h + 1;
+   }
+
+   while (h &gt;= 1) {
+       for (int i = h; i &lt; len; i++) {
+           for (int j = i; j &gt;= h; j -= h) {
+               if (arr[j] &lt; arr[j - h]) {
+                   swap(arr, j, j - h);
+               } else {
+                   break;
+               }
+           }
+       }
+       h = h / 3;
+   }
+}</code></pre>
+            <p>The function is called on the array <code>{62, 17, 45, 8, 91, 33, 76, 24, 5, 58, 12, 83, 39, 10, 28}</code>.</p>
+            <p>Add one iteration for each value of <code>h</code>, and show the array after that h-sort finishes. Drag a cell onto another to swap them, or type the values.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>Iteration</th><th>h</th><th>Array after the h-sort</th></tr>
+              <tr><td>1</td><td>13</td><td class="l">10 17 45 8 91 33 76 24 5 58 12 83 39 62 28</td></tr>
+              <tr><td>2</td><td>4</td><td class="l">5 17 12 8 10 33 28 24 39 58 45 83 91 62 76</td></tr>
+              <tr><td>3</td><td>1</td><td class="l">5 8 10 12 17 24 28 33 39 45 58 62 76 83 91</td></tr>
+            </table>
+            <p>len = 15 and 15 / 3 = 5, so h grows 1 → 4 → 13. The gaps used are 13, 4, 1: three iterations. With h = 13 only two pairs are compared: (0, 13) swaps 62 and 10, (1, 14) leaves 17 and 28 alone.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q6 -->
+      <section class="que" id="q6" data-q="6">
+        <div class="info">
+          <h3>Question <b>6</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 3.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider <code>insertion_sort()</code> from Lab 05:</p>
+<pre><code>template&lt;typename Data&gt;
+void ElementarySort::insertion_sort(Data *arr, int len) {
+   for (int i = 1; i &lt; len; i++) {
+       for (int j = i; j &gt; 0; j--) {
+           if (arr[j] &lt; arr[j - 1]) {
+               swap(arr, j, j - 1);
+           } else {
+               break;
+           }
+       }
+   }
+}</code></pre>
+            <p>The function is called on the array <code>{5, -1, 23, 8, 17, 4, 2, 6}</code> from <code>insertion_sort_demo()</code>.</p>
+            <p>Show the array after each iteration of the outer loop. Drag a cell onto another to swap them, or type the values.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>Iteration</th><th>i</th><th>Swaps</th><th>Array</th></tr>
+              <tr><td>1</td><td>1</td><td>1</td><td class="l">-1 5 23 8 17 4 2 6</td></tr>
+              <tr><td>2</td><td>2</td><td>0</td><td class="l">-1 5 23 8 17 4 2 6</td></tr>
+              <tr><td>3</td><td>3</td><td>1</td><td class="l">-1 5 8 23 17 4 2 6</td></tr>
+              <tr><td>4</td><td>4</td><td>1</td><td class="l">-1 5 8 17 23 4 2 6</td></tr>
+              <tr><td>5</td><td>5</td><td>4</td><td class="l">-1 4 5 8 17 23 2 6</td></tr>
+              <tr><td>6</td><td>6</td><td>5</td><td class="l">-1 2 4 5 8 17 23 6</td></tr>
+              <tr><td>7</td><td>7</td><td>3</td><td class="l">-1 2 4 5 6 8 17 23</td></tr>
+            </table>
+            <p>The outer loop runs for i = 1 … 7, so there are seven rows, including iteration 2 where 23 is already in place and nothing changes.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q7 -->
+      <section class="que" id="q7" data-q="7">
+        <div class="info">
+          <h3>Question <b>7</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 3.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider <code>insertion_sort()</code> from Lab 05:</p>
+<pre><code>template&lt;typename Data&gt;
+void ElementarySort::insertion_sort(Data *arr, int len) {
+   for (int i = 1; i &lt; len; i++) {
+       for (int j = i; j &gt; 0; j--) {
+           if (arr[j] &lt; arr[j - 1]) {
+               swap(arr, j, j - 1);
+           } else {
+               break;
+           }
+       }
+   }
+}</code></pre>
+            <p>The function is called on the array <code>{31, 17, 42, 9, 25}</code>.</p>
+            <p>You need to provide iteration whenever swap happens in the algorithm. Each swap is considered as a new iteration (which is different from how iterations are defined in the base algorithm itself). Drag a cell onto another to swap them, or type the values.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>Iteration</th><th>i</th><th>Swap</th><th>Array</th></tr>
+              <tr><td>1</td><td>1</td><td>17 ↔ 31</td><td class="l">17 31 42 9 25</td></tr>
+              <tr><td>2</td><td>3</td><td>9 ↔ 42</td><td class="l">17 31 9 42 25</td></tr>
+              <tr><td>3</td><td>3</td><td>9 ↔ 31</td><td class="l">17 9 31 42 25</td></tr>
+              <tr><td>4</td><td>3</td><td>9 ↔ 17</td><td class="l">9 17 31 42 25</td></tr>
+              <tr><td>5</td><td>4</td><td>25 ↔ 42</td><td class="l">9 17 31 25 42</td></tr>
+              <tr><td>6</td><td>4</td><td>25 ↔ 31</td><td class="l">9 17 25 31 42</td></tr>
+            </table>
+            <p>i = 2 (42) needs no swap, so it adds no row. 9 moves three places left, so it adds three rows in a row.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q8 -->
+      <section class="que" id="q8" data-q="8">
+        <div class="info">
+          <h3>Question <b>8</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 4.00</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider <code>selection_sort()</code> from Lab 05:</p>
+<pre><code>template&lt;typename Data&gt;
+void ElementarySort::selection_sort(Data *arr, int len) {
+   for (int i = 0; i &lt; len; i++) {
+       int min = i;
+       for (int j = i + 1; j &lt; len; j++) {
+           if (arr[j] &lt; arr[min]) {
+               min = j;
+           }
+       }
+       swap(arr, min, i);
+   }
+}</code></pre>
+            <p>The function is called on the array <code>{5, -1, 23, 8, 17, 4, 2, 6}</code> from <code>selection_sort_demo()</code>.</p>
+            <p>Show the array after each iteration of the outer loop, for <code>i = 0</code> to <code>i = len - 2</code>. Drag a cell onto another to swap them, or type the values.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>Iteration</th><th>i</th><th>min</th><th>Array</th></tr>
+              <tr><td>1</td><td>0</td><td>1 (-1)</td><td class="l">-1 5 23 8 17 4 2 6</td></tr>
+              <tr><td>2</td><td>1</td><td>6 (2)</td><td class="l">-1 2 23 8 17 4 5 6</td></tr>
+              <tr><td>3</td><td>2</td><td>5 (4)</td><td class="l">-1 2 4 8 17 23 5 6</td></tr>
+              <tr><td>4</td><td>3</td><td>6 (5)</td><td class="l">-1 2 4 5 17 23 8 6</td></tr>
+              <tr><td>5</td><td>4</td><td>7 (6)</td><td class="l">-1 2 4 5 6 23 8 17</td></tr>
+              <tr><td>6</td><td>5</td><td>6 (8)</td><td class="l">-1 2 4 5 6 8 23 17</td></tr>
+              <tr><td>7</td><td>6</td><td>7 (17)</td><td class="l">-1 2 4 5 6 8 17 23</td></tr>
+            </table>
+            <p>The min column shows the index that was swapped into position i (and its value). After iteration k the first k cells are final.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q9 -->
+      <section class="que" id="q9" data-q="9">
+        <div class="info">
+          <h3>Question <b>9</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 4.50</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>Consider <code>selection_sort()</code> from Lab 05:</p>
+<pre><code>template&lt;typename Data&gt;
+void ElementarySort::selection_sort(Data *arr, int len) {
+   for (int i = 0; i &lt; len; i++) {
+       int min = i;
+       for (int j = i + 1; j &lt; len; j++) {
+           if (arr[j] &lt; arr[min]) {
+               min = j;
+           }
+       }
+       swap(arr, min, i);
+   }
+}</code></pre>
+            <p>The function is called on the array <code>{11, 19, 24, 36, 42, 58}</code>.</p>
+            <p>Show the array after each iteration of the outer loop, for <code>i = 0</code> to <code>i = len - 2</code>. Drag a cell onto another to swap them, or type the values.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>Iteration</th><th>i</th><th>min</th><th>Array</th></tr>
+              <tr><td>1</td><td>0</td><td>0 (11)</td><td class="l">11 19 24 36 42 58</td></tr>
+              <tr><td>2</td><td>1</td><td>1 (19)</td><td class="l">11 19 24 36 42 58</td></tr>
+              <tr><td>3</td><td>2</td><td>2 (24)</td><td class="l">11 19 24 36 42 58</td></tr>
+              <tr><td>4</td><td>3</td><td>3 (36)</td><td class="l">11 19 24 36 42 58</td></tr>
+              <tr><td>5</td><td>4</td><td>4 (42)</td><td class="l">11 19 24 36 42 58</td></tr>
+            </table>
+            <p>The array is already sorted, so <code>min</code> always stays at <code>i</code> and every swap is a swap with itself. You still need five rows, all equal to the input. Unlike bubble sort, selection sort cannot stop early.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <!-- Q10 -->
+      <section class="que" id="q10" data-q="10">
+        <div class="info">
+          <h3>Question <b>10</b></h3>
+          <div class="state">Not complete</div>
+          <div class="grade">Marked out of 4.50</div>
+          <button class="flag" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V4c4-2 8 2 12 0v10c-4 2-8-2-12 0"/></svg><span>Flag question</span></button>
+        </div>
+        <div class="content">
+          <div class="formulation">
+            <p>The following function changes <code>selection_sort()</code> from Lab 05 so that it selects the largest remaining element:</p>
+<pre><code>template&lt;typename Data&gt;
+void selection_sort_max(Data *arr, int len) {
+   for (int i = len - 1; i &gt; 0; i--) {
+       int max = i;
+       for (int j = i - 1; j &gt;= 0; j--) {
+           if (arr[j] &gt; arr[max]) {
+               max = j;
+           }
+       }
+       swap(arr, max, i);
+   }
+}</code></pre>
+            <p>The function is called on the array <code>{26, 8, 41, 15, 33, 3, 19}</code>.</p>
+            <p>Show the array after each iteration of the outer loop. Drag a cell onto another to swap them, or type the values.</p>
+            <div class="prompt"><span>Answer:</span><span class="regime">(penalty regime: 0 %)</span></div>
+          </div>
+          <div class="answer" data-kind="trace"></div>
+          <div class="actions"><button class="btn primary check" type="button">Check</button></div>
+          <div class="outcome" hidden></div>
+          <details class="sol"><summary>Show solution</summary><div>
+            <table>
+              <tr><th>Iteration</th><th>i</th><th>max</th><th>Array</th></tr>
+              <tr><td>1</td><td>6</td><td>2 (41)</td><td class="l">26 8 19 15 33 3 41</td></tr>
+              <tr><td>2</td><td>5</td><td>4 (33)</td><td class="l">26 8 19 15 3 33 41</td></tr>
+              <tr><td>3</td><td>4</td><td>0 (26)</td><td class="l">3 8 19 15 26 33 41</td></tr>
+              <tr><td>4</td><td>3</td><td>2 (19)</td><td class="l">3 8 15 19 26 33 41</td></tr>
+              <tr><td>5</td><td>2</td><td>2 (15)</td><td class="l">3 8 15 19 26 33 41</td></tr>
+              <tr><td>6</td><td>1</td><td>1 (8)</td><td class="l">3 8 15 19 26 33 41</td></tr>
+            </table>
+            <p>The outer loop runs i = 6 … 1, so there are six rows. This time the sorted part grows from the right end.</p>
+          </div></details>
+        </div>
+      </section>
+
+      <p class="note">Code questions are checked by compiling your answer (together with the course's <code>LinkedList</code> for question 1) and a set of test cases on <a href="https://godbolt.org" target="_blank" rel="noopener">Compiler Explorer</a> (GCC 13, C++17), so <b>Check</b> on questions 1–3 needs an internet connection. These test cases were written for this page and are not the hidden LMS tests.</p>
+      <footer class="foot"><a class="back" href="../../../">← All courses</a><span>FENMS 0121 · Week 05</span></footer>
+    </main>
+
+    <aside class="side">
+      <div class="block">
+        <h2>Quiz navigation</h2>
+        <nav class="qnav" id="qnav" aria-label="Questions"></nav>
+        <div class="score"><span>Marks</span><b id="score">0.00 / 100.00</b></div>
+        <button class="btn ghost reset-all" type="button" id="resetAll">Start again</button>
+        <p class="hint">Answers are saved in this browser only.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script>
+(() => {
+"use strict";
+
+/* ---------- question setup ---------- */
+const LL_PREFIX = "#include <iostream>\n#include <fstream>\n#include <string>\n#include <cmath>\n#include <vector>\n#include <algorithm>\n\nusing namespace std;\n#define SEPARATOR \"#<ab@17943918#@>#\"\n\ntemplate<typename Data>\nstruct Node {\n    Data data;\n    Node *next{};\n\n    Node() = default;\n    explicit Node(Data data) : data(data) {}\n};\n\ntemplate<typename Data>\nclass LinkedList;\n\ntemplate<typename Data>\n__DECL__\n\ntemplate <typename Data>\nclass LinkedList {\nprivate:\n    Node<Data>* head{};\n    int size{0};\npublic:\n    // constructors\n    LinkedList() = default;\n    LinkedList(std::initializer_list<Data> list);\n    // copy semantics\n    LinkedList(const LinkedList<Data>& src);\n    LinkedList<Data>& operator=(const LinkedList<Data>& src);\n    // move semantics\n    LinkedList(LinkedList<Data>&& src) noexcept;\n    LinkedList<Data>& operator=(LinkedList<Data>&& src) noexcept;\n    // destructor\n    ~LinkedList();\n\n    void add_to_front(const Data& data);\n    void add_to_back(const Data& data);\n    void remove_from_front();\n    void remove_from_back();\n    int count() const;\n    void reverse();\n    Node<Data>* get_head() const;\n    __FRIEND__\n    \n};\n\ntemplate<typename Data>\nvoid LinkedList<Data>::add_to_front(const Data& data) {\n    Node<Data>* new_node = new Node<Data>();\n    new_node->data = data;\n    new_node->next = head;\n    head = new_node;\n    ++size;\n}\n\ntemplate<typename Data>\nvoid LinkedList<Data>::remove_from_front() {\n    if (head == nullptr) {\n        throw std::out_of_range(\"List is empty\");\n    }\n    const Node<Data>* temp = head;\n    head = head->next;\n    delete temp;\n    --size;\n}\n\ntemplate<typename Data>\nvoid LinkedList<Data>::add_to_back(const Data& data) {\n    Node<Data>* new_node = new Node<Data>();\n    new_node->data = data;\n\n    if (head == nullptr) {\n        head = new_node;\n    } else {\n        Node<Data>* temp = head;\n        while (temp->next != nullptr) {\n            temp = temp->next;\n        }\n        temp->next = new_node;\n    }\n    ++size;\n}\n\ntemplate<typename Data>\nvoid LinkedList<Data>::remove_from_back() {\n    if (head == nullptr) {\n        throw std::out_of_range(\"List is empty\");\n    } else if (head->next == nullptr) {\n        delete head;\n        head = nullptr;\n    } else {\n        Node<Data>* temp = head;\n        while (temp->next->next != nullptr) {\n            temp = temp->next;\n        }\n        delete temp->next;\n        temp->next = nullptr;\n    }\n    --size;\n}\n\ntemplate<typename Data>\nint LinkedList<Data>::count() const {\n    return size;\n}\n\ntemplate<typename Data>\nNode<Data>* LinkedList<Data>::get_head() const {\n    return head;\n}\n\ntemplate<typename Data>\nvoid LinkedList<Data>::reverse() {\n    Node<Data>* current = head;\n    Node<Data>* prev = nullptr;\n\n    while (current != nullptr) {\n        Node<Data>* next = current->next;\n        current->next = prev;\n        prev = current;\n        current = next;\n    }\n    head = prev;\n}\n\ntemplate<typename Data>\nLinkedList<Data>::~LinkedList() {\n    while (head != nullptr) {\n        const Node<Data>* temp = head;\n        head = head->next;\n        delete temp;\n    }\n}\n\ntemplate<typename Data>\nLinkedList<Data>::LinkedList(const LinkedList<Data> &src) {\n    Node<Data>* current = src.head;\n    while (current != nullptr) {\n        add_to_back(current->data);\n        current = current->next;\n    }\n}\n\ntemplate<typename Data>\nLinkedList<Data> &LinkedList<Data>::operator=(const LinkedList<Data> &src) {\n    // Prevent self-assignment\n    if (this != &src) {\n        // Clean up old data\n        while (head != nullptr) {\n            remove_from_front();\n        }\n\n        // Add new data\n        Node<Data>* current = src.head;\n        while (current != nullptr) {\n            add_to_back(current->data);\n            current = current->next;\n        }\n    }\n    return *this;\n\n    // Alternative way:\n    // if (this != &src) {\n    //     LinkedList<Data> temp(src);\n    //     std::swap(head, temp.head);\n    //     std::swap(size, temp.size);\n    // }\n    // return *this;\n}\n\ntemplate<typename Data>\nLinkedList<Data>::LinkedList(LinkedList<Data> &&src) noexcept {\n    head = src.head;\n    size = src.size;\n\n    src.head = nullptr;\n    src.size = 0;\n\n    // Alternative way:\n    // std::swap(head, src.head);\n    // std::swap(size, src.size);\n}\n\ntemplate<typename Data>\nLinkedList<Data> &LinkedList<Data>::operator=(LinkedList<Data> &&src) noexcept {\n    // Prevent self-assignment\n    if (this != &src) {\n        // Clean up old resources\n        while (head != nullptr) {\n            remove_from_front();\n        }\n\n        // Change ownership\n        head = src.head;\n        size = src.size;\n\n        src.head = nullptr;\n        src.size = 0;\n    }\n    return *this;\n\n    // Alternative way:\n    // if (this != &src) {\n    //     std::swap(head, src.head);\n    //     std::swap(size, src.size);\n    // }\n    // return *this;\n}\n\ntemplate<typename Data>\nLinkedList<Data>::LinkedList(std::initializer_list<Data> list) {\n    for (auto it = list.begin(); it != list.end(); ++it) {\n        add_to_back(*it);\n    }\n}\n\n";
+const LL_DECL = {
+  1: ["void selection_sort(LinkedList<Data>& list);", "friend void selection_sort<>(LinkedList<Data>& list);"]
+};
+const SEP = "#<ab@17943918#@>#";
+const PRINT_LIST = (t) => `\nfor (Node<${t}>* n = list.get_head(); n != nullptr; n = n->next) cout << n->data << " ";`;
+
+const QUESTIONS = {
+  1: {kind:"code", marks:25,
+      preload:"template <typename Data>\nvoid selection_sort(LinkedList<Data>& list) {\n    // your code\n}\n",
+      tests:[
+        {code:"LinkedList<int> list{5, -2, 10, 7, 21, 4, 3, 12};\nselection_sort(list);" + PRINT_LIST("int"), expected:"21 12 10 7 5 4 3 -2 "},
+        {code:"LinkedList<int> list{7};\nselection_sort(list);" + PRINT_LIST("int"), expected:"7 "},
+        {code:"LinkedList<int> list;\nselection_sort(list);\ncout << list.count();", expected:"0"},
+        {code:"LinkedList<int> list{1, 2, 3, 4, 5};\nselection_sort(list);" + PRINT_LIST("int"), expected:"5 4 3 2 1 "},
+        {code:"LinkedList<int> list{9, 7, 5, 3, 1};\nselection_sort(list);" + PRINT_LIST("int"), expected:"9 7 5 3 1 "},
+        {code:"LinkedList<int> list{3, 1, 3, 2, 1};\nselection_sort(list);" + PRINT_LIST("int"), expected:"3 3 2 1 1 "},
+        {code:"LinkedList<string> list{\"pear\", \"apple\", \"mango\", \"kiwi\"};\nselection_sort(list);" + PRINT_LIST("string"), expected:"pear mango kiwi apple "}
+      ]},
+  2: {kind:"code", marks:20,
+      preload:"template <typename Data>\nint* insertion_sort_count(Data *arr, const int len) {\n    int* counts = new int[2]{};\n    \n    // your code\n}\n",
+      tests:[
+        {code:"int arr[] = {5, -1, 23, 8, 17, 4, 2, 6};\nint* c = insertion_sort_count(arr, 8);\ncout << c[0] << \" \" << c[1];", expected:"21 15"},
+        {code:"int arr[] = {1, 2, 3, 4, 5};\nint* c = insertion_sort_count(arr, 5);\ncout << c[0] << \" \" << c[1];", expected:"4 0"},
+        {code:"int arr[] = {5, 4, 3, 2, 1};\nint* c = insertion_sort_count(arr, 5);\ncout << c[0] << \" \" << c[1];", expected:"10 10"},
+        {code:"int arr[] = {7};\nint* c = insertion_sort_count(arr, 1);\ncout << c[0] << \" \" << c[1];", expected:"0 0"},
+        {code:"int arr[] = {3, 1, 3, 2, 1};\nint* c = insertion_sort_count(arr, 5);\ncout << c[0] << \" \" << c[1];", expected:"9 6"},
+        {code:"int arr[] = {10, 20, 15, 40, 35, 30, 50};\nint* c = insertion_sort_count(arr, 7);\ncout << c[0] << \" \" << c[1];", expected:"10 4"},
+        {code:"double arr[] = {2.5, 1.5, 3.5, 0.5};\nint* c = insertion_sort_count(arr, 4);\ncout << c[0] << \" \" << c[1] << \" | \";\nfor (double x : arr) cout << x << \" \";", expected:"5 4 | 0.5 1.5 2.5 3.5 "},
+        {code:"int arr[] = {4, 3, 2, 1};\ninsertion_sort_count(arr, 4);\nfor (int x : arr) cout << x << \" \";", expected:"1 2 3 4 "}
+      ]},
+  3: {kind:"code", marks:30,
+      preload:"int* generate_sequence(const int n) {\n    int* sequence = new int[n]{};\n\n    // your code\n}\n",
+      tests:[
+        {code:"int* s = generate_sequence(1);\nfor (int k = 0; k < 1; k++) cout << s[k] << \" \";", expected:"1 "},
+        {code:"int* s = generate_sequence(2);\nfor (int k = 0; k < 2; k++) cout << s[k] << \" \";", expected:"1 3 "},
+        {code:"int* s = generate_sequence(3);\nfor (int k = 0; k < 3; k++) cout << s[k] << \" \";", expected:"1 3 11 "},
+        {code:"int* s = generate_sequence(7);\nfor (int k = 0; k < 7; k++) cout << s[k] << \" \";", expected:"1 3 11 37 113 347 1049 "},
+        {code:"int* s = generate_sequence(12);\nfor (int k = 0; k < 12; k++) cout << s[k] << \" \";", expected:"1 3 11 37 113 347 1049 3163 9491 28477 85439 256337 "}
+      ]},
+  4: {kind:"trace", marks:3, algo:"shell_sort", data:[5,-1,23,8,17,4,2,6], ask:"all"},
+  5: {kind:"trace", marks:3, algo:"shell_sort", data:[62,17,45,8,91,33,76,24,5,58,12,83,39,10,28], ask:"all"},
+  6: {kind:"trace", marks:3, algo:"insertion_sort", data:[5,-1,23,8,17,4,2,6], ask:"all"},
+  7: {kind:"trace", marks:3, algo:"insertion_swaps", data:[31,17,42,9,25], ask:"all"},
+  8: {kind:"trace", marks:4, algo:"selection_sort", data:[5,-1,23,8,17,4,2,6], ask:"all"},
+  9: {kind:"trace", marks:4.5, algo:"selection_sort", data:[11,19,24,36,42,58], ask:"all"},
+  10: {kind:"trace", marks:4.5, algo:"selection_sort_max", data:[26,8,41,15,33,3,19], ask:"all"}
+};
+const TOTAL = Object.values(QUESTIONS).reduce((s, q) => s + q.marks, 0);
+
+/* ---------- storage (per browser, optional) ---------- */
+const KEY = "ibu-dsa-w05-practice-v1";
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { saved = {}; }
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {} }
+function qsave(n, patch) { saved[n] = Object.assign({}, saved[n], patch); persist(); }
+
+/* ---------- theme ---------- */
+const root = document.documentElement;
+try { const t = localStorage.getItem(KEY + "-theme"); if (t) root.dataset.theme = t; } catch (e) {}
+document.getElementById("themeBtn").addEventListener("click", () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem(KEY + "-theme", root.dataset.theme); } catch (e) {}
+});
+
+/* ---------- helpers ---------- */
+const $ = (sel, el = document) => el.querySelector(sel);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ICON = {
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  undo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>',
+  redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.13-9.36L23 10"/></svg>',
+  help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  copy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+  ok:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  no:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+};
+
+/* ---------- grading state / navigation ---------- */
+const results = {}; // n -> {fraction}
+function setState(n, status, fraction) {
+  const sec = document.getElementById("q" + n), q = QUESTIONS[n];
+  const st = $(".state", sec), gr = $(".grade", sec);
+  st.className = "state";
+  if (status === "graded") {
+    const cls = fraction >= 1 ? "correct" : fraction > 0 ? "partial" : "incorrect";
+    st.classList.add(cls);
+    st.textContent = fraction >= 1 ? "Correct" : fraction > 0 ? "Partially correct" : "Incorrect";
+    gr.textContent = `Mark ${(fraction * q.marks).toFixed(2)} out of ${q.marks.toFixed(2)}`;
+    results[n] = {fraction};
+  } else {
+    st.textContent = status === "answered" ? "Answer saved" : "Not complete";
+    gr.textContent = `Marked out of ${q.marks.toFixed(2)}`;
+    delete results[n];
+  }
+  renderNav();
+}
+function renderNav() {
+  const nav = document.getElementById("qnav");
+  nav.innerHTML = Object.keys(QUESTIONS).map((n) => {
+    const r = results[n];
+    let cls = r ? (r.fraction >= 1 ? "correct" : r.fraction > 0 ? "partial" : "incorrect") : (saved[n] && saved[n].touched ? "answered" : "");
+    if (saved[n] && saved[n].flag) cls += " is-flagged";
+    const label = r ? (r.fraction >= 1 ? "correct" : "not fully correct") : "not checked";
+    return `<a href="#q${n}" class="${cls}" aria-label="Question ${n}, ${label}"><span class="n">${n}</span><span class="bar"></span></a>`;
+  }).join("");
+  const got = Object.entries(results).reduce((s, [n, r]) => s + r.fraction * QUESTIONS[n].marks, 0);
+  document.getElementById("score").textContent = `${got.toFixed(2)} / ${TOTAL.toFixed(2)}`;
+}
+function verdictHtml(ok, text) {
+  return `<div class="verdict ${ok ? "ok" : "no"}">${ok ? ICON.ok : ICON.no}<span>${esc(text)}</span></div>`;
+}
+function markInvalid(n) {
+  if (results[n]) { setState(n, "answered"); const o = $(`#q${n} .outcome`); o.hidden = true; qsave(n, {graded: null}); }
+}
+
+/* ---------- flags ---------- */
+document.querySelectorAll(".que").forEach((sec) => {
+  const n = sec.dataset.q, b = $(".flag", sec);
+  const paint = () => { const on = !!(saved[n] && saved[n].flag); b.setAttribute("aria-pressed", on); $("span", b).textContent = on ? "Remove flag" : "Flag question"; };
+  b.addEventListener("click", () => { qsave(n, {flag: !(saved[n] && saved[n].flag)}); paint(); renderNav(); });
+  paint();
+});
+
+/* ---------- code questions ---------- */
+function buildProgram(n, answer) {
+  const q = QUESTIONS[n];
+  let prefix;
+  if (n != 1) prefix = '#include <iostream>\n#include <string>\n#include <cmath>\n#include <vector>\n#include <algorithm>\n\nusing namespace std;\n#define SEPARATOR "' + SEP + '"\n';
+  else prefix = LL_PREFIX.replace("__DECL__", LL_DECL[n][0]).replace("__FRIEND__", LL_DECL[n][1]);
+  const main = "\nint main() {\n" + q.tests.map((t) => "    {\n" + t.code.split("\n").map((l) => "        " + l).join("\n") + "\n    }\n").join('    cout << SEPARATOR << endl;\n') + "    return 0;\n}\n";
+  return {source: prefix + "\n" + answer + "\n" + main, offset: (prefix + "\n").split("\n").length - 1};
+}
+const stripAnsi = (s) => s.replace(/\x1b\[[0-9;]*[A-Za-z]/g, "");
+
+async function runCode(n, answer) {
+  const {source, offset} = buildProgram(n, answer);
+  const body = {source, options:{userArguments:"-std=c++17 -O1", executeParameters:{args:[], stdin:""}, compilerOptions:{executorRequest:true}, filters:{execute:true}, tools:[], libraries:[]}, lang:"c++", allowStoreCodeDebug:false};
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 30000);
+  let r;
+  try {
+  const res = await fetch("https://godbolt.org/api/compiler/g132/compile", {signal:controller.signal, method:"POST", headers:{"Content-Type":"application/json", "Accept":"application/json"}, body:JSON.stringify(body)});
+  if (!res.ok) throw new Error("Compiler Explorer answered " + res.status);
+  r = await res.json();
+  } catch (err) {
+    if (controller.signal.aborted) throw new Error("The compiler request timed out after 30 seconds. Please try again.");
+    throw err;
+  } finally { clearTimeout(timer); }
+  const fixLines = (txt) => txt.replace(/(?:<source>|example\.cpp|\/app\/example\.cpp):(\d+)(:\d+)?/g, (m, l, c) => {
+    const ln = +l - offset; return ln >= 1 ? `your answer, line ${ln}${c || ""}` : `preloaded code, line ${l}${c || ""}`;
+  });
+  const build = r.buildResult || r;
+  const buildErr = stripAnsi((build.stderr || []).map((x) => x.text).join("\n"));
+  if ((build.code !== undefined && build.code !== 0) || r.didExecute === false && buildErr) {
+    return {compileError: fixLines(buildErr) || "Compilation failed."};
+  }
+  const out = (r.stdout || []).map((x) => x.text).join("\n");
+  const parts = out.split(SEP).map((s) => s.replace(/^\n/, "").replace(/\n$/, ""));
+  return {parts, didExecute:r.didExecute, exitCode: r.code, timedOut: r.timedOut, stderr: stripAnsi((r.stderr || []).map((x) => x.text).join("\n"))};
+}
+
+function mountCode(sec, n) {
+  const q = QUESTIONS[n], host = $(".answer", sec);
+  host.innerHTML = '<div class="editor"><textarea spellcheck="false" aria-label="Answer for question ' + n + '"></textarea></div>';
+  const ta = $("textarea", host);
+  ta.value = (saved[n] && typeof saved[n].code === "string") ? saved[n].code : q.preload;
+  let cm = null;
+  if (window.CodeMirror) {
+    cm = CodeMirror.fromTextArea(ta, {mode:"text/x-c++src", lineNumbers:true, indentUnit:4, tabSize:4, indentWithTabs:false, matchBrackets:true, viewportMargin:Infinity,
+      extraKeys:{Tab:(c) => c.somethingSelected() ? c.indentSelection("add") : c.replaceSelection("    ", "end")}});
+  } else {
+    ta.addEventListener("keydown", (e) => { if (e.key === "Tab") { e.preventDefault(); const s = ta.selectionStart; ta.setRangeText("    ", s, ta.selectionEnd, "end"); ta.dispatchEvent(new Event("input")); } });
+  }
+  const getVal = () => cm ? cm.getValue() : ta.value;
+  const setVal = (v) => cm ? cm.setValue(v) : (ta.value = v);
+  let revision = 0;
+  const onChange = () => { revision++; qsave(n, {code:getVal(), touched:true}); markInvalid(n); renderNav(); };
+  cm ? cm.on("change", onChange) : ta.addEventListener("input", onChange);
+
+  const out = $(".outcome", sec), btn = $(".check", sec);
+  const compilerNote = document.createElement("p");
+  compilerNote.className = "note";
+  compilerNote.textContent = "Check sends your code to Compiler Explorer (godbolt.org) to compile and run it. Internet is required; requests time out after 30 seconds.";
+  $(".actions", sec).after(compilerNote);
+  $(".reset", sec).addEventListener("click", () => { revision++; setVal(q.preload); qsave(n, {code:q.preload, touched:false, graded:null}); setState(n, "none"); out.hidden = true; });
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true; btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Checking…';
+    out.hidden = false; out.innerHTML = '<div class="marks">Compiling and running your code…</div>';
+    try {
+      const checkedRevision = revision;
+      const r = await runCode(n, getVal());
+      if (checkedRevision !== revision) {
+        out.hidden = true;
+        return;
+      }
+      if (r.compileError) {
+        out.innerHTML = verdictHtml(false, "Syntax error(s)") + `<pre>${esc(r.compileError)}</pre><div class="marks">Marks for this submission: 0.00/${q.marks.toFixed(2)}.</div>`;
+        setState(n, "graded", 0); qsave(n, {graded:0});
+      } else {
+        let pass = 0;
+        const rows = q.tests.map((t, i) => {
+          const got = r.parts[i] !== undefined ? r.parts[i] : "";
+          const ok = got === t.expected; if (ok) pass++;
+          return `<tr class="${ok ? "pass" : "fail"}"><td class="mark">${ok ? "✓" : "✗"}</td><td><pre>${esc(t.code)}</pre></td><td><pre>${esc(t.expected)}</pre></td><td><pre>${esc(got)}</pre></td></tr>`;
+        }).join("");
+        const all = pass === q.tests.length && r.parts.length === q.tests.length &&
+          r.didExecute === true && r.exitCode === 0 && !r.timedOut;
+        let extra = "";
+        if (r.timedOut) extra = "<pre>Your program ran for too long and was stopped (infinite loop?).</pre>";
+        else if (r.exitCode && r.exitCode !== 0) extra = `<pre>Program stopped with exit code ${esc(r.exitCode)}${r.stderr ? "\n" + esc(r.stderr) : ""} (a crash, e.g. following a null pointer).</pre>`;
+        out.innerHTML = verdictHtml(all, all ? "Passed all tests!" : `Output matched ${pass} of ${q.tests.length} tests; submission failed`) + extra +
+          `<div class="results"><table><thead><tr><th></th><th>Test</th><th>Expected</th><th>Got</th></tr></thead><tbody>${rows}</tbody></table></div>` +
+          `<div class="marks">Marks for this submission: ${(all ? q.marks : 0).toFixed(2)}/${q.marks.toFixed(2)}.</div>`;
+        setState(n, "graded", all ? 1 : 0); qsave(n, {graded: all ? 1 : 0});
+      }
+    } catch (err) {
+      out.innerHTML = verdictHtml(false, "Could not reach the compiler") + `<div class="marks">Check needs an internet connection to Compiler Explorer (godbolt.org). ${esc(err.message || "")}</div>`;
+    } finally {
+      btn.disabled = false; btn.textContent = "Check";
+    }
+  });
+  if (saved[n] && typeof saved[n].graded === "number") { setState(n, "graded", saved[n].graded); out.hidden = false; out.innerHTML = '<div class="marks">Checked earlier. Press <b>Check</b> again to see the test results.</div>'; }
+  else if (saved[n] && saved[n].touched) setState(n, "answered");
+}
+
+/* ---------- algorithm trace questions ---------- */
+function expectedSteps(q) {
+  const a = q.data;
+  if (q.algo === "binary_search") {
+    const steps = []; let low = 0, high = a.length - 1;
+    while (low <= high) {
+      const mid = low + Math.floor((high - low) / 2);
+      steps.push({low, mid, high});
+      if (q.target === a[mid]) break;
+      else if (q.target < a[mid]) high = mid - 1; else low = mid + 1;
+    }
+    return steps;
+  }
+  if (q.algo === "linear_search") {
+    const steps = [];
+    for (let i = 0; i < a.length; i++) { steps.push({i}); if (a[i] === q.target) break; }
+    return steps;
+  }
+  // elementary sorts from Lab 05, one snapshot per iteration as the question defines it
+  const arr = a.slice(), rows = [], n = arr.length, sw = (i, j) => { [arr[i], arr[j]] = [arr[j], arr[i]]; };
+  if (q.algo === "shell_sort") {
+    let h = 1; while (h < Math.floor(n / 3)) h = 3 * h + 1;
+    while (h >= 1) {
+      for (let i = h; i < n; i++) for (let j = i; j >= h && arr[j] < arr[j - h]; j -= h) sw(j, j - h);
+      rows.push(arr.slice()); h = Math.floor(h / 3);
+    }
+  } else if (q.algo === "insertion_sort" || q.algo === "insertion_swaps") {
+    for (let i = 1; i < n; i++) {
+      for (let j = i; j > 0 && arr[j] < arr[j - 1]; j--) { sw(j, j - 1); if (q.algo === "insertion_swaps") rows.push(arr.slice()); }
+      if (q.algo === "insertion_sort") rows.push(arr.slice());
+    }
+  } else if (q.algo === "selection_sort") {
+    for (let i = 0; i < n - 1; i++) { let m = i; for (let j = i + 1; j < n; j++) if (arr[j] < arr[m]) m = j; sw(m, i); rows.push(arr.slice()); }
+  } else if (q.algo === "selection_sort_max") {
+    for (let i = n - 1; i > 0; i--) { let m = i; for (let j = i - 1; j >= 0; j--) if (arr[j] > arr[m]) m = j; sw(m, i); rows.push(arr.slice()); }
+  }
+  return rows.map((r) => ({arr:r}));
+}
+
+function mountTrace(sec, n) {
+  const q = QUESTIONS[n], host = $(".answer", sec), out = $(".outcome", sec);
+  const isSort = !/search/.test(q.algo);
+  const ptrs = q.algo === "binary_search" ? ["low", "mid", "high"] : q.algo === "linear_search" ? ["i"] : [];
+  const fixed = Array.isArray(q.ask);
+  const blank = () => isSort ? {arr: q.data.slice()} : Object.fromEntries(ptrs.map((p) => [p, null]));
+  let steps = (saved[n] && Array.isArray(saved[n].steps)) ? saved[n].steps : (fixed ? q.ask.map(blank) : []);
+  if (fixed && steps.length !== q.ask.length) steps = q.ask.map(blank);
+  let undo = [], redo = [], marks = null, selected = null; // selected = {step, ptr}
+
+  const help = isSort
+    ? "Click “Add iteration” to add a row (it starts as a copy of the row above). Drag a cell onto another cell to swap the two values, or click a cell and type a value. " + ({shell_sort:"Each row is the array right after one complete h-sort.", insertion_swaps:"Each row is the array right after one swap."}[q.algo] || "Each row is the array right after that iteration of the outer loop.")
+    : `Click “Add iteration” for each ${q.algo === "linear_search" ? "comparison" : "value of mid"}. Drag the ${ptrs.map((p) => p).join(", ")} marker${ptrs.length > 1 ? "s" : ""} onto a cell (or click a marker, then click a cell). Drop a marker back on the tray to remove it. With a marker focused, use Left/Right arrows to move it, Enter to confirm, Escape to cancel, or Delete to remove it.`;
+
+  host.innerHTML = `<div class="trace">
+    <div class="t-toolbar" role="toolbar">
+      <div class="t-group">
+        ${fixed ? "" : `<button class="tool add" type="button">${ICON.plus}<span>Add iteration</span></button>`}
+        <button class="tool undo" type="button" disabled>${ICON.undo}<span>Undo</span></button>
+        <button class="tool redo" type="button" disabled>${ICON.redo}<span>Redo</span></button>
+      </div>
+      <div class="t-group"><button class="tool helpbtn" type="button" aria-expanded="false">${ICON.help}<span>Help</span></button></div>
+    </div>
+    <p class="t-help" hidden>${esc(help)}</p>
+    <div class="t-body"></div>
+  </div>`;
+  const body = $(".t-body", host);
+
+  function commit(mutator) {
+    undo.push(JSON.stringify(steps)); if (undo.length > 100) undo.shift(); redo = [];
+    mutator(); changed();
+  }
+  function changed() {
+    qsave(n, {steps, touched:true}); marks = null; markInvalid(n); render(); renderNav();
+  }
+  function label(i) { return fixed ? `After iteration ${q.ask[i]}` : `Iteration ${i + 1}`; }
+
+  function render() {
+    const idxRow = (show) => q.data.map((_, i) => `<span class="idx">${show ? i : ""}</span>`);
+    let h = `<div class="step initial"><div class="stephead"><span class="steplabel">Initial</span></div><div class="cols">` +
+      q.data.map((v, i) => `<div class="col"><span class="idx">${i}</span><span class="cell locked">${v}</span></div>`).join("") + `</div>` +
+      (q.target !== undefined ? `<div class="target">Target: <b>${q.target}</b></div>` : "") + `</div>`;
+    if (!steps.length) h += `<div class="t-empty">No iterations yet. Click <b>Add iteration</b> to add the first one.</div>`;
+    steps.forEach((s, si) => {
+      const m = marks ? marks[si] : null;
+      h += `<div class="step ${m === true ? "ok" : m === false ? "bad" : ""}" data-step="${si}">
+        <div class="stephead"><span class="steplabel">${label(si)}${m === true ? '<span class="tag ok">correct</span>' : m === false ? '<span class="tag bad">wrong</span>' : ""}</span>
+          <div class="stepactions">
+            <button class="iconbtn copyprev" type="button" title="Make this step the same as the one before it">${ICON.copy}<span>Copy previous</span></button>
+            ${fixed ? "" : `<button class="iconbtn remove" type="button" title="Remove ${label(si)}">${ICON.trash}<span>Remove</span></button>`}
+          </div></div><div class="cols">`;
+      if (isSort) {
+        h += s.arr.map((v, i) => `<div class="col"><span class="idx">${i}</span><span class="cell sortcell" data-i="${i}"><input inputmode="numeric" value="${esc(v)}" aria-label="${label(si)}, position ${i}"></span></div>`).join("") + `</div>`;
+      } else {
+        h += q.data.map((v, i) => `<div class="col ${selected && selected.step === si ? "target-ready" : ""}" data-i="${i}"><span class="idx">${i}</span><span class="cell locked">${v}</span><div class="lane">${ptrs.filter((p) => s[p] === i).map((p) => chip(si, p)).join("")}</div></div>`).join("") + `</div>`;
+        const loose = ptrs.filter((p) => s[p] === null || s[p] === undefined);
+        h += `<div class="tray" data-tray="1">${loose.length ? loose.map((p) => chip(si, p)).join("") : "<span>Drop a marker here to remove it</span>"}</div>`;
+      }
+      h += `</div>`;
+    });
+    body.innerHTML = h;
+    $(".undo", host).disabled = !undo.length; $(".redo", host).disabled = !redo.length;
+  }
+  function chip(si, p) {
+    const sel = selected && selected.step === si && selected.ptr === p;
+    return `<button class="chip ${p}${sel ? " selected" : ""}" type="button" data-step="${si}" data-ptr="${p}" aria-pressed="${sel}">${p}</button>`;
+  }
+
+  // toolbar
+  const addBtn = $(".add", host);
+  if (addBtn) addBtn.addEventListener("click", () => commit(() => steps.push(isSort && steps.length ? {arr: steps[steps.length - 1].arr.slice()} : blank())));
+  $(".undo", host).addEventListener("click", () => { if (!undo.length) return; redo.push(JSON.stringify(steps)); steps = JSON.parse(undo.pop()); changed(); });
+  $(".redo", host).addEventListener("click", () => { if (!redo.length) return; undo.push(JSON.stringify(steps)); steps = JSON.parse(redo.pop()); changed(); });
+  $(".helpbtn", host).addEventListener("click", (e) => { const p = $(".t-help", host); p.hidden = !p.hidden; e.currentTarget.setAttribute("aria-expanded", !p.hidden); });
+
+  body.addEventListener("click", (e) => {
+    const stepEl = e.target.closest(".step[data-step]"); if (!stepEl) return;
+    const si = +stepEl.dataset.step;
+    if (e.target.closest(".copyprev")) {
+      commit(() => { steps[si] = si === 0 ? (isSort ? {arr:q.data.slice()} : blank()) : JSON.parse(JSON.stringify(steps[si - 1])); });
+      return;
+    }
+    if (e.target.closest(".remove")) { commit(() => steps.splice(si, 1)); selected = null; return; }
+    if (isSort) return;
+    const c = e.target.closest(".chip");
+    if (c) {
+      if (suppressClick) return;
+      selected = (selected && selected.step === si && selected.ptr === c.dataset.ptr) ? null : {step:si, ptr:c.dataset.ptr, index:steps[si][c.dataset.ptr] ?? 0};
+      render(); const again = body.querySelector(`.chip[data-step="${si}"][data-ptr="${c.dataset.ptr}"]`); if (again) again.focus();
+      return;
+    }
+    if (selected && selected.step === si) {
+      const col = e.target.closest(".col[data-i]"), tray = e.target.closest(".tray");
+      if (col) { const p = selected.ptr; selected = null; commit(() => { steps[si][p] = +col.dataset.i; }); }
+      else if (tray) { const p = selected.ptr; selected = null; commit(() => { steps[si][p] = null; }); }
+    }
+  });
+  body.addEventListener("keydown", (e) => {
+    const c = e.target.closest(".chip");
+    if (!c || isSort) return;
+    const si = +c.dataset.step, p = c.dataset.ptr;
+    const focusMarker = () => body.querySelector(`.chip[data-step="${si}"][data-ptr="${p}"]`)?.focus();
+    if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      if (!selected || selected.step !== si || selected.ptr !== p)
+        selected = {step:si, ptr:p, index:steps[si][p] ?? (e.key === "ArrowRight" ? -1 : q.data.length)};
+      selected.index = Math.max(0, Math.min(q.data.length - 1, selected.index + (e.key === "ArrowRight" ? 1 : -1)));
+      render();
+      body.querySelector(`.step[data-step="${si}"] .col[data-i="${selected.index}"]`).classList.add("drop-hover");
+      focusMarker();
+    } else if (e.key === "Enter" && selected && selected.step === si && selected.ptr === p) {
+      e.preventDefault(); const index = selected.index; selected = null;
+      commit(() => { steps[si][p] = index; }); focusMarker();
+    } else if (e.key === "Delete" || e.key === "Backspace") {
+      e.preventDefault(); selected = null; commit(() => { steps[si][p] = null; }); focusMarker();
+    } else if (e.key === "Escape" && selected) {
+      e.preventDefault(); selected = null; render(); focusMarker();
+    }
+  });
+
+  // sort cells: typing
+  body.addEventListener("change", (e) => {
+    const inp = e.target.closest(".sortcell input"); if (!inp) return;
+    const si = +inp.closest(".step").dataset.step, i = +inp.closest(".cell").dataset.i;
+    const v = inp.value.trim(); const num = Number(v);
+    commit(() => { steps[si].arr[i] = v === "" ? "" : (Number.isFinite(num) ? num : v); });
+  });
+
+  // pointer drag (chips onto cells, sort cells onto sort cells)
+  let drag = null, suppressClick = false;
+  body.addEventListener("pointerdown", (e) => {
+    const c = e.target.closest(".chip"), sc = e.target.closest(".sortcell");
+    if (!c && !sc) return;
+    if (e.button !== 0) return;
+    const stepEl = e.target.closest(".step[data-step]");
+    drag = {el: c || sc, kind: c ? "chip" : "cell", step: +stepEl.dataset.step, ptr: c ? c.dataset.ptr : null, i: sc ? +sc.dataset.i : null, x: e.clientX, y: e.clientY, active:false, ghost:null, over:null};
+  });
+  window.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    if (!drag.active) {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 6) return;
+      drag.active = true;
+      const g = drag.el.cloneNode(true); g.classList.add("drag-ghost"); g.classList.remove("selected");
+      if (drag.kind === "cell") { const inp = drag.el.querySelector("input"); g.innerHTML = esc(inp ? inp.value : ""); if (inp) inp.blur(); }
+      document.body.appendChild(g); drag.ghost = g;
+    }
+    e.preventDefault();
+    drag.ghost.style.left = e.clientX + "px"; drag.ghost.style.top = e.clientY + "px";
+    const under = document.elementFromPoint(e.clientX, e.clientY);
+    let over = null;
+    if (under) {
+      const st = under.closest(`.step[data-step="${drag.step}"]`);
+      if (st && host.contains(st)) over = drag.kind === "chip" ? (under.closest(".col[data-i]") || under.closest(".tray")) : under.closest(".sortcell");
+    }
+    if (over !== drag.over) { if (drag.over) drag.over.classList.remove("drop-hover"); if (over) over.classList.add("drop-hover"); drag.over = over; }
+  }, {passive:false});
+  window.addEventListener("pointerup", () => {
+    if (!drag) return;
+    const d = drag; drag = null;
+    if (!d.active) return;
+    d.ghost.remove(); if (d.over) d.over.classList.remove("drop-hover");
+    suppressClick = true; setTimeout(() => { suppressClick = false; }, 0);
+    if (!d.over) return;
+    if (d.kind === "chip") {
+      const to = d.over.classList.contains("tray") ? null : +d.over.dataset.i;
+      selected = null;
+      commit(() => { steps[d.step][d.ptr] = to; });
+    } else {
+      const j = +d.over.dataset.i; if (j === d.i) return;
+      commit(() => { const a = steps[d.step].arr; [a[d.i], a[j]] = [a[j], a[d.i]]; });
+    }
+  });
+  window.addEventListener("pointercancel", () => { if (drag && drag.ghost) drag.ghost.remove(); if (drag && drag.over) drag.over.classList.remove("drop-hover"); drag = null; });
+
+  // check
+  $(".check", sec).addEventListener("click", () => {
+    const exp = expectedSteps(q);
+    const same = (a, b) => isSort ? a.arr.length === b.arr.length && a.arr.every((v, i) => Number(v) === b.arr[i] && String(v).trim() !== "") : ptrs.every((p) => a[p] === b[p]);
+    marks = steps.map((s, i) => i < exp.length && same(s, exp[i]));
+    const right = marks.filter(Boolean).length;
+    const all = right === exp.length && steps.length === exp.length;
+    const lines = [];
+    if (!all) {
+      if (steps.length < exp.length) lines.push(`Some iterations are missing: you have ${steps.length}.`);
+      else if (steps.length > exp.length) lines.push(`There are too many iterations: you have ${steps.length}.`);
+      const wrong = marks.map((m, i) => m ? null : label(i)).filter(Boolean);
+      if (wrong.length) lines.push(`Not correct: ${wrong.join(", ")}.`);
+      if (!isSort) { const missing = steps.some((s) => ptrs.some((p) => s[p] === null || s[p] === undefined)); if (missing) lines.push("Some markers are still on the tray."); }
+    }
+    out.hidden = false;
+    out.innerHTML = verdictHtml(all, all ? "Correct trace!" : "Not quite right") +
+      (lines.length ? `<div>${lines.map(esc).join("<br>")}</div>` : "") +
+      `<div class="marks">Marks for this submission: ${(all ? q.marks : 0).toFixed(2)}/${q.marks.toFixed(2)}.</div>`;
+    render();
+    setState(n, "graded", all ? 1 : 0); qsave(n, {graded: all ? 1 : 0});
+  });
+
+  render();
+  if (saved[n] && typeof saved[n].graded === "number") $(".check", sec).click();
+  else if (saved[n] && saved[n].touched) setState(n, "answered");
+}
+
+/* ---------- boot ---------- */
+document.querySelectorAll(".que").forEach((sec) => {
+  const n = sec.dataset.q;
+  QUESTIONS[n].kind === "code" ? mountCode(sec, n) : mountTrace(sec, n);
+});
+document.getElementById("resetAll").addEventListener("click", () => {
+  if (!confirm("Clear all your answers on this page and start again?")) return;
+  saved = {}; persist(); location.reload();
+});
+renderNav();
+})();
+</script>
+</body>
+</html>
