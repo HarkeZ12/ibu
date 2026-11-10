@@ -472,6 +472,15 @@ function openTask(id, scroll) {
     const value = ta.value;
     edBox.innerHTML = '<div class="monaco-host"></div>';
     const host = $(".monaco-host", edBox);
+    // Suggestions/hovers go in a node on <body>: the glass card's backdrop-filter would make
+    // their position:fixed relative to the card, so they jumped up once the page was scrolled.
+    let overflow = document.getElementById("monaco-overflow");
+    if (!overflow) {
+      overflow = document.createElement("div");
+      overflow.id = "monaco-overflow"; overflow.className = "monaco-editor";
+      overflow.style.cssText = "position:absolute;top:0;left:0;width:0;height:0;z-index:60";
+      document.body.appendChild(overflow);
+    }
     ed = m.editor.create(host, {
       value, language: "cpp", theme: monacoTheme(), automaticLayout: true,
       fontFamily: "'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace", fontSize: 14, lineHeight: 21,
@@ -481,7 +490,7 @@ function openTask(id, scroll) {
       quickSuggestions: { other: true, comments: false, strings: false }, suggestOnTriggerCharacters: true,
       wordBasedSuggestions: "off", snippetSuggestions: "top", tabCompletion: "on", acceptSuggestionOnEnter: "on",
       suggest: { showWords: true, preview: true }, autoClosingBrackets: "always", autoClosingQuotes: "always",
-      autoIndent: "full", bracketPairColorization: { enabled: true }, fixedOverflowWidgets: true,
+      autoIndent: "full", bracketPairColorization: { enabled: true }, fixedOverflowWidgets: true, overflowWidgetsDomNode: overflow,
       ariaLabel: "Your answer (C++ editor)",
     });
     activeEditor = ed;
