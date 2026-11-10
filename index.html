@@ -63,7 +63,7 @@ a.dl:hover, a.dl:focus-visible{background:var(--accent-soft); outline:none}
 // New quiz: add an entry to the course's "quizzes" list.
 // Each course folder is named "<code> - <name>", e.g. "IT 2001 - Web Programming".
 // "file" is the path inside the course folder, e.g. "week04/quiz/reading-04.html".
-// Download buttons appear by themselves for every week used in "file"; the ZIPs
+// Download buttons appear by themselves for every week or assignment folder used in "file"; the ZIPs
 // are built by .github/workflows/downloads.yml.
 const SUBJECTS = [
   { code:"FENMS 0121", name:"Data Structures and Algorithms", quizzes:[{file:"week04/reading-material/reading-04-guide.html",title:"Reading 04 · Study guide",meta:"read"},{file:"week04/quiz/reading-04.html",title:"Reading 04 · Quiz",meta:"82 questions"},{file:"week04/practice-questions/practice-04.html",title:"Practice 04 · Practice questions",meta:"8 questions"},{file:"week05/reading-05.html",title:"Reading 05 · Elementary Sorts · Study guide + quiz",meta:"104 questions"},{file:"week05/practice-questions/practice-05.html",title:"Practice 05 · Practice questions",meta:"10 questions"},{file:"assignment-02/assignment-2-prep.html",title:"Assignment 2 prep · Weeks 3–5 · coding, tracing, stacks & queues",meta:"50 coding tasks"}] },
@@ -73,8 +73,11 @@ const SUBJECTS = [
   { code:"IT 2004", name:"Parallel Programming", quizzes:[{file:"week05/reading-05.html",title:"Reading 05 · Parallel Algorithms · Study guide + quiz",meta:"140 questions"}] },
 ];
 const DOWNLOADS = "https://github.com/HarkeZ12/ibu/releases/download/downloads/";
-const zipUrl = (code, part) => DOWNLOADS + code.replace(/ /g, "-") + "-" + part + ".zip";
-const weeksOf = s => [...new Set(s.quizzes.map(q => q.file.split("/")[0]).filter(w => /^week\d+$/.test(w)))].sort();
+// ZIP names match .github/scripts/build-zips.sh: "<Name>-Week-05.zip", "<Name>-Assignment-02.zip", "<Name>-Whole-course.zip"
+const partLabel = p => p.startsWith("week") ? "Week " + p.slice(4) : "Assignment " + p.split("-")[1];
+const zipUrl = (s, label) => DOWNLOADS + (s.name + " " + label).replace(/ /g, "-") + ".zip";
+const weeksOf = s => [...new Set(s.quizzes.map(q => q.file.split("/")[0]).filter(w => /^(week\d+|assignment-\d+)$/.test(w)))]
+  .sort((a, b) => (a.startsWith("week") ? 0 : 1) - (b.startsWith("week") ? 0 : 1) || a.localeCompare(b));
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 document.getElementById("subjects").innerHTML = SUBJECTS.map(s => `
   <section class="subject">
@@ -86,7 +89,7 @@ document.getElementById("subjects").innerHTML = SUBJECTS.map(s => `
       ? `<ul>${s.quizzes.map(q => `<li><a class="quiz" href="${esc([s.code + " - " + s.name, ...q.file.split("/")].map(encodeURIComponent).join("/"))}"><span>${esc(q.title)}</span><span class="meta">${esc(q.meta)}</span></a></li>`).join("")}</ul>`
       : `<p class="empty">No quizzes yet.</p>`}
     ${weeksOf(s).length
-      ? `<div class="downloads">${weeksOf(s).map(w => `<a class="dl" href="${esc(zipUrl(s.code, w))}">↓ ${esc(w.replace(/^week0*/, "Week "))} (.zip)</a>`).join("")}<a class="dl" href="${esc(zipUrl(s.code, "all"))}">↓ Whole course (.zip)</a></div>`
+      ? `<div class="downloads">${weeksOf(s).map(w => `<a class="dl" href="${esc(zipUrl(s, partLabel(w)))}">↓ ${esc(partLabel(w).replace(/ 0+(\d)/, " $1"))} (.zip)</a>`).join("")}<a class="dl" href="${esc(zipUrl(s, "Whole course"))}">↓ Whole course (.zip)</a></div>`
       : ""}
   </section>`).join("");
 </script>
