@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Apache (XAMPP/MAMP) may hide the "Authorization: Bearer ..." header from PHP – pass it on
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Send every request that is not an existing file/folder to index.php (FlightPHP)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lab 07 Trainer</title>
+<meta name="description" content="IT 2001 Web Programming, Lab 07: practise JWT authentication and middleware in FlightPHP. Your code runs in PHP 8.4 in the browser and is checked with real requests.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500;600&display=swap">
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"><div class="grain"></div></div>
+
+<header class="top">
+  <div class="topbar glass">
+    <a class="brand" href="../../index.html" title="All courses">
+      <span class="logo"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+      <span><small>IT 2001 · Week 7</small><b>Lab 07 trainer</b></span>
+    </a>
+    <div class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-code" aria-controls="panel-code" data-tab="code">Coding <span class="count" id="count-code">0/0</span></button>
+      <button class="tab" role="tab" id="tab-client" aria-controls="panel-client" data-tab="client">API client &amp; JWT <span class="count" id="count-client">0</span></button>
+    </div>
+    <button class="icon-btn saver-btn" id="examBtn" type="button" aria-pressed="false" title="Hide the hints and the solutions, like in the assignment">Exam: off</button>
+    <button class="icon-btn saver-btn" id="battery-saver" type="button" aria-pressed="false" title="Turn off the glass blur to save battery">Battery saver: off</button>
+    <button class="icon-btn" id="themeBtn" type="button" title="Toggle light / dark" aria-label="Toggle light or dark theme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero glass">
+    <div class="eyebrow"><span><i class="dot"></i>IT 2001 · Web Programming</span><span>Lab 07 · JWT &amp; middleware</span><span>2026/2027</span></div>
+    <h1>Lab 07 <em>trainer</em></h1>
+    <p class="lede">Every file of Lab 07, the way the assignment asks for it: login and registration with JWT, AuthMiddleware, error and request logging, .htaccess and Swagger. Your code runs in real PHP 8.4 inside your browser and gets real HTTP requests. Your answers stay in this browser.</p>
+    <div class="stats">
+      <span class="stat"><b id="stat-tasks">12</b>files to write</span>
+      <span class="stat"><b id="stat-checks">126</b>automatic checks</span>
+      <span class="stat"><b>∞</b>new gaps</span>
+      <span class="stat"><b>1</b>API client + jwt.io</span>
+    </div>
+  </div>
+
+  <!-- ===================== CODING ===================== -->
+  <section class="panel" id="panel-code" role="tabpanel" aria-labelledby="tab-code" hidden>
+    <div class="intro">
+      In the assignment you protect your REST API: you get files with <b>missing code</b> or write them <b>from scratch</b>. Every task is one file of the lecture project (CampusEvents, week 7). Each task has two modes:
+      <ul>
+        <li><b>Whole file</b>: the starter file with <code>// TODO</code> comments – write all of the missing code.</li>
+        <li><b>Missing lines</b>: one to three lines of the solution are replaced with <code>// TODO: missing line</code>; <b>New gaps</b> removes different ones.</li>
+        <li><b>Exam</b> (top right) hides the hints and the solutions – only the TODO comments stay, like in the assignment.</li>
+        <li><b>Check</b> puts your file into the CampusEvents backend (FlightPHP 3.19, firebase/php-jwt 7); every other file is the original solution. Then it sends real requests and reads <code>logs/info.log</code> and <code>logs/error.log</code>.</li>
+      </ul>
+      <p class="note" style="margin:10px 0 0"><b>Database:</b> SQLite instead of MySQL, with the users <code>ema@campusevents.ba / Student123!</code> (student, id 2) and <code>admin@campusevents.ba / Admin123!</code> (admin, id 1). It is fresh for every check.</p>
+    </div>
+    <div class="layout">
+      <main id="codeMain"></main>
+      <aside class="side">
+        <div class="block compiler" id="phpBox">
+          <h2>PHP 8.4</h2>
+          <div class="row"><span class="led" aria-hidden="true"></span><span id="phpState">Loading…</span></div>
+          <p class="small">PHP runs inside your browser (WebAssembly). The first load downloads about 8&nbsp;MB once; after that it is cached.</p>
+        </div>
+        <div class="block">
+          <h2>Tasks</h2>
+          <nav class="tasklist" id="codeList" aria-label="Coding tasks"></nav>
+          <div class="score"><span>Solved</span><b id="codeScore">0 / 0</b></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ===================== API CLIENT ===================== -->
+  <section class="panel" id="panel-client" role="tabpanel" aria-labelledby="tab-client" hidden>
+    <div class="intro">
+      Step 9 of the lab, without Postman: send requests to the API, watch the token travel in <code>Authorization: Bearer …</code>, change one character of it, and read the payload like on jwt.io. The API uses <b>your</b> code for every solved task and the original solution for the rest.
+    </div>
+    <div class="layout">
+      <main id="clientMain"></main>
+      <aside class="side">
+        <div class="block">
+          <h2>Quick requests</h2>
+          <nav class="tasklist" id="quickList" aria-label="Quick requests"></nav>
+          <div class="score"><span>Requests sent</span><b id="clientScore">0</b></div>
+        </div>
+        <div class="block">
+          <h2>Your files in the API</h2>
+          <p class="small" id="clientFiles">–</p>
+          <button class="btn small ghost" type="button" id="resetDb">Fresh database + empty logs</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Code and checks are based on the Lab 07 tutorial and the week-07 CampusEvents project of the course.</span>
+    <button class="btn ghost small" type="button" id="resetAll">Clear all my answers</button>
+  </footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

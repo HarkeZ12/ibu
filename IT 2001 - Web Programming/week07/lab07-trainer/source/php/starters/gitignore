@@ -1,0 +1,6 @@
+# Composer dependencies
+backend/vendor/
+
+# TODO: secrets – config.php must never be committed
+
+# TODO: log files – but keep the empty folder (logs/.gitkeep)

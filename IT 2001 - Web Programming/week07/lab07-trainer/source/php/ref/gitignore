@@ -1,0 +1,9 @@
+# Composer dependencies
+backend/vendor/
+
+# Secrets – only config.example.php is committed
+backend/config/config.php
+
+# Log files – the folder stays, the logs are never committed
+backend/logs/*
+!backend/logs/.gitkeep
